@@ -1,0 +1,322 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>io.migrate</groupId>
+    <artifactId>godwits</artifactId>
+    <version>0.1.0-SNAPSHOT</version>
+
+    <name>The Migrate IO web application.</name>
+    <packaging>war</packaging>
+
+    <description>
+        Web application for moving emails, calendars, contacts and documents from one
+        cloud account to another.
+    </description>
+
+    <properties>
+        <browser>/Applications/Google Chrome.app/Contents/MacOS/Google Chrome</browser>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <jetty-version>8.1.9.v20130131</jetty-version>
+
+        <slf4j-version>1.7.2</slf4j-version>
+        <logback-version>1.0.9</logback-version>
+
+        <ringo-version>0.9.0-alpha-7-SNAPSHOT</ringo-version>
+        <stick-version>0.1.0-alpha-7</stick-version>
+        <store-version>1.0.6-SNAPSHOT</store-version>
+
+        <spring-version>3.2.1.RELEASE</spring-version>
+        <springsec-version>3.1.3.RELEASE</springsec-version>
+        <springext-version>1.0.10</springext-version>
+
+        <beanstalk-version>1.0.5</beanstalk-version>
+        <beanstalk.environment.name>${environment}-migrate</beanstalk.environment.name>
+        <beanstalk.s3.name>${environment}.${project.groupId}.${project.artifactId}.images</beanstalk.s3.name>
+
+        <!-- Amazon deployment credentials -->
+        <aws-version>1.3.30</aws-version>
+        <aws.access_key>${migrate.aws.access_key}</aws.access_key>
+        <aws.secret_key>${migrate.aws.secret_key}</aws.secret_key>
+    </properties>
+
+    <prerequisites>
+        <maven>2.2.1</maven>
+    </prerequisites>
+
+    <dependencies>
+
+        <!-- RingoJS & Stick -->
+
+        <dependency>
+            <groupId>org.ringojs</groupId>
+            <artifactId>ringojs</artifactId>
+            <version>${ringo-version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.ringojs</groupId>
+            <artifactId>stick</artifactId>
+            <version>${stick-version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.ringojs</groupId>
+            <artifactId>httpclient-jetty</artifactId>
+            <version>1.0.0-SNAPSHOT</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.pykl.ringojs</groupId>
+            <artifactId>spring-ext</artifactId>
+            <version>${springext-version}</version>
+        </dependency>
+
+        <!-- Jetty's HTTP Client -->
+
+<!--
+        <dependency>
+            <groupId>org.eclipse.jetty</groupId>
+            <artifactId>jetty-client</artifactId>
+            <version>${jetty-version}</version>
+        </dependency>
+-->
+
+        <!-- Amazon AWS SDK -->
+
+        <dependency>
+            <groupId>com.amazonaws</groupId>
+            <artifactId>aws-java-sdk</artifactId>
+            <version>${aws-version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>junit</groupId>
+                    <artifactId>junit</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>commons-logging</groupId>
+                    <artifactId>commons-logging</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
+        <!-- Logging -->
+
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>${slf4j-version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <version>${logback-version}</version>
+        </dependency>
+
+        <!-- SIGAR for native OS monitoring -->
+
+        <dependency>
+            <groupId>org.hyperic</groupId>
+            <artifactId>sigar</artifactId>
+            <version>1.6.4</version>
+            <scope>system</scope>
+            <systemPath>${basedir}/misc/sigar/sigar.jar</systemPath>
+        </dependency>
+
+
+        <dependency>
+            <groupId>org.pykl</groupId>
+            <artifactId>tv4</artifactId>
+            <version>1.0.1</version>
+        </dependency>
+
+        <!-- Google Docs -->
+
+        <dependency>
+            <groupId>org.pykl.ringojs</groupId>
+            <artifactId>google-api</artifactId>
+            <version>0.2.3-SNAPSHOT</version>
+        </dependency>
+
+    </dependencies>
+
+
+    <build>
+        <finalName>${project.artifactId}</finalName>
+
+        <plugins>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>versions-maven-plugin</artifactId>
+                <version>2.0</version>
+            </plugin>
+
+            <plugin>
+                <groupId>org.pykl.maven.plugins</groupId>
+                <artifactId>maven-beanstalk-plugin</artifactId>
+                <version>${beanstalk-version}</version>
+                <configuration>
+                    <accessKey>${aws.access_key}</accessKey>
+                    <secretKey>${aws.secret_key}</secretKey>
+                    <applicationName>${project.groupId}.${project.artifactId}</applicationName>
+                    <environmentName>${beanstalk.environment.name}</environmentName>
+                    <s3Bucket>${beanstalk.s3.name}</s3Bucket>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>com.kelveden</groupId>
+                <artifactId>maven-karma-plugin</artifactId>
+                <version>1.0</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>start</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <!--<browsers>Chrome</browsers>-->
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.mortbay.jetty</groupId>
+                <artifactId>jetty-maven-plugin</artifactId>
+                <version>${jetty-version}</version>
+                <configuration>
+                    <systemProperties>
+                        <force>true</force>
+                        <systemProperty>
+                            <name>java.library.path</name>
+                            <value>${java.library.path}:${basedir}/misc/sigar</value>
+                        </systemProperty>
+                    </systemProperties>
+                    <webAppConfig>
+                        <contextPath>/migrate</contextPath>
+                        <descriptor>${project.build.directory}/web.xml</descriptor>
+                        <resourceBases>
+                            <resourceBase>src/main/webapp</resourceBase>
+                        </resourceBases>
+                    </webAppConfig>
+                    <connectors>
+                        <connector
+                                implementation="org.eclipse.jetty.server.nio.SelectChannelConnector">
+                            <port>8080</port>
+                            <maxIdleTime>60000</maxIdleTime>
+                        </connector>
+                    </connectors>
+                    <stopKey>abcdef</stopKey>
+                    <stopPort>8081</stopPort>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-war-plugin</artifactId>
+                <version>2.3</version>
+                <configuration>
+                    <failOnMissingWebXml>false</failOnMissingWebXml>
+                    <webResources>
+                        <resource>
+                            <directory>${basedir}/misc/sigar</directory>
+                            <targetPath>WEB-INF/lib</targetPath>
+                        </resource>
+                    </webResources>
+                </configuration>
+            </plugin>
+
+        </plugins>
+
+        <!-- Allow property substitution filtering on all files in src/main/resources -->
+
+        <resources>
+            <resource>
+                <filtering>true</filtering>
+                <directory>${basedir}/src/main/resources</directory>
+            </resource>
+            <resource>
+                <filtering>false</filtering>
+                <directory>${basedir}/misc/sigar/lib</directory>
+            </resource>
+        </resources>
+    </build>
+
+    <profiles>
+        <profile>
+            <id>dev</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <properties>
+                <environment>dev</environment>
+
+                <!-- The URL to access web services from the gc platform. -->
+                <localUrl>http://localhost:8080/migrate</localUrl>
+
+                <!-- Hazelcast configuration -->
+                <hz.name>hazelcast-${beanstalk.environment.name}-${user.name}</hz.name>
+                <hz.password>u$sj91pt9zz</hz.password>
+                <hz.multicast.enabled>true</hz.multicast.enabled>
+                <hz.aws.enabled>false</hz.aws.enabled>
+
+                <!-- AWS App Access -->
+                <aws.app.access_key>AKIAIIQOWQM6FFLQB2EQ</aws.app.access_key>
+                <aws.app.secret_key>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</aws.app.secret_key>
+            </properties>
+        </profile>
+        <profile>
+            <id>qa</id>
+            <properties>
+                <environment>qa</environment>
+                <!-- The URL to access web services from the gcplatform. -->
+                <localUrl>http://${beanstalk.environment.name}.elasticbeanstalk.com/api</localUrl>
+
+                <!-- Hazelcast configuration -->
+                <hz.name>hazelcast-${beanstalk.environment.name}</hz.name>
+                <hz.password>me91c3lq9a</hz.password>
+                <hz.multicast.enabled>false</hz.multicast.enabled>
+                <hz.aws.enabled>true</hz.aws.enabled>
+
+                <!-- AWS App Access -->
+                <aws.app.access_key>AKIAJUK7QWOGW5XMHLXQ</aws.app.access_key>
+                <aws.app.secret_key>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</aws.app.secret_key>
+            </properties>
+        </profile>
+        <profile>
+            <id>prod</id>
+            <properties>
+                <environment>prod</environment>
+                <!-- The URL to access web services from the gcplatform. -->
+                <localUrl>http://${beanstalk.environment.name}.elasticbeanstalk.com/api</localUrl>
+
+                <!-- Hazelcast configuration -->
+                <hz.name>hazelcast-${beanstalk.environment.name}</hz.name>
+                <hz.password>an3kd7c6bl</hz.password>
+                <hz.multicast.enabled>false</hz.multicast.enabled>
+                <hz.aws.enabled>true</hz.aws.enabled>
+
+                <!-- AWS App Access -->
+                <aws.app.access_key>${migrate.aws.app.access_key}</aws.app.access_key>
+                <aws.app.secret_key>${migrate.aws.app.secret_key}</aws.app.secret_key>
+            </properties>
+        </profile>
+    </profiles>
+<!--
+    <repositories>
+        <repository>
+            <id>com.googlecode.jstd-maven-plugin</id>
+            <name>JsTestDriver Maven Plugin Repository</name>
+            <url>http://jstd-maven-plugin.googlecode.com/svn/maven2</url>
+        </repository>
+    </repositories>
+    <pluginRepositories>
+        <pluginRepository>
+            <id>com.googlecode.jstd-maven-plugin</id>
+            <name>JsTestDriver Maven Plugin Repository</name>
+            <url>http://jstd-maven-plugin.googlecode.com/svn/maven2</url>
+        </pluginRepository>
+    </pluginRepositories>
+-->    
+</project>
