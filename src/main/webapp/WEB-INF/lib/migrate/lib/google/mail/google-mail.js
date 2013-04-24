@@ -6,62 +6,109 @@ exports.Service = function (opts) {
 
     log.info('Initializing service with options: {}', JSON.stringify(opts, null, 4));
 
+    function GenericException(code, msg) {
+        log.error(msg);
+        this.code = code;
+        this.message = msg;
+    }
+
+    GenericException.prototype.toString = function () {
+        return this.message;
+    };
+
+    function WrappedException(code, msg, e) {
+        log.error(msg, e);
+        this.code = code;
+        this.message = msg;
+        this.exception = e;
+    }
+
+    WrappedException.prototype.toString = function () {
+        return JSON.stringify({
+            code: this.code,
+            message: this.message,
+            exception: this.exception
+        }, null, 4);
+    };
+
     var props = java.lang.System.getProperties();
     props.setProperty('mail.store.protocol', 'imaps');
 
     log.info('Set mail.store.protocol to secure imap.');
 
-    try {
-        var session = javax.mail.Session.getInstance(props, null);
-    } catch (e) {
-        log.error('Error getting session: {}', e);
-        throw {
-            code: 400, // Temporary
-            message: 'Error getting session'
-        }
-    }
+    var session;
 
     try {
-        var store = session.getStore('imaps');
+        log.info('Trying to get session instance.');
+        session = javax.mail.Session.getInstance(props, null);
     } catch (e) {
-        log.error('Error getting IMAP store: {}', e);
-        return;
+        throw new WrappedException(500, 'Error getting session.', e);
+    }
+
+    var store;
+
+    try {
+        log.info('Trying to get IMAP store.');
+        store = session.getStore('imaps');
+    } catch (e) {
+        throw new WrappedException(500, 'Error getting IMAP store.', e);
     }
 
     if (!(opts.password || opts.oauth)) {
-        log.error('No authentication provided.');
-        return;
+        throw new GenericException(401, 'No authentication provided.');
     }
 
     if (opts.password) {
-        // Try to connect to the store.
         try {
+            log.info('Trying to connect to IMAP store with supplied credentials: {}', JSON.stringify(opts, null, 4));
             store.connect(hostname, opts.email, opts.password);
         } catch (e) {
-            log.error('Error connecting to imap store: {}', e);
-            return;
+            throw new WrappedException(500, 'Could not connect to store', e);
         }
     }
 
     if (opts.oauth) {
-
-        log.error('Oauth authentication not yet supported.');
-        return;
-
-        // Try to connect to the store.
-        try {
-            store.connect(hostname, opts.email, opts.password);
-        } catch (e) {
-            log.error('Error connecting to imap store: {}', e);
-            return;
-        }
+        throw new GenericException(400, 'Not yet implemented.');
     }
-
-    var DEFAULT_FOLDER = store.getDefaultFolder();
-
 
     function read() {
 
+        // If this is true, this function has been called incorrectly, so we throw an exception.
+        if (!arguments[1] && Array.isArray(arguments[0])) {
+            throw new GenericException(400, 'Incorrect arguments passed to read. Accepted calling patterns: read(number, number) OR read(array_of_ids)');
+        }
+
+        if (typeof arguments[0] === 'number' && typeof arguments[1] === 'number') {
+            return readRange(arguments[0], arguments[1]);
+        }
+
+        if (Array.isArray(arguments[0])) {
+            return readIDS(arguments[0]);
+        }
+
+        function readRange(from, to) {
+            var folder = store.getFolder('Inbox');
+
+            // If it isn't already open, we open it in read only mode since we only want to read messages.
+            if (!folder.isOpen()) {
+                folder.open(javax.mail.Folder.READ_ONLY);
+            }
+
+            // Grab the chunk of messages and return.
+            return folder.getMessages(from, to);
+        }
+
+        function readIDS(ids) {
+            var folder = store.getFolder('Inbox');
+
+            // If it isn't already open, we open it in read only mode since we only want to read messages.
+            if (!folder.isOpen()) {
+                folder.open(javax.mail.Folder.READ_ONLY);
+            }
+
+            // Grab the chunk of messages and return.
+            return folder.getMessages(ids);
+        }
     }
 
     function write() {
