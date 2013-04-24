@@ -22,6 +22,8 @@
         <slf4j-version>1.7.2</slf4j-version>
         <logback-version>1.0.9</logback-version>
 
+        <mail-version>1.4.6</mail-version>
+
         <ringo-version>0.9.0-alpha-7-SNAPSHOT</ringo-version>
         <stick-version>0.1.0-alpha-7</stick-version>
         <store-version>1.0.6-SNAPSHOT</store-version>
@@ -31,8 +33,8 @@
         <springext-version>1.0.10</springext-version>
 
         <beanstalk-version>1.0.5</beanstalk-version>
-        <beanstalk.environment.name>${environment}-migrate</beanstalk.environment.name>
-        <beanstalk.s3.name>${environment}.${project.groupId}.${project.artifactId}.images</beanstalk.s3.name>
+        <beanstalk.environment.name>${environment}-godwits</beanstalk.environment.name>
+        <beanstalk.s3.name>${environment}.${project.groupId}.${project.artifactId}.deploy</beanstalk.s3.name>
 
         <!-- Amazon deployment credentials -->
         <aws-version>1.3.30</aws-version>
@@ -131,12 +133,10 @@
             <version>1.0.1</version>
         </dependency>
 
-        <!-- Google Docs -->
-
         <dependency>
-            <groupId>org.pykl.ringojs</groupId>
-            <artifactId>google-api</artifactId>
-            <version>0.2.3-SNAPSHOT</version>
+            <groupId>javax.mail</groupId>
+            <artifactId>mail</artifactId>
+            <version>${mail-version}</version>
         </dependency>
 
     </dependencies>
@@ -194,7 +194,7 @@
                         </systemProperty>
                     </systemProperties>
                     <webAppConfig>
-                        <contextPath>/migrate</contextPath>
+                        <contextPath>/mio</contextPath>
                         <descriptor>${project.build.directory}/web.xml</descriptor>
                         <resourceBases>
                             <resourceBase>src/main/webapp</resourceBase>
@@ -270,7 +270,6 @@
             <id>qa</id>
             <properties>
                 <environment>qa</environment>
-                <!-- The URL to access web services from the gcplatform. -->
                 <localUrl>http://${beanstalk.environment.name}.elasticbeanstalk.com/api</localUrl>
 
                 <!-- Hazelcast configuration -->
@@ -288,7 +287,6 @@
             <id>prod</id>
             <properties>
                 <environment>prod</environment>
-                <!-- The URL to access web services from the gcplatform. -->
                 <localUrl>http://${beanstalk.environment.name}.elasticbeanstalk.com/api</localUrl>
 
                 <!-- Hazelcast configuration -->
