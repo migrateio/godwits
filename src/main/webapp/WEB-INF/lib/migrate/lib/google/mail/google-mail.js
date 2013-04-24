@@ -78,36 +78,18 @@ exports.Service = function (opts) {
             throw new GenericException(400, 'Incorrect arguments passed to read. Accepted calling patterns: read(number, number) OR read(array_of_ids)');
         }
 
+        var folder = store.getFolder('Inbox');
+
+        if (!folder.isOpen()) {
+            folder.open(javax.mail.Folder.READ_ONLY);
+        }
+
         if (typeof arguments[0] === 'number' && typeof arguments[1] === 'number') {
-            return readRange(arguments[0], arguments[1]);
+            return folder.getMessages(arguments[0], arguments[1]);
         }
 
         if (Array.isArray(arguments[0])) {
-            return readIDS(arguments[0]);
-        }
-
-        function readRange(from, to) {
-            var folder = store.getFolder('Inbox');
-
-            // If it isn't already open, we open it in read only mode since we only want to read messages.
-            if (!folder.isOpen()) {
-                folder.open(javax.mail.Folder.READ_ONLY);
-            }
-
-            // Grab the chunk of messages and return.
-            return folder.getMessages(from, to);
-        }
-
-        function readIDS(ids) {
-            var folder = store.getFolder('Inbox');
-
-            // If it isn't already open, we open it in read only mode since we only want to read messages.
-            if (!folder.isOpen()) {
-                folder.open(javax.mail.Folder.READ_ONLY);
-            }
-
-            // Grab the chunk of messages and return.
-            return folder.getMessages(ids);
+            return folder.getMessages(arguments[0]);
         }
     }
 
