@@ -35,7 +35,7 @@
 
     <servlet>
         <servlet-name>ringo-api</servlet-name>
-        <servlet-class>org.ringojs.jsgi.ExtJsgiServlet</servlet-class>
+        <servlet-class>org.ringojs.jsgi.JsgiServlet</servlet-class>
         <init-param>
             <param-name>verbose</param-name>
             <param-value>true</param-value>
