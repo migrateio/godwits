@@ -28,14 +28,32 @@ app.get('/test/src/:email/:password/dest/:emaildest/:passworddest', function (re
         password: passworddest
     };
 
-    var source = new Google.Mail(src);
-    var destination = new Google.Mail(dest);
+    var results = [];
 
-    try {
-        var emails = source.read(1, 100);
-        var result = destination.write(emails);
-    } catch (e) {
-        log.error(e);
+    for( var i = 1; i < 11; i++ ) {
+        var thread = new java.lang.Thread(
+            new java.lang.Runnable(
+                {
+                    run: function () {
+                        var source = new Google.Mail(src);
+                        var destination = new Google.Mail(dest);
+                        try {
+                            var emails = source.read((i*100)-99, i*100);
+                            results.push(destination.write(emails));
+                        } catch (e) {
+                            log.error(e);
+                        }
+
+                    }
+                }
+            ));
+
+        thread.start();
     }
-    return json(result);
+
+    while(results.length < 10) {
+
+    }
+
+    return json(results);
 });

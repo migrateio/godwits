@@ -1,7 +1,8 @@
+var log = require('ringo/logging').getLogger(module.id);
+
 exports.Service = function (opts) {
     'use strict';
 
-    var log = require('ringo/logging').getLogger(module.id);
     var hostname = 'imap.gmail.com';
 
     log.info('Initializing service with options: {}', JSON.stringify(opts, null, 4));
@@ -121,7 +122,7 @@ exports.Service = function (opts) {
         //Now that the folder is open and able to receive messages, we try to write them to it.
         // This function will throw an error if it fails.
         for (var i = 0; i < messages.length; i++) {
-            log.info('Appending message: {}', messages[i].getSubject());
+            log.info('Appending message: {}', messages[i].getMessageNumber());
             try {
                 folder.appendMessages([messages[i]]);
             } catch (e) {
