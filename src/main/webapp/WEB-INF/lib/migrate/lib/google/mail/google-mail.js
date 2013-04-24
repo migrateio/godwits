@@ -34,7 +34,7 @@ exports.Service = function (opts) {
     var props = java.lang.System.getProperties();
     props.setProperty('mail.store.protocol', 'imaps');
 
-    log.info('Set mail.store.protocol to secure imap.');
+    log.info('Set mail.store.protocol to secure IMAP.');
 
     var session;
 
@@ -54,6 +54,7 @@ exports.Service = function (opts) {
         throw new WrappedException(500, 'Error getting IMAP store.', e);
     }
 
+    // If neither of these exist, we've got no authentication provided and cannot proceed.
     if (!(opts.password || opts.oauth)) {
         throw new GenericException(401, 'No authentication provided.');
     }
@@ -71,6 +72,10 @@ exports.Service = function (opts) {
         throw new GenericException(400, 'Not yet implemented.');
     }
 
+    /**
+     * @params [from], [to], [ids]
+     * @returns IMAPMessages
+     */
     function read() {
 
         // If this is true, this function has been called incorrectly, so we throw an exception.
@@ -78,6 +83,7 @@ exports.Service = function (opts) {
             throw new GenericException(400, 'Incorrect arguments passed to read. Accepted calling patterns: read(number, number) OR read(array_of_ids)');
         }
 
+        // TODO: All folders, not just the Inbox.
         var folder = store.getFolder('Inbox');
 
         if (!folder.isOpen()) {
@@ -93,8 +99,48 @@ exports.Service = function (opts) {
         }
     }
 
-    function write() {
+    function write(messages) {
 
+        var folder = store.getFolder('Inbox');
+
+        if (folder.getType() === javax.mail.Folder.HOLDS_FOLDERS) {
+            throw new GenericException(500, 'Folder cannot contain messages, unable to write.');
+        }
+
+        if (folder.isOpen()) {
+            log.info('Closing folder, reopening with correct mode.');
+            folder.close(false);
+        }
+
+        // Open folder to be written to.
+        folder.open(javax.mail.Folder.READ_WRITE);
+        log.info('Opened recipient folder.');
+
+        var successCount = 0;
+        var errors = [];
+        //Now that the folder is open and able to receive messages, we try to write them to it.
+        // This function will throw an error if it fails.
+        for (var i = 0; i < messages.length; i++) {
+            log.info('Appending message: {}', messages[i].getSubject());
+            try {
+                folder.appendMessages([messages[i]]);
+            } catch (e) {
+                log.error('Error appending message', e);
+                errors.push({
+                    id: messages[i].getMessageNumber(),
+                    imap: messages[i],
+                    code: 500,
+                    message: e.toString()
+                });
+                continue;
+            }
+            successCount++;
+        }
+
+        return {
+            successCount: successCount,
+            errors: errors
+        }
     }
 
     return {
