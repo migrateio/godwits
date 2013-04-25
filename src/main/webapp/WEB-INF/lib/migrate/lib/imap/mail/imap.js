@@ -36,8 +36,13 @@ exports.ImapService = Object.subClass({
 
         this.props.setProperty('mail.store.protocol', 'imaps');
 
-        if (this.opts.debug) {
-            this.props.setProperty('mail.debug', 'true');
+        if (this.opts.props) {
+            var names = Object.getOwnPropertyNames(this.opts.props);
+            for (var i = 0; i < names.length; i++) {
+                // Does this work how I expect it to?
+                // I think it does.
+                this.props.setProperty(names[i], this.opts.props[names[i]]);
+            }
         }
 
         log.info('Set mail.store.protocol to secure IMAP.');
