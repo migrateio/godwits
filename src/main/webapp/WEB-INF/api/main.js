@@ -30,38 +30,42 @@ app.get('/test/src/:email/:password/dest/:emaildest/:passworddest', function (re
 
     var results = [];
 
-    var source = new Google.Mail(src);
+    var source = new Google.Mail();
 
-    var srcfolders = source.getFolderStructure();
+    source.connect(src);
 
-    var destination = new Google.Mail(dest);
+    var srcfolders = source.getFolders();
 
-    destination.replicateFolders(srcfolders);
+    var destination = new Google.Mail();
 
-    for( var i = 1; i < 11; i++ ) {
-        var emails = source.read((i*100)-99, i*100);
+    destination.connect(dest);
 
-        var thread = new java.lang.Thread(
-            new java.lang.Runnable(
-                {
-                    run: function () {
-                        var destination = new Google.Mail(dest);
-                        try {
-                            results.push(destination.write(emails));
-                        } catch (e) {
-                            log.error(e);
-                        }
+    destination.writeFolders(srcfolders);
 
-                    }
-                }
-            ));
-
-        thread.start();
-    }
-
-    while(results.length < 10) {
-      //THIS IS A HACK OH GOD
-    }
+//    for( var i = 1; i < 11; i++ ) {
+//        var emails = source.read('inbox', (i*100)-99, i*100);
+//
+//        var thread = new java.lang.Thread(
+//            new java.lang.Runnable(
+//                {
+//                    run: function () {
+//                        var destination = new Google.Mail(dest);
+//                        try {
+//                            results.push(destination.write('inbox', emails));
+//                        } catch (e) {
+//                            log.error(e);
+//                        }
+//
+//                    }
+//                }
+//            ));
+//
+//        thread.start();
+//    }
+//
+//    while(results.length < 10) {
+//      //THIS IS A HACK OH GOD
+//    }
 
     return json(results);
 });

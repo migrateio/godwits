@@ -7,31 +7,6 @@ exports.Service = function (opts) {
 
     log.info('Initializing service with options: {}', JSON.stringify(opts, null, 4));
 
-    function GenericException(code, msg) {
-        log.error(msg);
-        this.code = code;
-        this.message = msg;
-    }
-
-    GenericException.prototype.toString = function () {
-        return this.message;
-    };
-
-    function WrappedException(code, msg, e) {
-        log.error(msg, e);
-        this.code = code;
-        this.message = msg;
-        this.exception = e;
-    }
-
-    WrappedException.prototype.toString = function () {
-        return JSON.stringify({
-            code: this.code,
-            message: this.message,
-            exception: this.exception
-        }, null, 4);
-    };
-
     var props = java.lang.System.getProperties();
     props.setProperty('mail.store.protocol', 'imaps');
     props.setProperty('mail.imap.yahoo.guid', '1'); // this hack is necessary to support yahoo.

@@ -2,10 +2,33 @@
 
 var log = require('ringo/logging').getLogger(module.id);
 
+function GenericException(code, msg) {
+    log.error(msg);
+    this.code = code;
+    this.message = msg;
+}
+
+GenericException.prototype.toString = function () {
+    return this.message;
+};
+
+function WrappedException(code, msg, e) {
+    log.error(msg, e);
+    this.code = code;
+    this.message = msg;
+    this.exception = e;
+}
+
+WrappedException.prototype.toString = function () {
+    return JSON.stringify({
+        code: this.code,
+        message: this.message,
+        exception: this.exception
+    }, null, 4);
+};
+
 exports.ImapService = Object.subClass({
     init: function() {
-        log.info('Initializing service with options: {}', JSON.stringify(opts, null, 4));
-
         this.props = java.lang.System.getProperties();
 
         this.props.setProperty('mail.store.protocol', 'imaps');
@@ -15,7 +38,7 @@ exports.ImapService = Object.subClass({
 
         try {
             log.info('Trying to get session instance.');
-            this.session = javax.mail.Session.getInstance(props, null);
+            this.session = javax.mail.Session.getInstance(this.props, null);
         } catch (e) {
             throw new WrappedException(500, 'Error getting session.', e);
         }
@@ -122,6 +145,9 @@ exports.ImapService = Object.subClass({
         return this.store.getDefaultFolder().list('*');
     },
     writeFolders: function (folders) {
+        if(!folders){
+            throw new GenericException(500, 'Bad request, folders must be an array.');
+        }
         for (var i = 0; i < folders.length; i++) {
             var folder = this.store.getFolder(folders[i].getFullName());
             if (!folder.exists()) {

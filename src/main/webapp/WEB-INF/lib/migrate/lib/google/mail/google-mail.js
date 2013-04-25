@@ -8,7 +8,7 @@ exports.Service = ImapService.subClass({
     },
     connect: function(opts) {
         Object.extend(opts, {
-            hostname: 'imap.google.com'
+            hostname: 'imap.gmail.com'
         });
         this._super(opts);
     },
@@ -16,10 +16,10 @@ exports.Service = ImapService.subClass({
         this._super(folder, from, to);
     },
     write: function(folder, messages) {
-        this._super(folder, messages);
+        return this._super(folder, messages);
     },
     getFolders: function() {
-        this._super();
+        return this._super();
     },
     writeFolders: function(folders) {
         this._super(folders);
