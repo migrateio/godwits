@@ -34,6 +34,7 @@ exports.Service = function (opts) {
 
     var props = java.lang.System.getProperties();
     props.setProperty('mail.store.protocol', 'imaps');
+    props.setProperty('mail.debug', 'true');
 
     log.info('Set mail.store.protocol to secure IMAP.');
 
@@ -73,30 +74,48 @@ exports.Service = function (opts) {
         throw new GenericException(400, 'Not yet implemented.');
     }
 
+    function getFolderStructure() {
+        return store.getDefaultFolder().list('*');
+    }
+
+    function replicateFolders(folders) {
+        for (var i = 0; i < folders.length; i++) {
+            var folder = store.getFolder(folders[i].getFullName());
+            if (!folder.exists()) {
+                log.info('creating folder: {}', folders[i].getFullName());
+                folder.create(folders[i].getType());
+            }
+        }
+    }
+
     /**
      * @params [from], [to], [ids]
      * @returns IMAPMessages
      */
-    function read() {
+    function read(folder, from, to) {
+
+        // just to make it clear what cases I'm checking.
+        var ids = from;
 
         // If this is true, this function has been called incorrectly, so we throw an exception.
-        if (!arguments[1] && Array.isArray(arguments[0])) {
+        if (!to && Array.isArray(ids)) {
             throw new GenericException(400, 'Incorrect arguments passed to read. Accepted calling patterns: read(number, number) OR read(array_of_ids)');
         }
 
-        // TODO: All folders, not just the Inbox.
-        var folder = store.getFolder('Inbox');
+        if (typeof folder === 'string') {
+            folder = store.getFolder(folder);
+        }
 
         if (!folder.isOpen()) {
             folder.open(javax.mail.Folder.READ_ONLY);
         }
 
-        if (typeof arguments[0] === 'number' && typeof arguments[1] === 'number') {
-            return folder.getMessages(arguments[0], arguments[1]);
+        if (typeof from === 'number' && typeof to === 'number') {
+            return folder.getMessages(from, to);
         }
 
-        if (Array.isArray(arguments[0])) {
-            return folder.getMessages(arguments[0]);
+        if (Array.isArray(ids)) {
+            return folder.getMessages(ids);
         }
     }
 
@@ -147,6 +166,8 @@ exports.Service = function (opts) {
     return {
         email: opts.email,
         read: read,
-        write: write
+        write: write,
+        getFolderStructure: getFolderStructure,
+        replicateFolders: replicateFolders
     }
 };

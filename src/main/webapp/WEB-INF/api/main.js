@@ -30,30 +30,38 @@ app.get('/test/src/:email/:password/dest/:emaildest/:passworddest', function (re
 
     var results = [];
 
-    for( var i = 1; i < 11; i++ ) {
-        var thread = new java.lang.Thread(
-            new java.lang.Runnable(
-                {
-                    run: function () {
-                        var source = new Google.Mail(src);
-                        var destination = new Google.Mail(dest);
-                        try {
-                            var emails = source.read((i*100)-99, i*100);
-                            results.push(destination.write(emails));
-                        } catch (e) {
-                            log.error(e);
-                        }
+    var source = new Google.Mail(src);
 
-                    }
-                }
-            ));
+    var srcfolders = source.getFolderStructure();
 
-        thread.start();
-    }
+    var destination = new Google.Mail(dest);
 
-    while(results.length < 10) {
+    destination.replicateFolders(srcfolders);
 
-    }
+//    for( var i = 1; i < 11; i++ ) {
+//        var emails = source.read((i*100)-99, i*100);
+//
+//        var thread = new java.lang.Thread(
+//            new java.lang.Runnable(
+//                {
+//                    run: function () {
+//                        var destination = new Google.Mail(dest);
+//                        try {
+//                            results.push(destination.write(emails));
+//                        } catch (e) {
+//                            log.error(e);
+//                        }
+//
+//                    }
+//                }
+//            ));
+//
+//        thread.start();
+//    }
+//
+//    while(results.length < 10) {
+//      //THIS IS A HACK OH GOD
+//    }
 
     return json(results);
 });
