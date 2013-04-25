@@ -3,9 +3,9 @@ var log = require('ringo/logging').getLogger(module.id);
 exports.Service = function (opts) {
     'use strict';
 
-    var hostname = 'imap.gmail.com';
+    var hostname = 'imap.mail.yahoo.com';
 
-
+    log.info('Initializing service with options: {}', JSON.stringify(opts, null, 4));
 
     function GenericException(code, msg) {
         log.error(msg);
@@ -34,6 +34,7 @@ exports.Service = function (opts) {
 
     var props = java.lang.System.getProperties();
     props.setProperty('mail.store.protocol', 'imaps');
+    props.setProperty('mail.imap.yahoo.guid', '1'); // this hack is necessary to support yahoo.
     props.setProperty('mail.debug', 'true');
 
     log.info('Set mail.store.protocol to secure IMAP.');

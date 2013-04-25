@@ -2,6 +2,9 @@ exports.Google = {
     Mail: require( './google/mail/google-mail' ).Service
 };
 
+exports.Yahoo = {
+    Mail: require( './yahoo/mail/yahoo-mail' ).Service
+};
 
 if (typeof Object.extend !== 'function') {
     Object.extend = function extend( orig ) {
