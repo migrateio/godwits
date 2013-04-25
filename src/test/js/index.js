@@ -1,3 +1,6 @@
+require.paths.push( module.resolve( '../../main/webapp/WEB-INF/api' ) );
+require.paths.push( module.resolve( '../../main/webapp/WEB-INF/lib' ) );
+
 var fs = require( 'fs' );
 var baseDir = fs.workingDirectory() + 'src/test/js';
 
