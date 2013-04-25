@@ -1,7 +1,7 @@
 require.paths.push( module.resolve( '../../main/webapp/WEB-INF/api' ) );
 require.paths.push( module.resolve( '../../main/webapp/WEB-INF/lib' ) );
 
-describe( "The GoogleMail service", function () {
+describe( 'The GoogleMail service', function () {
 
     var {Google} = require( 'migrate' );
     var service;
@@ -13,7 +13,11 @@ describe( "The GoogleMail service", function () {
     } );
 
 
-    it( "should return the expected email address", function () {
+    it( 'should exist', function () {
+        expect( service.email ).toBeDefined();
+    } );
+
+    it( 'should return the expected email address', function () {
         expect( service.email ).toEqual( 'joe@blow.me' );
     } );
 } );
