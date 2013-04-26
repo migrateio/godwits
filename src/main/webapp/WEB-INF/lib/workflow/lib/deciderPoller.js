@@ -55,6 +55,12 @@ var taskListName;
 var workflow;
 
 /**
+ * A reference to the worker than spawned this one. Used to post messages back.
+ * @type {Worker}
+ */
+var source;
+
+/**
  * @param e
  */
 function onmessage( e ) {
@@ -72,6 +78,7 @@ function onmessage( e ) {
             if ( !taskListName )
                 throw { status : 400, message : 'Command [start] requires property [taskListName].'};
             polling = true;
+            source = e.source;
             break;
         case 'stop':
             polling = false;

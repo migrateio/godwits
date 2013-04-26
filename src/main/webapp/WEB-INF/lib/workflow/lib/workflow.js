@@ -2,7 +2,10 @@ var log = require( 'ringo/logging' ).getLogger( module.id );
 
 var {AmazonSimpleWorkflowClient} = Packages.com.amazonaws.services.simpleworkflow;
 var {
-    ActivityType, Decision, RegisterActivityTypeRequest, RegisterWorkflowTypeRequest,
+    ActivityType, Decision, RecordActivityTaskHeartbeatRequest,
+    RegisterActivityTypeRequest, RegisterWorkflowTypeRequest,
+    RespondActivityTaskCompletedRequest, RespondActivityTaskFailedRequest,
+    RespondActivityTaskCanceledRequest
     RespondDecisionTaskCompletedRequest, StartWorkflowExecutionRequest,
     TaskList, TypeAlreadyExistsException, WorkflowType
     } = Packages.com.amazonaws.services.simpleworkflow.model;
@@ -290,6 +293,48 @@ exports.Workflow = Object.subClass( {
     },
 
     /**
+     * Used by workers to get an ActivityTask from the specified activity taskList. This
+     * initiates a long poll, where the service holds the HTTP connection open and
+     * responds as soon as a task becomes available. The maximum time the service holds
+     * on to the request before responding is 60 seconds. If no task is available within
+     * 60 seconds, the poll will return an empty result. An empty result, in this
+     * context, means that an ActivityTask is returned, but that the value of taskToken
+     * is an empty string. If a task is returned, the worker should use its type to
+     * identify and process it correctly. (@see http://goo.gl/C0diS)
+     *
+     * Valid options are:
+     *
+     * **domain** {String}
+     * > The name of the domain containing the task lists to poll. Defaults to workflow's
+     * > domain.
+     *
+     * **taskListName** {String}
+     * > Specifies the task list to poll for activity tasks.
+     *
+     * _identity_ {String}
+     * > Identity of the worker making the request, which is recorded in the
+     * > ActivityTaskStarted event in the workflow history. This enables diagnostic
+     * > tracing when problems arise. The form of this identity is user defined.
+     *
+     * @param options
+     */
+    pollForActivityTask : function ( options ) {
+        log.debug( 'Workflow::pollForActivityTask', JSON.stringify( options ) );
+
+        var taskList = new TaskList().withName( options.taskListName );
+
+        var request = new PollForActivityTaskRequest()
+            .withDomain(options.domain || this.workflowType.domain)
+            .withTaskList(taskList);
+        if (options.identity) request.setIdentity( options.identity );
+
+        var task = this.getSwfClient().pollForActivityTask(request);
+        if (!task.taskToken) return null;
+        return this.convertActivityTaskToJson(task);
+    },
+
+
+    /**
      * Used by deciders to get a DecisionTask from the specified decision taskList. A
      * decision task may be returned for any open workflow execution that is using the
      * specified task list. The task includes a paginated view of the history of the
@@ -362,6 +407,95 @@ exports.Workflow = Object.subClass( {
         if (fullHistory) this.completeDeciderHistory( request, task );
 
         return this.convertDeciderTaskToJson(task);
+    },
+
+    /**
+     * Used by workers to tell the service that the ActivityTask identified by the
+     * taskToken completed successfully with a result (if provided). The result appears
+     * in the ActivityTaskCompleted event in the workflow history.
+     * (@see http://goo.gl/GvXuZ)
+     *
+     * Valid options are:
+     *
+     * **taskToken** {String}
+     * > The taskToken from the ActivityTask.
+     *
+     * _result_ {String}
+     * > The result of the activity task. It is a free form string that is implementation
+     * > specific.
+     *
+     * @param options
+     */
+    respondActivityTaskCompleted : function ( options ) {
+        log.debug( 'Workflow::respondActivityTaskCompleted', JSON.stringify( options ) );
+
+        var request = new RespondActivityTaskCompletedRequest()
+            .withTaskToken( options.taskToken );
+        if (options.result) request.setResult( options.result );
+
+        this.swfClient.respondActivityTaskCompleted( request );
+    },
+
+    /**
+     * Used by workers to tell the service that the ActivityTask identified by the
+     * taskToken has failed with reason (if specified). The reason and details appear in
+     * the ActivityTaskFailed event added to the workflow history.
+     * (@see http://goo.gl/Yqxvq)
+     *
+     * Valid options are:
+     *
+     * **taskToken** {String}
+     * > The taskToken from the ActivityTask.
+     *
+     * _details_ {String}
+     * > Optional detailed information about the failure.
+     *
+     * _reason_ {String}
+     * > Description of the error that may assist in diagnostics.
+     *
+     * @param options
+     */
+    respondActivityTaskFailed : function ( options ) {
+        log.debug( 'Workflow::respondActivityTaskFailed', JSON.stringify( options ) );
+
+        var request = new RespondActivityTaskFailedRequest()
+            .withTaskToken( options.taskToken );
+        if (options.details) request.setDetails( options.details );
+        if (options.reason) request.setReason( options.reason );
+
+        this.swfClient.respondActivityTaskFailed( request );
+    },
+
+    /**
+     * Used by workers to tell the service that the ActivityTask identified by the
+     * taskToken was successfully canceled. Additional details can be optionally provided
+     * using the details argument.
+     *
+     * These details (if provided) appear in the ActivityTaskCanceled event added to the
+     * workflow history.
+     *
+     * **Important** Only use this operation if the canceled flag of a
+     * RecordActivityTaskHeartbeat request returns true and if the activity can be safely
+     * undone or abandoned. (@see http://goo.gl/lJdF0)
+     *
+     * Valid options are:
+     *
+     * **taskToken** {String}
+     * > The taskToken from the ActivityTask.
+     *
+     * _details_ {String}
+     * > Optional detailed information about the cancelure.
+     *
+     * @param options
+     */
+    respondActivityTaskCanceled : function ( options ) {
+        log.debug( 'Workflow::respondActivityTaskCanceled', JSON.stringify( options ) );
+
+        var request = new RespondActivityTaskCanceledRequest()
+            .withTaskToken( options.taskToken );
+        if (options.details) request.setDetails( options.details );
+
+        this.swfClient.respondActivityTaskCanceled( request );
     },
 
     /**
@@ -489,6 +623,38 @@ exports.Workflow = Object.subClass( {
 
 
     /**
+     * Used by activity workers to report to the service that the ActivityTask
+     * represented by the specified taskToken is still making progress. The worker can
+     * also (optionally) specify details of the progress, for example percent complete,
+     * using the details parameter. This action can also be used by the worker as a
+     * mechanism to check if cancellation is being requested for the activity task. If a
+     * cancellation is being attempted for the specified task, then the boolean
+     * cancelRequested flag returned by the service is set to true.
+     * (@see http://goo.gl/DVMJp)
+     *
+     * Valid options are:
+     *
+     * **taskToken** {String}
+     * > The taskToken from the ActivityTask.
+     *
+     * _details_ {String}
+     * > If specified, contains details about the progress of the task.
+     *
+     * @param options
+     * @return {Boolean} True if the workflow is requesting the activity to be cancelled
+     */
+    recordActivityTaskHeartbeat : function ( options ) {
+        log.debug( 'Workflow::recordActivityTaskHeartbeat', JSON.stringify( options ) );
+
+        var request = new RecordActivityTaskHeartbeatRequest()
+            .withTaskToken( options.taskToken );
+
+        if ( options.details ) request.setDetails( options.details );
+        var response = this.swfClient.recordActivityTaskHeartbeat( request );
+        return response.isCancelRequested().booleanValue();
+    },
+
+    /**
      * Uses Java package naming conventions to build the Java Decision object which
      * corresponds with the Json definition.
      *
@@ -550,8 +716,7 @@ exports.Workflow = Object.subClass( {
     },
 
     /**
-     * Convert the Task into a JSON object and pull its full execution history if
-     * necessary.
+     * Convert the DecisionTask into a JSON object.
      *
      * @param {DecisionTask} task
      */
@@ -634,6 +799,27 @@ exports.Workflow = Object.subClass( {
         } );
 
         return result;
+    },
+
+    /**
+     * Convert the ActivityTask into a JSON object.
+     *
+     * @param {ActivityTask} task
+     */
+    convertActivityTaskToJson: function (task) {
+        return {
+            taskToken : task.getTaskToken(),
+            activityType : {
+                name : task.activityType.name,
+                version : task.activityType.version
+            },
+            input : task.input,
+            startedEventId : task.startedEventId,
+            workflowExecution : {
+                runId : task.workflowExecution.runId,
+                workflowId : task.workflowExecution.workflowId
+            }
+        };
     },
 
     /**
