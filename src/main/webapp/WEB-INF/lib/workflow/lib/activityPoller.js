@@ -1,10 +1,10 @@
 /**
  * @fileOverview
- * The DeciderPoller is a Worker object which will run in its own thread and react to
+ * The ActivityPoller is a Worker object which will run in its own thread and react to
  * events published by Amazon Simple Workflow.
  *
- * 1. The DeciderPoller will continuously poll SWF for pending decisions.
- * 2. When a decision has been received, the Poller will:
+ * 1. The Poller will continuously poll SWF for pending activity tasks.
+ * 2. When a task has been received, the Poller will:
  *     1. Instantiate a new Decider worker
  *     2. Place the new worker in an internal queue
  *     3. Attach a listener to the Worker to be notified in the event of success or

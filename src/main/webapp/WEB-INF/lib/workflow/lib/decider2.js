@@ -55,6 +55,79 @@ exports.Decider = Object.subClass({
      * decisions by returning a JSON object (for a single decision), or a JSON
      * array for multiple decisions. Potential decisions are:
      *
+     * return [
+     *      {   type: 'CancelTimer',
+     *          timerId: ''
+     *      },
+     *      {   type: 'CancelWorkflowExecution',
+     *          details: ''
+     *      },
+     *      {   type: 'CompleteWorkflowExecution',
+     *          result: ''
+     *      },
+     *      {   type: 'ContinueAsNewWorkflowExecution',
+     *          childPolicy: '',
+     *          executionStartToCloseTimeout: '',
+     *          taskStartToCloseTimeout: ''
+     *          input: '',
+     *          tagList: [''],
+     *          taskListName: '',
+     *          workflowTypeVersion: ''
+     *      },
+     *      {   type: 'FailWorkflowExecution',
+     *          details: '',
+     *          reason: ''
+     *      },
+     *      {   type: 'RecordMarker',
+     *          details: '',
+     *          markerName: ''
+     *      },
+     *      {   type: 'RequestCancelActivityTask',
+     *          activityId: '',
+     *      },
+     *      {   type: 'RequestCancelExternalWorkflowExecution',
+     *          control: '',
+     *          runId: '',
+     *          workflowId: ''
+     *      },
+     *      {   type: 'ScheduleActivityTask',
+     *          activityId: '',
+     *          activityType: { name: '', version: '' },
+     *          control: '',
+     *          heartbeatTimeout: '',
+     *          input: '',
+     *          scheduleToStartTimeout: '',
+     *          scheduleToCloseTimeout: '',
+     *          startToCloseTimeout: ''
+     *          taskListName: ''
+     *      },
+     *      {   type: 'SignalExternalWorkflowExecution',
+     *          control: '',
+     *          input: '',
+     *          runId: '',
+     *          signalName: '',
+     *          workflowId: ''
+     *      },
+     *      {   type: 'StartChildWorkflowExecution',
+     *          childPolicy: '',
+     *          control: '',
+     *          executionStartToCloseTimeout: '',
+     *          taskStartToCloseTimeout: ''
+     *          input: '',
+     *          tagList: [''],
+     *          taskList: '',
+     *          workflowId: '',
+     *          workflowType: {
+     *              name: '',
+     *              version: ''
+     *          }
+     *      },
+     *      {   type: 'StartTimer',
+     *          control: '',
+     *          startToFireTimeout: ''
+     *          timerid: ''
+     *      }
+     * ];
      */
     onDecide: function () {
         log.debug('Decider::onDecide[{}/{}]', this.task.workflowType, this.task.taskToken);

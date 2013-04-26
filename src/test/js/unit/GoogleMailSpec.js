@@ -69,4 +69,3 @@ describe('The GoogleMail service', function () {
     });
 
 });
-
