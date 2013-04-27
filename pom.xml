@@ -246,6 +246,11 @@
                                     <!--<arg value="-d"/>-->
                                     <!--<arg value="-V"/>-->
                                     <arg value="src/test/js/runner.js"/>
+                                    <arg value="-w"/>
+                                    <arg value="-v 3"/>
+                                    <arg value="-t ${basedir}/src/test/js/"/>
+                                    <arg value="-s ${basedir}/src/main/webapp/WEB-INF"/>
+                                    <arg value="-j ${basedir}/target/surefire-reports/"/>
                                     <classpath refid="maven.test.classpath"/>
                                 </java>
                             </target>
