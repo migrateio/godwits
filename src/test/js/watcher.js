@@ -1,9 +1,11 @@
 var log = require( 'ringo/logging' ).getLogger( module.id );
 var fs = require( 'fs' );
-var basePaths;
+var watchPaths;
+var watchInterval;
 var source;
 var previousCount;
 var previousCRC;
+var firstTime = true;
 var crc = new java.util.zip.CRC32();
 
 function changesDetected( folders ) {
@@ -30,7 +32,7 @@ function changesDetected( folders ) {
 //    log.info( 'Found {} JS files. Previous count: {}', jsFiles.length, previousCount );
     if ( jsFiles.length != previousCount ) {
         previousCount = jsFiles.length;
-        return true;
+        if (!firstTime) return true;
     }
 
     crc.reset();
@@ -45,25 +47,33 @@ function changesDetected( folders ) {
 //    log.info( 'New CRC {}. Previous CRC: {}', value, previousCRC );
     if ( previousCRC !== value ) {
         previousCRC = value;
-        return true;
+        if (!firstTime) return true;
     }
 
+    firstTime = false;
     return false;
 }
 
 function checkForChanges() {
-    if ( basePaths ) {
-        var isChanged = changesDetected( basePaths );
-        source.postMessage( {changed : isChanged} );
+    try {
+//        log.info( 'Watching for modified files on paths: {}',
+//            JSON.stringify( watchPaths, null, 2 ) );
+        if ( watchPaths ) {
+            var isChanged = changesDetected( watchPaths );
+            if ( isChanged ) source.postMessage( {changed : isChanged} );
+        }
+    } catch ( e ) {
+        log.error( 'Error: ', e );
     }
-    setTimeout( checkForChanges, 2000 );
+    setTimeout( checkForChanges, watchInterval );
 }
 
 function onmessage( e ) {
-    log.info( 'Watching for modified files on paths: {}',
-        JSON.stringify( e.data, null, 2 ) );
-    basePaths = e.data;
+    watchInterval = e.data.interval || 2000;
+    watchPaths = e.data.watchPaths;
     source = e.source;
+//    log.info( 'Watcher paths: {}',
+//        JSON.stringify( e.data, null, 2 ), watchInterval, watchPaths );
 }
 
 setTimeout( checkForChanges, 0 );

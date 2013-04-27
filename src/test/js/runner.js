@@ -1,65 +1,90 @@
+var system = require( 'system' );
+var fs = require( 'fs' );
+var {Parser} = require( 'ringo/args' );
+var {Worker} = require( 'ringo/worker' );
 var log = require( 'ringo/logging' ).getLogger( module.id );
 
+var jasmineEnv;
 
 require.paths.push( module.resolve( '../../main/webapp/WEB-INF/api' ) );
 require.paths.push( module.resolve( '../../main/webapp/WEB-INF/lib' ) );
 
-var fs = require( 'fs' );
-var baseDir = fs.workingDirectory() + 'src/test/js';
+var baseDir = fs.directory(module.path);
 
 load( baseDir + '/jasmine/jasmine-1.3.1.js' );
 load( baseDir + '/jasmine/jasmine.terminal_reporter.js' );
 load( baseDir + '/jasmine/jasmine.junit_reporter.js' );
 
-fs.listTree( baseDir ).forEach( function ( file ) {
-    var f = baseDir + '/' + file;
-    if ( fs.isFile( f ) && /.+Spec\.js$/g.test( file ) ) load( f );
-} );
+function initializeJasmine( watcher, verbosity, junitDir ) {
+    jasmineEnv = jasmine.getEnv();
 
-var jasmineEnv = jasmine.getEnv();
+    var reporter = new jasmine.TerminalReporter( {
+        verbosity : verbosity,
+        color : true
+    } );
+    jasmineEnv.addReporter( reporter );
 
-var reporter = new jasmine.TerminalReporter( {
-    verbosity : 3,
-    color : true
-} );
-jasmineEnv.addReporter( reporter );
-
-jasmineEnv.addReporter(
-    new jasmine.JUnitXmlReporter( fs.workingDirectory() + 'target/surefire-reports/' )
-);
-
-var done = function () {
-    print( 'Calling done' );
-//    if ( reporter.hasErrors() ) require( 'system' ).exit( -1 );                          ~
-};
-
-var oldCallback = jasmineEnv.currentRunner().finishCallback;
-
-jasmineEnv.currentRunner().finishCallback = function () {
-    oldCallback.apply( this, arguments );
-    done();
-};
-
-jasmineEnv.execute();
-
-var watcher = new Worker( module.resolve( './watcher' ) );
-watcher.onmessage = function(e){
-    if ( e.data.changed) {
-        log.info( '\n\nFiles changed, re-executing tests' );
-
-        fs.listTree( baseDir ).forEach( function ( file ) {
-            var f = baseDir + '/' + file;
-            if ( fs.isFile( f ) && /.+Spec\.js$/g.test( file ) ) load( f );
-        } );
-
-        jasmineEnv.execute();
+    if ( junitDir ) {
+        jasmineEnv.addReporter(
+            new jasmine.JUnitXmlReporter( junitDir )
+        );
     }
-};
 
-var basePaths = [
-    '/Users/jcook/Projects/MigrateIO/godwits/src/test/js',
-    '/Users/jcook/Projects/MigrateIO/godwits/src/main/webapp/WEB-INF'
-    ];
-watcher.postMessage( basePaths );
+    var oldCallback = jasmineEnv.currentRunner().finishCallback;
+    jasmineEnv.currentRunner().finishCallback = function () {
+        oldCallback.apply( this, arguments );
+        if ( !watcher && reporter.hasErrors() ) require( 'system' ).exit( -1 );
+    };
+}
 
-log.info( 'Runner started' );
+function executeTests( testDirs ) {
+    fs.listTree( testDirs ).forEach( function ( file ) {
+        var f = testDirs + '/' + file;
+        if ( fs.isFile( f ) && /.+Spec\.js$/g.test( file ) ) load( f );
+    } );
+    jasmineEnv.execute();
+}
+
+function main( args ) {
+    var parser = new Parser();
+    parser.addOption( 'h', 'help', null, 'Run to see the usage options.' );
+    parser.addOption( 'w', 'watch', null, 'Enable to run tests when files change.' );
+    parser.addOption( 'i', 'interval', 'interval', 'The number of milliseconds between polling for modified files.' );
+    parser.addOption( 'v', 'verbosity', 'verbosity', 'How much logging from 0 - 3.' );
+    parser.addOption( 'j', 'junitDir', 'junitDir', 'Directory for JUnit tests.' );
+    parser.addOption( 's', 'sourceDirs', 'sourceDirs', 'Path to source files (can use comma to separate).' );
+    parser.addOption( 't', 'testDirs', 'testDirs', 'Path to test files (can use comma to separate).' );
+
+    args.shift();
+    args = args.filter(function(arg) { return !!arg });
+
+//    log.info( 'Arguments: {}', JSON.stringify( args, null, 4 ) );
+    var options = parser.parse( args );
+//    log.info( 'Options: {}', JSON.stringify( options, null, 4 ) );
+
+    if (options.help) {
+        print( parser.help() );
+        system.exit(0);
+    }
+
+    var sourceDirs = options.sourceDirs && options.sourceDirs.trim().split( /[:;]/ );
+    var testDirs = options.testDirs && options.testDirs.trim().split( /[:;]/ );
+    var junitDir = options.junitDir && options.junitDir.trim();
+
+    initializeJasmine( options.watch, options.verbosity, junitDir );
+
+    if ( options.watch ) {
+        var watchPaths = [].concat( sourceDirs ).concat( testDirs );
+        var watcher = new Worker( module.resolve( './watcher' ) );
+        watcher.onmessage = function ( e ) {
+            executeTests( testDirs );
+        };
+        watcher.postMessage( { watchPaths : watchPaths, interval : options.interval } );
+    }
+
+    executeTests( testDirs );
+}
+
+if ( require.main === module ) {
+    main( system.args );
+}
