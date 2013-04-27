@@ -38,7 +38,6 @@ function initializeJasmine( watcher, verbosity, junitDir ) {
 }
 
 function executeTests( testDirs ) {
-    log.info( 'Test dirs: {}', JSON.stringify( testDirs ) );
     fs.listTree( testDirs ).forEach( function ( file ) {
         var f = testDirs + '/' + file;
         if ( fs.isFile( f ) && /.+Spec\.js$/g.test( file ) ) load( f );
@@ -48,6 +47,7 @@ function executeTests( testDirs ) {
 
 function main( args ) {
     var parser = new Parser();
+    parser.addOption( 'h', 'help', null, 'Run to see the usage options.' );
     parser.addOption( 'w', 'watch', null, 'Enable to run tests when files change.' );
     parser.addOption( 'i', 'interval', 'interval', 'The number of milliseconds between polling for modified files.' );
     parser.addOption( 'v', 'verbosity', 'verbosity', 'How much logging from 0 - 3.' );
@@ -56,13 +56,21 @@ function main( args ) {
     parser.addOption( 't', 'testDirs', 'testDirs', 'Path to test files (can use comma to separate).' );
 
     args.shift();
+    args = args.filter(function(arg) { return !!arg });
+
+//    log.info( 'Arguments: {}', JSON.stringify( args, null, 4 ) );
     var options = parser.parse( args );
+//    log.info( 'Options: {}', JSON.stringify( options, null, 4 ) );
 
-    var sourceDirs = options.sourceDirs.trim().split( /[:;]/ );
-    var testDirs = options.testDirs.trim().split( /[:;]/ );
-    var junitDir = options.junitDir.trim();
+    if (options.help) {
+        print( parser.help() );
+        system.exit(0);
+    }
 
-//    log.info( 'Arguments: {}', JSON.stringify( options, null, 4 ) );
+    var sourceDirs = options.sourceDirs && options.sourceDirs.trim().split( /[:;]/ );
+    var testDirs = options.testDirs && options.testDirs.trim().split( /[:;]/ );
+    var junitDir = options.junitDir && options.junitDir.trim();
+
     initializeJasmine( options.watch, options.verbosity, junitDir );
 
     if ( options.watch ) {
