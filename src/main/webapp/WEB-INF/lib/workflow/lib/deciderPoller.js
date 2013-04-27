@@ -1,195 +1,233 @@
-var log = require('ringo/logging').getLogger(module.id);
+/**
+ * @fileOverview
+ * The DeciderPoller is a Worker object which will run in its own thread and react to
+ * events published by Amazon Simple Workflow.
+ *
+ * 1. The DeciderPoller will continuously poll SWF for pending decisions.
+ * 2. When a decision has been received, the Poller will:
+ *     1. Instantiate a new Decider worker
+ *     2. Place the new worker in an internal queue
+ *     3. Attach a listener to the Worker to be notified in the event of success or
+ *        failure
+ * 3. When the Poller is notified of a Worker completion
+ *     1. Notify SWF of the Workers completion status (whether success or error)
+ *     2. Remove the Worker from the internal queue
+ * 4. In the event of a shutdown message from the workflow:
+ *     1. The Poller will cease to poll SWF for new decisions
+ *     2. The Poller will continue to remove completed workers from the queue.
+ *     3. When the queue is empty, the Poller will send ACK to workflow which will
+ *        terminate the Poller.
+ */
 
-var {
-    PollForDecisionTaskRequest, TaskList
-    } = Packages.com.amazonaws.services.simpleworkflow.model;
-var ISO_FORMAT = new java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+var log = require( 'ringo/logging' ).getLogger( module.id );
 
-exports.DeciderPoller = Object.subClass({
-    init: function (workflow, taskListName, threadCount, aDecider) {
-        log.debug('DeciderPoller::init, {}', JSON.stringify(arguments));
-        this.workflow = workflow;
-        this.taskList = new TaskList().withName(taskListName);
-        this.swfClient = this.workflow.getSwfClient();
+/**
+ * Indicates whether the poller is trying to shutdown.
+ * @type {Boolean}
+ */
+var shuttingDown = false;
 
-        this.Decider = aDecider;
+/**
+ * Indicates whether the polling loop is still operating.
+ * @type {Boolean}
+ */
+var polling;
 
-        // Create a thread pool containing at most <threadCount> decider threads doing their thing.
-        // When more than <threadCount> runnables are added, the runnables will queue to be executed
-        // as other threads complete.
-        this.pool = java.util.concurrent.Executors.newFixedThreadPool(threadCount);
+/**
+ * Keeps track of the number of outstanding workers. 0 indicates there are no worker
+ * processes running.
+ *
+ * @type {Number}
+ */
+var workerCount = 0;
 
-        // Some serious gymnastics to make sure the 'this' scope is not lost when
-        // run() is executed by new thread. Only took a day to figure this out. --jc
-        var runnable = { run: function () {
-            this.run()
-        }.bind(this) };
-        var poolRunner = new java.lang.Runnable(runnable);
-        this.poolThread = new java.lang.Thread(poolRunner);
-        this.poolThread.setName('decider/' + taskListName + '/poll');
 
-        this.count = 0;
-    },
+/**
+ * The name of the taskList this Poller will be retrieving decisions from.
+ * @type {String}
+ */
+var taskListName;
 
-    /**
-     * Convert the ActivityTask into a JSON object and pull its full
-     * execution history if necessary.
-     *
-     * @param task
-     */
-    extractFullTask: function (request, task) {
-        var result = {
-            events: [],
-            previousStartedEventId: task.getPreviousStartedEventId(),
-            startedEventId: task.getStartedEventId(),
-            taskToken: task.getTaskToken()
-        };
+/**
+ * The workflow object associated with this Poller.
+ * @type {Workflow}
+ */
+var workflow;
 
-        if (task.getWorkflowExecution() != null) {
-            result.workflowExecution = {
-                runId: task.getWorkflowExecution().getRunId(),
-                workflowId: task.getWorkflowExecution().getWorkflowId()
-            };
-        }
+/**
+ * A reference to the worker than spawned this one. Used to post messages back.
+ * @type {Worker}
+ */
+var source;
 
-        if (task.getWorkflowType() != null) {
-            result.workflowType = {
-                name: task.getWorkflowType().getName(),
-                version: task.getWorkflowType().getVersion()
+/**
+ * @param e
+ */
+function onmessage( e ) {
+    log.info( 'onmessage: {}', JSON.stringify( arguments ) );
+
+    if ( !e.data || !e.data.command )
+        throw { status : 400, message : 'Invalid message. No command specified.'};
+
+    switch ( e.data.command ) {
+        case 'start':
+            taskListName = taskListName || e.data.taskListName;
+            workflow = workflow || e.data.workflow;
+            if ( !workflow ) {
+                throw { status : 400, message : 'Command [start] requires property [workflow].'};
             }
-        }
-
-        /**
-         * Just converting Java object to JSON object.
-         * @todo This is why we should make the REST calls ourselves.
-         *
-         * @param result
-         * @param task
-         */
-        var processEvents = function (result, task) {
-            var events = task.getEvents().toArray().forEach(function (event) {
-                var e = {
-                    eventType: event.getEventType(),
-                    eventId: event.getEventId(),
-                    eventTimestamp: ISO_FORMAT.format(event.getEventTimestamp())
-                };
-
-                // The attributes for this event are retrieved by calling a getter
-                // made from the event type name
-                var attrs = event['get' + e.eventType + 'EventAttributes']();
-                Object.keys(attrs).forEach(function (key) {
-                    // We only care about properties that don't start with 'with'...
-                    if (/^with/.test(key)) return;
-                    // ... but have a 'withXXX' match
-                    if (!attrs['with' + key.charAt(0).toUpperCase() + key.slice(1)]) return;
-                    log.info('DeciderPoller::processEvents, eventType: {}, key: {}', e.eventType, key);
-                    var value = attrs[key];
-                    // If value is null, bail now
-                    if (value == null) {
-                        log.warn('DeciderPoller::processEvents, eventType: {}, key: {}, value: null',
-                            e.eventType, key);
-                        return;
-                    }
-                    if (key === 'activityType' || key === 'workflowType') {
-                        value = {
-                            name: value.getName(),
-                            version: value.getVersion()
-                        }
-                    } else
-                    if (key === 'taskList') {
-                        value = {
-                            name: value.getName()
-                        }
-                    } else
-                    if (key === 'input') {
-                        value = JSON.parse(value);
-                    } else
-                    if (key === 'tagList') {
-                        var a = value.toArray();
-                        value = [];
-                        for (var i = 0; i < a.length; i++) {
-                            value.push('' + a[i]);
-                        }
-                    } else
-                    if (key === 'workflowExecution' || key === 'externalWorkflowExecution' || key === 'parentWorkflowExecution') {
-                        value = {
-                            runId: value.getRunId(),
-                            workflowId: value.getWorkflowId()
-                        }
-                    }
-                    e[key] = value;
-                    JSON.stringify(e);
-                });
-                result.events.push(e);
-            });
-        };
-
-        // Keep polling for the rest of the events, if there are any
-        processEvents(result, task);
-        while (task.getNextPageToken()) {
-            task = this.swfClient.pollForDecisionTask(request);
-            processEvents(result, task);
-        }
-
-        return result;
-    },
-
-
-    poll: function () {
-        log.debug('DeciderPoller::poll, polling for decider from tasklist [{}/{}]',
-            this.workflow.getDomain(), this.taskList.name);
-
-        var request = new PollForDecisionTaskRequest()
-            .withMaximumPageSize(100)
-            .withReverseOrder(true)
-            .withDomain(this.workflow.getDomain())
-            .withTaskList(this.taskList);
-
-        var task = this.swfClient.pollForDecisionTask(request);
-
-        task = this.extractFullTask(request, task);
-
-        return task;
-    },
-
-    run: function () {
-        log.debug('DeciderPoller::run, beginning to poll for deciders from tasklist [{}]', this.taskList.name);
-        while (true) {
-            try {
-                var task = this.poll();
-                if (task.taskToken) {
-                    log.debug('DeciderPoller::run, retrieved task: [{}/{}]', task.workflowType, task.taskToken);
-                    var runnable = { run: function () {
-                        var decider = new this.Decider(this.workflow, task);
-                        decider.run();
-                    }.bind(this) };
-//                    var runnable = new java.lang.Runnable(decider);
-                    var poolRunner = new java.lang.Runnable(runnable);
-                    this.pool.submit(poolRunner);
-                }
-                java.lang.Thread.sleep(20000);
-            } catch (e) {
-                log.error('Error occurred while polling for task', e);
-            }
-        }
-    },
-
-    toString: function () {
-        return 'DeciderPoller[workflow:' + this.workflow + ', taskListName:' + this.taskList.name + ']';
-    },
-
-    start: function () {
-        log.debug('DeciderPoller::start, starting thread pool');
-        this.poolThread.start();
-    },
-
-    stop: function () {
-
-    },
-
-    shutdown: function () {
-
+            if ( !taskListName )
+                throw { status : 400, message : 'Command [start] requires property [taskListName].'};
+            polling = true;
+            source = e.source;
+            break;
+        case 'stop':
+            polling = false;
+            break;
+        case 'shutdown':
+            shuttingDown = true;
+            polling = false;
+            break;
+        default:
+            var s = java.lang.String.format( 'onmessage, unknown command [%s]', e.data.command );
+            throw { status : 400, message : s};
     }
-});
+}
+
+/**
+ *
+ */
+function poll() {
+    if (polling) {
+        var task = workflow.pollForDecisionTask( {
+            taskListName : taskListName
+        } );
+        if ( task ) startTask( task );
+    }
+    if (!shuttingDown) setTimeout( poll, 1000 );
+}
+
+/**
+ * Called when the Decider finishes with a decision. Each decision will result in one or
+ * more actions being returned. These actions will be represented by JSON objects and
+ * there can be one or and array of them.
+ *
+ * e.data {Object|Array}
+ *     [
+ *         {   type : 'CancelTimer',
+ *             timerId : ''
+ *         },
+ *         {   type : 'CancelWorkflowExecution',
+ *             details : ''
+ *         },
+ *         {   type : 'CompleteWorkflowExecution',
+ *             result : ''
+ *         },
+ *         {   type : 'ContinueAsNewWorkflowExecution',
+ *             childPolicy : '',
+ *             executionStartToCloseTimeout : '',
+ *             taskStartToCloseTimeout : ''
+ *             input : '',
+ *             tagList : [''],
+ *             taskListName : '',
+ *             workflowTypeVersion : ''
+ *         },
+ *         {   type : 'FailWorkflowExecution',
+ *             details : '',
+ *             reason : ''
+ *         },
+ *         {   type : 'RecordMarker',
+ *             details : '',
+ *             markerName : ''
+ *         },
+ *         {   type : 'RequestCancelActivityTask',
+ *             activityId : '',
+ *         },
+ *         {   type : 'RequestCancelExternalWorkflowExecution',
+ *             control : '',
+ *             runId : '',
+ *             workflowId : ''
+ *         },
+ *         {   type : 'ScheduleActivityTask',
+ *             activityId : '',
+ *             activityType : { name : '', version : '' },
+ *             control : '',
+ *             heartbeatTimeout : '',
+ *             input : '',
+ *             scheduleToStartTimeout : '',
+ *             scheduleToCloseTimeout : '',
+ *             startToCloseTimeout : ''
+ *             taskListName : ''
+ *         },
+ *         {   type : 'SignalExternalWorkflowExecution',
+ *             control : '',
+ *             input : '',
+ *             runId : '',
+ *             signalName : '',
+ *             workflowId : ''
+ *         },
+ *         {   type : 'StartChildWorkflowExecution',
+ *             childPolicy : '',
+ *             control : '',
+ *             executionStartToCloseTimeout : '',
+ *             taskStartToCloseTimeout : ''
+ *             input : '',
+ *             tagList : [''],
+ *             taskList : '',
+ *             workflowId : '',
+ *             workflowType : {
+ *                 name : '',
+ *                 version : ''
+ *             }
+ *         },
+ *         {   type : 'StartTimer',
+ *             control : '',
+ *             startToFireTimeout : ''
+ *             timerid : ''
+ *         }
+ *     ];
+ *
+ * @param e
+ */
+function workerSuccess( task, data ) {
+    workflow.respondDecisionTaskCompleted( {
+        decisions: data.decisions || [],
+        executionContext: data.executionContext,
+        taskToken: task.taskToken
+    } );
+}
+
+/**
+ * There is no failure condition for a decision task. If we get here, then there is a
+ * serious problem with our decision object.
+ *
+ * @param task
+ * @param data
+ */
+function workerError( task, data ) {
+    log.fatal( 'Should not have a failure condition possible from the Decider. ' +
+        'Write more tests! Task Token: {}, Error: {}',
+        task.taskToken, JSON.stringify( data ) );
+}
+
+function startTask( task ) {
+    var worker = new WorkerPromise( decider, task );
+    workerCount++;
+    worker
+        .then( function() {
+            workerSuccess( task, e.data );
+        }, function() {
+            workerError( task, e.data );
+        })
+        .then( function () {
+            workerCount--;
+            if (shuttingDown && workerCount === 0) {
+                source.postMessage( { code : 200, message : 'Ready to terminate'} );
+            }
+        });
+}
+
+setTimeout( poll, 0 );
+
 
 

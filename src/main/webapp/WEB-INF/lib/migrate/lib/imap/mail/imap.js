@@ -28,11 +28,22 @@ WrappedException.prototype.toString = function () {
 };
 
 exports.ImapService = Object.subClass({
-    init: function() {
+    init: function (opts) {
+
+        this.opts = opts;
+        this.email = this.opts.email;
         this.props = java.lang.System.getProperties();
 
         this.props.setProperty('mail.store.protocol', 'imaps');
-        this.props.setProperty('mail.debug', 'true');
+
+        if (this.opts.props) {
+            var names = Object.getOwnPropertyNames(this.opts.props);
+            for (var i = 0; i < names.length; i++) {
+                // Does this work how I expect it to?
+                // I think it does.
+                this.props.setProperty(names[i], this.opts.props[names[i]]);
+            }
+        }
 
         log.info('Set mail.store.protocol to secure IMAP.');
 
@@ -50,29 +61,28 @@ exports.ImapService = Object.subClass({
             throw new WrappedException(500, 'Error getting IMAP store.', e);
         }
     },
-    connect: function (opts) {
+    connect: function () {
         // If neither of these exist, we've got no authentication provided and cannot proceed.
-        if (!(opts.password || opts.oauth)) {
+        if (!(this.opts.password || this.opts.oauth)) {
             throw new GenericException(401, 'No authentication provided.');
         }
 
-        if (opts.password) {
+        if (this.opts.password) {
             try {
-                log.info('Trying to connect to IMAP store with supplied credentials: {}', JSON.stringify(opts, null, 4));
-                this.store.connect(opts.hostname, opts.email, opts.password);
+                log.info('Trying to connect to IMAP store with supplied credentials: {}', JSON.stringify(this.opts, null, 4));
+                this.store.connect(this.opts.hostname, this.opts.email, this.opts.password);
             } catch (e) {
                 throw new WrappedException(500, 'Could not connect to store', e);
             }
         }
 
-        if (opts.oauth) {
+        if (this.opts.oauth) {
             throw new GenericException(400, 'Not yet implemented.');
         }
 
-
     },
     write: function (folder, messages) {
-        if(typeof folder === 'string') {
+        if (typeof folder === 'string') {
             folder = this.store.getFolder(folder);
         }
 
@@ -145,11 +155,20 @@ exports.ImapService = Object.subClass({
         return this.store.getDefaultFolder().list('*');
     },
     writeFolders: function (folders) {
-        if(!folders){
+        if (!folders) {
             throw new GenericException(500, 'Bad request, folders must be an array.');
         }
         for (var i = 0; i < folders.length; i++) {
-            var folder = this.store.getFolder(folders[i].getFullName());
+            var folder;
+
+            if (typeof folders[i] === 'object') {
+                folder = this.store.getFolder(folders[i].getFullName());
+            } else if (typeof folders[i] === 'string') {
+                folder = this.store.getFolder(folders[i]);
+            } else {
+                throw new GenericException(500, 'Folders should be an array of either javax.mail.folders or strings');
+            }
+
             if (!folder.exists()) {
                 log.info('creating folder: {}', folders[i].getFullName());
                 folder.create(folders[i].getType());

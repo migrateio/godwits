@@ -30,15 +30,15 @@ app.get('/test/src/:email/:password/dest/:emaildest/:passworddest', function (re
 
     var results = [];
 
-    var source = new Google.Mail();
+    var source = new Google.Mail(src);
 
-    source.connect(src);
+    source.connect();
 
     var srcfolders = source.getFolders();
 
-    var destination = new Google.Mail();
+    var destination = new Google.Mail(dest);
 
-    destination.connect(dest);
+    destination.connect();
 
     destination.writeFolders(srcfolders);
 
