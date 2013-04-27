@@ -1,3 +1,6 @@
+var log = require( 'ringo/logging' ).getLogger( module.id );
+
+
 require.paths.push( module.resolve( '../../main/webapp/WEB-INF/api' ) );
 require.paths.push( module.resolve( '../../main/webapp/WEB-INF/lib' ) );
 
@@ -15,7 +18,6 @@ fs.listTree( baseDir ).forEach( function ( file ) {
 
 var jasmineEnv = jasmine.getEnv();
 
-
 var reporter = new jasmine.TerminalReporter( {
     verbosity : 3,
     color : true
@@ -28,7 +30,7 @@ jasmineEnv.addReporter(
 
 var done = function () {
     print( 'Calling done' );
-    if ( reporter.hasErrors() ) require( 'system' ).exit( -1 );
+//    if ( reporter.hasErrors() ) require( 'system' ).exit( -1 );                          ~
 };
 
 var oldCallback = jasmineEnv.currentRunner().finishCallback;
@@ -40,3 +42,24 @@ jasmineEnv.currentRunner().finishCallback = function () {
 
 jasmineEnv.execute();
 
+var watcher = new Worker( module.resolve( './watcher' ) );
+watcher.onmessage = function(e){
+    if ( e.data.changed) {
+        log.info( '\n\nFiles changed, re-executing tests' );
+
+        fs.listTree( baseDir ).forEach( function ( file ) {
+            var f = baseDir + '/' + file;
+            if ( fs.isFile( f ) && /.+Spec\.js$/g.test( file ) ) load( f );
+        } );
+
+        jasmineEnv.execute();
+    }
+};
+
+var basePaths = [
+    '/Users/jcook/Projects/MigrateIO/godwits/src/test/js',
+    '/Users/jcook/Projects/MigrateIO/godwits/src/main/webapp/WEB-INF'
+    ];
+watcher.postMessage( basePaths );
+
+log.info( 'Runner started' );

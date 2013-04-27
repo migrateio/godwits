@@ -245,7 +245,7 @@
                                     <jvmarg value="-Dringo.verbose=false"/>
                                     <!--<arg value="-d"/>-->
                                     <!--<arg value="-V"/>-->
-                                    <arg value="src/test/js/index.js"/>
+                                    <arg value="src/test/js/runner.js"/>
                                     <classpath refid="maven.test.classpath"/>
                                 </java>
                             </target>

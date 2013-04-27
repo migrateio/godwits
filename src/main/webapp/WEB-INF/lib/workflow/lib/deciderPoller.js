@@ -71,10 +71,11 @@ function onmessage( e ) {
 
     switch ( e.data.command ) {
         case 'start':
-            taskListName = taskListName || data.taskListName;
-            workflow = workflow || data.workflow;
-            if ( !workflow )
+            taskListName = taskListName || e.data.taskListName;
+            workflow = workflow || e.data.workflow;
+            if ( !workflow ) {
                 throw { status : 400, message : 'Command [start] requires property [workflow].'};
+            }
             if ( !taskListName )
                 throw { status : 400, message : 'Command [start] requires property [taskListName].'};
             polling = true;
@@ -97,15 +98,13 @@ function onmessage( e ) {
  *
  */
 function poll() {
-    while ( !shuttingDown ) {
-        while ( polling ) {
-            var task = workflow.pollForDecisionTask( {
-                taskListName : taskListName
-            } );
-            if ( task ) startTask( task );
-        }
-        java.lang.Thread.sleep( 1000 );
+    if (polling) {
+        var task = workflow.pollForDecisionTask( {
+            taskListName : taskListName
+        } );
+        if ( task ) startTask( task );
     }
+    if (!shuttingDown) setTimeout( poll, 1000 );
 }
 
 /**

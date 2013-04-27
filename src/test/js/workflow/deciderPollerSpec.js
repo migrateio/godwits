@@ -4,7 +4,7 @@ var {Worker, WorkerPromise} = require( 'ringo/worker' );
 
 describe( 'DeciderPoller', function () {
 
-    it( 'should be a worker instance', function () {
+    it( 'should not be created without a workflow instance', function () {
 
         var success;
 
@@ -21,15 +21,8 @@ describe( 'DeciderPoller', function () {
 
                 w.onerror = function ( e ) {
                     success = true;
-                    log.info( 'Spec::onerror: {}', JSON.stringify( e ) );
                 };
 
-                w.onmessage = function ( e ) {
-                    success = false;
-                    log.info( 'Spec::onmessage: {}', JSON.stringify( e ) );
-                };
-
-                log.info( 'Spec::posting: {}', JSON.stringify( opts ) );
                 w.postMessage( opts );
             } catch ( e ) {
                 log.error( e )
@@ -39,7 +32,7 @@ describe( 'DeciderPoller', function () {
         waits( 100 );
 
         runs( function () {
-            expect( this.success ).toBe(true);
+            expect( success ).toBe(true);
         } );
     } );
 
