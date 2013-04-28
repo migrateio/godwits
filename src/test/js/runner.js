@@ -12,6 +12,7 @@ require.paths.push( module.resolve( '../../main/webapp/WEB-INF/lib' ) );
 var baseDir = fs.directory(module.path);
 
 load( baseDir + '/jasmine/jasmine-1.3.1.js' );
+load( baseDir + '/jasmine/jasmine.async.js' );
 load( baseDir + '/jasmine/jasmine.terminal_reporter.js' );
 load( baseDir + '/jasmine/jasmine.junit_reporter.js' );
 

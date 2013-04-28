@@ -20,10 +20,10 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <jetty-version>8.1.9.v20130131</jetty-version>
 
-        <slf4j-version>1.7.2</slf4j-version>
-        <logback-version>1.0.9</logback-version>
+        <slf4j-version>1.7.5</slf4j-version>
+        <logback-version>1.0.12</logback-version>
 
-        <mail-version>1.4.6</mail-version>
+        <mail-version>1.5.0-b01</mail-version>
 
         <ringo-version>0.9.0-alpha-7-SNAPSHOT</ringo-version>
         <stick-version>0.1.0-alpha-7</stick-version>
@@ -40,7 +40,7 @@
         </beanstalk.s3.name>
 
         <!-- Amazon deployment credentials -->
-        <aws-version>1.3.30</aws-version>
+        <aws-version>1.4.2.1</aws-version>
         <aws.access_key>${migrate.aws.access_key}</aws.access_key>
         <aws.secret_key>${migrate.aws.secret_key}</aws.secret_key>
 
@@ -355,20 +355,4 @@
             </properties>
         </profile>
     </profiles>
-    <!--
-        <repositories>
-            <repository>
-                <id>com.googlecode.jstd-maven-plugin</id>
-                <name>JsTestDriver Maven Plugin Repository</name>
-                <url>http://jstd-maven-plugin.googlecode.com/svn/maven2</url>
-            </repository>
-        </repositories>
-        <pluginRepositories>
-            <pluginRepository>
-                <id>com.googlecode.jstd-maven-plugin</id>
-                <name>JsTestDriver Maven Plugin Repository</name>
-                <url>http://jstd-maven-plugin.googlecode.com/svn/maven2</url>
-            </pluginRepository>
-        </pluginRepositories>
-    -->
 </project>

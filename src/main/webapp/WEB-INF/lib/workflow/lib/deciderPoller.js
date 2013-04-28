@@ -41,6 +41,13 @@ var polling;
  */
 var workerCount = 0;
 
+/**
+ * The name of the decifer module to load when decisions have to be made.
+ *
+ * @type {String}
+ */
+
+var decider = '';
 
 /**
  * The name of the taskList this Poller will be retrieving decisions from.
@@ -71,13 +78,19 @@ function onmessage( e ) {
 
     switch ( e.data.command ) {
         case 'start':
+            // todo: perhaps these 'or' comparisons should be flipped, but it we won't be
+            // calling start more than once
             taskListName = taskListName || e.data.taskListName;
             workflow = workflow || e.data.workflow;
-            if ( !workflow ) {
+            decider = decider || e.data.decider;
+
+            if ( !decider)
+                throw { status : 400, message : 'Command [start] requires property [decider].'};
+            if ( !workflow )
                 throw { status : 400, message : 'Command [start] requires property [workflow].'};
-            }
             if ( !taskListName )
                 throw { status : 400, message : 'Command [start] requires property [taskListName].'};
+
             polling = true;
             source = e.source;
             break;
