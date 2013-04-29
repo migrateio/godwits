@@ -2,7 +2,9 @@ describe('The GoogleMail service', function () {
 
     var {Google} = require('migrate');
     var service;
+    var log = require('ringo/logging').getLogger(module.id);
 
+    // before each test we instantiate a service object.
     beforeEach(function () {
         service = new Google.Mail({
             email: 'migratetester@gmail.com',
@@ -11,6 +13,12 @@ describe('The GoogleMail service', function () {
                 'mail.debug': 'false'
             }
         });
+    });
+
+    // after each test we'll close our connections
+    afterEach(function () {
+        // Clean up after ourselves.
+        service.store.close();
     });
 
     it('should exist', function () {
@@ -44,11 +52,22 @@ describe('The GoogleMail service', function () {
             }
         });
 
-        xit('should return an array of all the folders in the account', function () {
-            var log = require('ringo/logging').getLogger(module.id);
+        it('should return an array of all the folders in the account', function () {
+            var folders = service.getFolders();
 
-            log.info(JSON.stringify(service.getFolders(), null, 4));
-            expect(Array.isArray(service.getFolders())).toBeTruthy();
+            expect(folders.forEach).toBeTruthy();
+            expect(folders.map).toBeTruthy();
+            expect(folders.length > 1).toBeTruthy();
+
+            var result = false;
+
+            for (var i = 0; i < folders.length; i++) {
+                if (folders[i].getName() === 'INBOX') {
+                    result = true;
+                }
+            }
+
+            expect(result).toBeTruthy();
         });
 
     });
@@ -88,7 +107,7 @@ describe('The GoogleMail service', function () {
         it('should allow me to write an email to the server', function () {
             // We need a mock email, and this email account isn't wiped, so let's generate a semi-random string and test for it.
             // Thanks, stack overflow: http://stackoverflow.com/questions/6248666/how-to-generate-short-uid-like-ax4j9z-in-js
-            var uid = ("0000" + (Math.random()*Math.pow(36,4) << 0).toString(36)).substr(-4);
+            var uid = ("0000" + (Math.random() * Math.pow(36, 4) << 0).toString(36)).substr(-4);
 
             // Now we need to start writing a new email.
             // The message constructor takes a session as an argument.
@@ -128,7 +147,7 @@ describe('The GoogleMail service', function () {
             var count = folder.getMessageCount();
 
             // This shouldn't be necessary, as it should still be open from the write call. However, we include this just to be sure.
-            if(!folder.isOpen()) {
+            if (!folder.isOpen()) {
                 folder.open(javax.mail.Folder.READ_ONLY);
             }
 
@@ -143,8 +162,11 @@ describe('The GoogleMail service', function () {
             expect(testEmail.getSubject()).toBe(uid);
             expect(testEmail.getSentDate().toString()).toEqual(sentDate.toString());
             expect(testEmail.getSender().toString()).toBe('test@migrate.io');
+
             // This one is probably uh, not right.
             expect(testEmail.getRecipients(javax.mail.Message.RecipientType.TO)[0].toString()).toBe('migratetester@gmail.com');
+
+            // All done.
         });
     });
 
@@ -160,7 +182,24 @@ describe('The GoogleMail service', function () {
         });
 
         it('should write all the folders passed in, if they do not already exist', function () {
+            var uid = ("0000" + (Math.random() * Math.pow(36, 4) << 0).toString(36)).substr(-4);
 
+            var result = service.writeFolders([uid]);
+
+            expect(result.successCount).toBe(1);
+            expect(result.errors).toEqual([]);
+
+            var folders = service.getFolders();
+            var testFolder;
+
+            for (var i = 0; i < folders.length; i++) {
+                if (folders[i].getName() === uid) {
+                    testFolder = folders[i];
+                }
+            }
+
+            expect(testFolder).toBeDefined();
+            expect(testFolder.getName()).toBe(uid);
         });
     });
 });

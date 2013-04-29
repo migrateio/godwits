@@ -2,7 +2,6 @@
 
 var log = require('ringo/logging').getLogger(module.id);
 
-
 // Let's define some exceptions that we might through, so we can have a bit more fun than just throwing objects.
 function GenericException(code, msg) {
     log.error(msg);
@@ -32,7 +31,6 @@ WrappedException.prototype.toString = function () {
     }, null, 4);
 };
 
-
 // **Export** our CommonJS module, which is also a subclass of Object. This is for extensibility.
 exports.ImapService = Object.subClass({
 
@@ -50,7 +48,6 @@ exports.ImapService = Object.subClass({
 
         // Set the protocol to imaps, (IMAP, secure).
         this.props.setProperty('mail.store.protocol', 'imaps');
-
 
         // If we've got other properties passed in, set those as well.
         if (this.opts.props) {
@@ -113,17 +110,15 @@ exports.ImapService = Object.subClass({
             folder = this.store.getFolder(folder);
         }
 
-
         // If the folder's type is incorrect, we cannot write messages to this folder.
         if (folder.getType() === javax.mail.Folder.HOLDS_FOLDERS) {
             throw new GenericException(500, 'Folder cannot contain messages, unable to write.');
         }
 
         // If folder isn't open, we open it.
-        if(!folder.isOpen()) {
+        if (!folder.isOpen()) {
             folder.open(javax.mail.Folder.READ_WRITE);
         }
-
 
         // If the folder is open, but in readonly mode, we need to close and reopen it correctly.
         if (folder.isOpen() && folder.getMode() === javax.mail.Folder.READ_ONLY) {
@@ -131,7 +126,6 @@ exports.ImapService = Object.subClass({
             folder.open(javax.mail.Folder.READ_WRITE);
             // Okay, now our folder is open, and set to the correct mode.
         }
-
 
         // Define some result variables.
         var successCount = 0;
@@ -208,6 +202,8 @@ exports.ImapService = Object.subClass({
 
     // Sometimes we need to write folders. Let's do that now.
     writeFolders: function (folders) {
+        var successCount = 0;
+        var errors = [];
 
         // Why wouldn't you give me the folders to write :(
         if (!folders) {
@@ -216,21 +212,34 @@ exports.ImapService = Object.subClass({
 
         // Simply loop over the array passed in,
         for (var i = 0; i < folders.length; i++) {
-            var folder;
+            var folder, type;
 
-            if (typeof folders[i] === 'object') {
+            if (typeof folders[i] === 'object' && typeof folders[i].getFullName === 'function') {
                 folder = this.store.getFolder(folders[i].getFullName());
+                type = 'java';
             } else if (typeof folders[i] === 'string') {
                 folder = this.store.getFolder(folders[i]);
+                type = 'string';
             } else {
                 throw new GenericException(500, 'Folders should be an array of either javax.mail.folders or strings');
             }
 
             // And if the folder doesn't exist already, we create it.
             if (!folder.exists()) {
-                log.info('creating folder: {}', folders[i].getFullName());
-                folder.create(folders[i].getType());
+                log.info('creating folder: {}', folders[i]);
+                if (type === 'java') {
+                    folder.create(folder.getType());
+                } else {
+                    folder.create(javax.mail.Folder.HOLDS_MESSAGES);
+                }
             }
+
+            successCount++;
+        }
+
+        return {
+            successCount: successCount,
+            errors: errors
         }
     }
 });
