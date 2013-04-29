@@ -55,7 +55,7 @@
         <init-param>
             <param-name>module-path</param-name>
             <param-value>
-                WEB-INF/api,WEB-INF/lib
+                WEB-INF/api,WEB-INF/lib,
             </param-value>
         </init-param>
         <load-on-startup>1</load-on-startup>
