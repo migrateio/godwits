@@ -92,11 +92,11 @@ describe('The GoogleMail service', function () {
 
             // Now we need to start writing a new email.
             // The message constructor takes a session as an argument.
-            var email = new javax.mail.Internet.MimeMessage(service.session);
+            var email = new javax.mail.internet.MimeMessage(service.session);
 
             // Now lets fill out some dummy data in the message.
-            email.setFrom(new javax.mail.Internet.InternetAddress('test@migrate.io'));
-            email.setRecipient(javax.mail.Message.RecipientType.TO, new javax.mail.Internet.InternetAddress('migratetester@gmail.com'));
+            email.setFrom(new javax.mail.internet.InternetAddress('test@migrate.io'));
+            email.setRecipient(javax.mail.Message.RecipientType.TO, new javax.mail.internet.InternetAddress('migratetester@gmail.com'));
 
             // This is the main thing we'll test for, since its the one that will be unique-ish.
             email.setSubject(uid);
@@ -128,17 +128,20 @@ describe('The GoogleMail service', function () {
             var count = folder.getMessageCount();
 
             // This shouldn't be necessary, as it should still be open from the write call. However, we include this just to be sure.
-            if(!folder.isOpen) {
+            if(!folder.isOpen()) {
                 folder.open(javax.mail.Folder.READ_ONLY);
             }
 
             // Since it should be the last email, we call getMessages with a new array containing the count.
             // Message numbers shouldn't have gaps, so this should return the last email.
-            var testEmail = service.store.getMessages([count]);
+            var testEmail = folder.getMessages([count]);
+
+            // getMessages returns an array, so lets alias that to a single message object.
+            testEmail = testEmail[0];
 
             // Alright, we have our email, lets test it.
             expect(testEmail.getSubject()).toBe(uid);
-            expect(testEmail.getSentDate()).toBe(sentDate);
+            expect(testEmail.getSentDate().toString()).toEqual(sentDate.toString());
             expect(testEmail.getSender().toString()).toBe('test@migrate.io');
             // This one is probably uh, not right.
             expect(testEmail.getRecipients(javax.mail.Message.RecipientType.TO)[0].toString()).toBe('migratetester@gmail.com');
