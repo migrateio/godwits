@@ -83,7 +83,15 @@
                 }
                 this.log(this.inColor(resultText, color));
             } else if (this.verbosity > 2) {
-                resultText = "Failed";
+                resultText = "Failed\n";
+
+                var items = spec.results().getItems();
+                for ( var j in items ) {
+                    var item = items[j];
+                    if ( !item.passed() ) {
+                        resultText += ("\n  " + item.message);
+                    }
+                }
 
                 if (spec.results().passed()) {
                     resultText = 'Passed';
