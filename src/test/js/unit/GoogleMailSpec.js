@@ -1,4 +1,4 @@
-xdescribe('The GoogleMail service', function () {
+describe('The GoogleMail service', function () {
 
     var {Google} = require('migrate');
     var service;
