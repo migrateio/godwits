@@ -1,5 +1,6 @@
 var log = require( 'ringo/logging' ).getLogger( module.id );
 var {Deferred} = require( 'ringo/promise' );
+var {config, uuid} = require( 'utility' );
 
 /**
  * The Decider processes the workflow history from SWF and determines what is the next
@@ -29,15 +30,35 @@ var {Deferred} = require( 'ringo/promise' );
  */
 exports.Decider = function ( events ) {
 
-    var loadCustomer = function ( job ) {
-        var customerId = job.customerId;
-        return {
-            id : job.customerId,
-            name : 'Fred Flintstone',
-            freshbooksId : '12345',
-            stripeId : '67890'
+    /**
+     *
+     * @param {String} activityName
+     * @param {String} [activityVersion]
+     * @param {Object} input
+     * @param {Object} [control]
+     */
+    function scheduleTask(activityName, activityVersion, input, control) {
+        log.info( 'Arguments: {}', JSON.stringify( arguments ) );
+        var args = Array.prototype.slice.call( arguments, 0 );
+        log.info( 'Args: {}', JSON.stringify( args ) );
+
+        activityName = args.shift();
+        activityVersion = typeof args[0] === 'object' ? config.version : args.shift();
+        input = args.shift();
+        control = args.shift();
+
+        log.info( 'Params: {}', JSON.stringify( [activityName, activityVersion, input, control] ) );
+
+        var task = {
+            type : 'ScheduleActivityTask',
+            activityId : uuid(),
+            activityType : { name : activityName, version : activityVersion },
+            control : control,
+            input : input
         };
-    };
+        log.info( 'Emitting task: {}', JSON.stringify( task ) );
+        machina.emit( 'task', task );
+    }
 
     var machina = require( 'machinajs' )();
 
@@ -49,9 +70,9 @@ exports.Decider = function ( events ) {
                 _onEnter : function () {
                     log.info( 'uninitialized::onEnter: {}', JSON.stringify( arguments ) );
                 },
-                WorkflowExecutionStarted : function ( job ) {
+                WorkflowExecutionStarted : function ( event ) {
                     log.info( 'uninitialized::WorkflowExecutionStarted: {}', JSON.stringify( arguments ) );
-                    this.job = job;
+                    this.job = event.input;
                     // Do the initialization work here
                     this.transition( 'initialized' );
                 }
@@ -60,17 +81,17 @@ exports.Decider = function ( events ) {
             initialized : {
                 _onEnter : function () {
                     log.info( 'initialized::onEnter: {}', JSON.stringify( arguments ) );
-                    machina.emit( 'task', {
-                        type : 'ScheduleActivityTask',
-                        activityId : '',
-                        activityType : { name : '', version : '' },
-                        control : '',
-                        input : { customerId: this.job.customerId }
-                    } );
+                    log.info( 'initialized::onEnter: job: {}', JSON.stringify( this.job ) );
+                    scheduleTask( 'loadCustomer', { userId : this.job.userId } );
                 }
             }
         }
     } );
+
+    // Convert events json to Events
+    events = [].concat(events).map(function(event) {
+        return new Event( event );
+    });
 
     var deferred = new Deferred();
 
@@ -86,6 +107,7 @@ exports.Decider = function ( events ) {
      * @param {Array} events List of events from SWF
      */
     function replay( events ) {
+        log.info( 'Replaying events: {}', JSON.stringify( events ) );
         var event;
         while ( events.length > 1 ) {
             event = events.shift();
@@ -96,6 +118,7 @@ exports.Decider = function ( events ) {
             deferred.resolve( {fsm : fsm, task : task} );
         } );
         event = events.shift();
+        log.info( 'Processing event: {}', JSON.stringify( event ) );
         if ( event ) {
             fsm.handle( event.eventType, event );
         }
@@ -109,4 +132,36 @@ exports.Decider = function ( events ) {
     return deferred.promise;
 };
 
+
+function Event(event) {
+
+    var input;
+
+    var obj = {
+        toString: function() {
+            return JSON.stringify( event );
+        },
+        toJSON: function() {
+            return JSON.stringify( event );
+        }
+    };
+
+    Object.defineProperty(obj, 'input', {
+        get: function() {
+            if (input) return input;
+            if (/WorkflowExecutionStarted/.test(event.eventType)) {
+                input = event.workflowExecutionStartedEventAttributes.input;
+            }
+            return input;
+        }
+    });
+    Object.defineProperty(obj, 'eventType', {
+        get: function() {
+            return event.eventType;
+        }
+    });
+    Object.defineProperty(obj, 'json', { value: event, configurable: true });
+
+    return obj;
+}
 

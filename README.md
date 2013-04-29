@@ -41,7 +41,48 @@ a new user interface catering to the needs of the bulk migrator who will need to
 hundreds or thousands of user accounts. Additionally, we may add support for integration
 with Microsoft Active Directory, LDAP directories, and Lotus Notes.
 
-## Domain Objects
+# Developer Docs
 
+## Testing
+
+### Unit Tests
+
+We are using Jasmine for server-side unit tests. The Jasmine tests are most easily
+executed by using Maven to start the process.
+
+    mvn clean test
+
+This will execute all tests and report the results to the console, and to a JUnit-
+compatible XML files in target/surefire-reports. Other Maven goals will use these XML
+files for further generation of other reports.
+
+For developers practicing TDD, the tests can be started and run continuously using a
+variation. Anytime a test or source file is added or modified, the test runner will
+execute and dump the results to the console (and the XML reports).
+
+    mvn clean test -P watch
+
+### Integration Tests
+
+### Acceptance Tests
+
+We are using Jasmine to execute the acceptance tests, and these tests are using the
+AngularJS bridge to make UI testing quite a bit easier to manage.
+
+A single run of acceptance testing can be executed using:
+
+    karma start
+
+If you wish to run the acceptance tests continuously in the background, you may use:
+
+    karma start --singleRun=false
+
+By default, the browser used is Google Chrome. If you wish to run tests for other
+browsers, you may specify them on the command line:
+
+    karma start --browsers="Firefox,Chrome"
+
+
+# Domain Objects
 
 ##
