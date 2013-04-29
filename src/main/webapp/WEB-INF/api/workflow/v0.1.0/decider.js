@@ -24,11 +24,14 @@ var {config, uuid} = require( 'utility' );
  * 4. When the response is received by the decider, it will include a JSON object that
  *    indicates which activity worker to instantiate and the input to feed to it.
  *
+ * todo: Create decoupling between this class and the FSM configuration. Move this class
+ * into the workflow library and keep the FSM info with the domain's business logic.
+ *
  * @param {Array} events
  * @return {Object}
  * @constructor
  */
-exports.Decider = function ( events ) {
+exports.Decider = function ( moduleId, events ) {
 
     /**
      *

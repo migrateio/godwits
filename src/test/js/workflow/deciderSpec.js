@@ -1,6 +1,6 @@
-var {Decider} = require( 'workflow/decider' );
+var {Decider} = require( 'workflow/v0.1.0/decider' );
 
-describe( 'Decider', function () {
+xdescribe( 'Decider', function () {
 
     var decider;
     var async = new AsyncSpec( this );

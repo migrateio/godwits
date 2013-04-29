@@ -108,23 +108,15 @@ function onmessage( e ) {
             polling = false;
             break;
         case 'registerWorker':
-            if ( !e.data.activityType || !e.data.activityType.name)
-                throw {
+            if (!workflow) throw {
+                status: 400,
+                message: 'Command [registerWorker] must be executed after start command.'
+            };
+            if ( !e.data.moduleId ) throw {
                     status : 400,
-                    message : 'Command [registerWorker] requires property [activityType.name].'
+                    message : 'Command [registerWorker] requires property [moduleId].'
                 };
-            if ( !e.data.activityType || !e.data.activityType.version)
-                throw {
-                    status : 400,
-                    message : 'Command [registerWorker] requires property [activityType.version].'
-                };
-            if ( !e.data.worker )
-                throw {
-                    status : 400,
-                    message : 'Command [registerWorker] requires property [worker].'
-                };
-            var key = e.data.activityType.name + '/' + e.data.activityType.version;
-            registry[key] = e.data.worker;
+            registerWorker( e.data.moduleId );
             break;
         default:
             var s = java.lang.String.format( 'onmessage, unknown command [%s]', e.data.command );
@@ -201,18 +193,18 @@ function workerError( task, data ) {
  */
 function getActivityWorker( task ) {
     var key = task.activityType.name + '/' + task.activityType.version;
-    var worker = registry[key] || null;
-    if (!worker)
+    var workerModule = registry[key] || null;
+    if (!workerModule)
         workerError( task, {
             reason: 'The activity poller did not have a worker for activity type ['
                 + key + ']' } );
-    return worker;
+    return workerModule;
 }
 
 function startTask( task ) {
-    var activityWorker = getActivityWorker( task );
-    if (activityWorker) {
-        var worker = new WorkerPromise( activityWorker, task );
+    var workerModule = getActivityWorker( task );
+    if (workerModule) {
+        var worker = new WorkerPromise( workerModule, task );
         var heartbeat = new Worker( 'workflow/heartbeat' );
         heartbeat.postMessage( { taskToken: task.taskToken } );
         workerCount++;
@@ -230,6 +222,37 @@ function startTask( task ) {
                 }
             });
     }
+}
+
+function registerWorker(moduleId) {
+    var worker = require( moduleId );
+    if (!worker) throw {
+        status: 400,
+        message: 'The worker module [' + moduleId
+            + '] could not be resolved to a physical module.'
+    };
+    var type = worker.ActivityType;
+    if (!type) throw {
+        status: 400,
+        message: 'The worker module [' + moduleid + '] must export property [ActivityType]'
+    };
+    if ( !type.name)
+        throw {
+            status : 400,
+            message : 'Command [registerWorker] requires property [ActivityType.name].'
+        };
+    if ( !type.version)
+        throw {
+            status : 400,
+            message : 'Command [registerWorker] requires property [ActivityType.version].'
+        };
+
+    // Register the ActivityType with Amazon SWF
+    workflow.registerActivityType( type );
+
+    // Store the moduleId so we can instantiate this module as a Worker later
+    var key = type.name + '/' + type.version;
+    registry[key] = moduleId;
 }
 
 setTimeout( poll, 0 );

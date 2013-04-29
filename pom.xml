@@ -308,8 +308,7 @@
 
                 <!-- AWS App Access -->
                 <aws.app.access_key>AKIAIIQOWQM6FFLQB2EQ</aws.app.access_key>
-                <aws.app.secret_key>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
-                </aws.app.secret_key>
+                <aws.app.secret_key>ItTa0xaI9sey2SEGGEN8yVcA5slN95+qmNrf1TMd</aws.app.secret_key>
             </properties>
         </profile>
         <profile>
@@ -327,8 +326,7 @@
 
                 <!-- AWS App Access -->
                 <aws.app.access_key>AKIAJUK7QWOGW5XMHLXQ</aws.app.access_key>
-                <aws.app.secret_key>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
-                </aws.app.secret_key>
+                <aws.app.secret_key>FqqpFVhZpSDmlh5AhCPD4LhpXDUbRSUD80Yq++Lt</aws.app.secret_key>
             </properties>
         </profile>
         <profile>

@@ -2,7 +2,7 @@ var log = require( 'ringo/logging' ).getLogger( module.id );
 
 var {Worker, WorkerPromise} = require( 'ringo/worker' );
 
-describe( 'DeciderPoller', function () {
+xdescribe( 'DeciderPoller', function () {
     var async = new AsyncSpec( this );
 
     describe( 'should have proper init values', function () {
