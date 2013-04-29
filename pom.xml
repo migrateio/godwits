@@ -255,7 +255,7 @@
                                     <arg value="src/test/js/runner.js"/>
                                     <arg value="${watcher}"/>
                                     <arg value="-v 3"/>
-                                    <arg value="-t ${basedir}/src/test/js/"/>
+                                    <arg value="-t ${basedir}/src/test/js/workflow"/>
                                     <arg value="-s ${basedir}/src/main/webapp/WEB-INF"/>
                                     <arg value="-j ${basedir}/target/surefire-reports/"/>
                                     <classpath refid="maven.test.classpath"/>

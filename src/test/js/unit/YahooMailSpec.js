@@ -1,4 +1,4 @@
-describe( 'The Yahoo Mail service', function () {
+xdescribe( 'The Yahoo Mail service', function () {
 
     var {Yahoo} = require( 'migrate' );
     var service;

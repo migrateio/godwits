@@ -39,6 +39,7 @@ function initializeJasmine( watcher, verbosity, junitDir ) {
 }
 
 function executeTests( testDirs ) {
+    log.debug( '\n\nRunning tests at {}', new Date().toISOString() );
     fs.listTree( testDirs ).forEach( function ( file ) {
         var f = testDirs + '/' + file;
         if ( fs.isFile( f ) && /.+Spec\.js$/g.test( file ) ) load( f );
