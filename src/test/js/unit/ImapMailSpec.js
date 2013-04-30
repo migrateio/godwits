@@ -113,6 +113,7 @@ function writeTests(service) {
             //Found an easier way to do the attachment. using it
             var ds = new javax.mail.util.ByteArrayDataSource(json, 'application/json');
             attachment.setDataHandler(new javax.activation.DataHandler(ds));
+            attachment.setFileName('test.json');
             multipart.addBodyPart(attachment);
 
             email.setContent(multipart);
@@ -150,6 +151,20 @@ function writeTests(service) {
             expect(testEmail.getSubject()).toBe(uid);
             expect(testEmail.getSentDate().toString()).toEqual(sentDate.toString());
             expect(testEmail.getSender().toString()).toBe('test@migrate.io');
+
+            var emailTestMultiPart = testEmail.getContent();
+            var attachmentTestPart, stringTestPart;
+
+            for(var i=0; i<emailTestMultiPart.getCount(); i++ ) {
+                if(emailTestMultiPart.getBodyPart(i).getDisposition() === javax.mail.BodyPart.ATTACHMENT) {
+                    attachmentTestPart = emailTestMultiPart.getBodyPart(i);
+                } else {
+                    stringTestPart = emailTestMultiPart.getBodyPart(i);
+                }
+            }
+
+            expect(attachmentTestPart.getDataHandler().getName()).toBe('test.json');
+            expect(stringTestPart.getContent()).toBe('Test email w/ attachment.');
 
             // This one is probably uh, not right.
             expect(testEmail.getRecipients(javax.mail.Message.RecipientType.TO)[0].toString()).toBe(service.email);
