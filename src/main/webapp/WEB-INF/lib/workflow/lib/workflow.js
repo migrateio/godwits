@@ -136,7 +136,7 @@ exports.Workflow = function ( workflowOptions, accessKey, secretKey ) {
                 options.defaultExecutionStartToCloseTimeout
             );
         if (options.defaultTaskStartToCloseTimeout)
-            request.setDefaultTaskStartToClose( options.defaultTaskStartToCloseTimeout );
+            request.setDefaultTaskStartToCloseTimeout( options.defaultTaskStartToCloseTimeout );
 
         try {
             swfClient.registerWorkflowType( request );
@@ -966,9 +966,9 @@ exports.Workflow = function ( workflowOptions, accessKey, secretKey ) {
      *
      * @param {DeciderPoller|Array} deciderPoller
      */
-    function addDeciderPoller( deciderPoller ) {
-        log.debug( 'Workflow::addDeciderPoller, {}', JSON.stringify( arguments ) );
-        this.deciderPollers = this.deciderPollers.concat( deciderPoller );
+    function registerDecider( taskListName, decider ) {
+        log.debug( 'Workflow::registerDecider, {}', JSON.stringify( arguments ) );
+//        this.deciderPollers = this.deciderPollers.concat( deciderPoller );
     }
 
     /**
@@ -1080,11 +1080,19 @@ exports.Workflow = function ( workflowOptions, accessKey, secretKey ) {
             message: 'Workflow instance requires an [secretKey] parameter as a string.'
         };
 
-        log.debug( "Workflow::init, establishing AWS SWF Client using access key: {}, secret key: {}",
-            accessKey, secretKey );
-        var credentials = new BasicAWSCredentials( accessKey, secretKey );
-        swfClient = new AmazonSimpleWorkflowClient( credentials );
+        try {
+            log.debug( "Workflow::init, establishing AWS SWF Client using access key: {}, secret key: {}",
+                accessKey, secretKey );
+            var credentials = new BasicAWSCredentials( accessKey, secretKey );
+            log.info( 'Creating SWF Client: {}', credentials );
+            swfClient = new AmazonSimpleWorkflowClient( credentials );
+            log.info( 'Done Creating SWF Client' );
+        } catch ( e ) {
+            log.info( 'init::error', e );
+            throw e;
+        }
 
+        log.info( 'Preparing to register workflowtype: {}', JSON.stringify( workflowType ) );
         registerWorkflowType( workflowType );
     }
 
@@ -1105,10 +1113,11 @@ exports.Workflow = function ( workflowOptions, accessKey, secretKey ) {
 
         registerDecider : registerDecider,
         registerActivities : registerActivities,
-        startExecution : startExecution,
+
         start : start,
         stop : stop,
         shutdown : shutdown,
+
         toJSON : toJSON,
         toString : toString
     }

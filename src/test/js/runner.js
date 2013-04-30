@@ -5,10 +5,10 @@ var {Worker} = require( 'ringo/worker' );
 var log = require( 'ringo/logging' ).getLogger( module.id );
 
 var jasmineEnv;
+var watcher;
 
 require.paths.push( module.resolve( '../../main/webapp/WEB-INF/api' ) );
 require.paths.push( module.resolve( '../../main/webapp/WEB-INF/lib' ) );
-require.paths.push( module.resolve( './unit' ) );
 
 var baseDir = fs.directory(module.path);
 
@@ -34,6 +34,7 @@ function initializeJasmine( watcher, verbosity, junitDir ) {
 
     var oldCallback = jasmineEnv.currentRunner().finishCallback;
     jasmineEnv.currentRunner().finishCallback = function () {
+        log.info( 'Finish Callback' );
         oldCallback.apply( this, arguments );
         if ( !watcher && reporter.hasErrors() ) require( 'system' ).exit( -1 );
     };

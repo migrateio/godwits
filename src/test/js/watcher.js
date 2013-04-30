@@ -32,7 +32,7 @@ function changesDetected( folders ) {
 //    log.info( 'Found {} JS files. Previous count: {}', jsFiles.length, previousCount );
     if ( jsFiles.length != previousCount ) {
         previousCount = jsFiles.length;
-        if (!firstTime) return true;
+        if ( !firstTime ) return true;
     }
 
     crc.reset();
@@ -47,7 +47,7 @@ function changesDetected( folders ) {
 //    log.info( 'New CRC {}. Previous CRC: {}', value, previousCRC );
     if ( previousCRC !== value ) {
         previousCRC = value;
-        if (!firstTime) return true;
+        if ( !firstTime ) return true;
     }
 
     firstTime = false;
@@ -55,15 +55,11 @@ function changesDetected( folders ) {
 }
 
 function checkForChanges() {
-    try {
 //        log.info( 'Watching for modified files on paths: {}',
 //            JSON.stringify( watchPaths, null, 2 ) );
-        if ( watchPaths ) {
-            var isChanged = changesDetected( watchPaths );
-            if ( isChanged ) source.postMessage( {changed : isChanged} );
-        }
-    } catch ( e ) {
-        log.error( 'Error: ', e );
+    if ( watchPaths ) {
+        var isChanged = changesDetected( watchPaths );
+        if ( isChanged ) source.postMessage( {changed : isChanged} );
     }
     setTimeout( checkForChanges, watchInterval );
 }

@@ -224,6 +224,7 @@ function workerError( task, data ) {
 }
 
 function startTask( task ) {
+    log.info( 'DeciderPoller::startTask: {}', JSON.stringify( task ) );
     var worker = new WorkerPromise( decider, task );
     workerCount++;
     worker
