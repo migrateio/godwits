@@ -89,7 +89,7 @@
                 for ( var j in items ) {
                     var item = items[j];
                     if ( !item.passed() ) {
-                        resultText += ("\n  " + item.message);
+                        resultText += ("\n  " + item.message + '\n' + item.trace.stack);
                     }
                 }
 
