@@ -9,6 +9,7 @@ var watcher;
 
 require.paths.push( module.resolve( '../../main/webapp/WEB-INF/api' ) );
 require.paths.push( module.resolve( '../../main/webapp/WEB-INF/lib' ) );
+require.paths.push( module.resolve( './support' ) );
 
 var baseDir = fs.directory(module.path);
 

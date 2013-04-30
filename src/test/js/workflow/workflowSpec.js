@@ -25,15 +25,33 @@ describe( 'Workflow', function () {
         } ).toThrow('com.amazonaws.AmazonServiceException: The security token included in the request is invalid');
     } );
 
+} );
+
+describe('Workflow object and decider registration', function() {
+
+    var workflow;
+
+    beforeEach( function() {
+        workflow = new Workflow( workflowType, accessKey, secretKey );
+    });
+
+    afterEach( function() {
+        workflow.shutdown();
+    });
+
     it( 'will create a proper workflow object', function () {
-        var workflow = new Workflow( workflowType,
-            'AKIAIIQOWQM6FFLQB2EQ', 'ItTa0xaI9sey2SEGGEN8yVcA5slN95+qmNrf1TMd' );
         expect( workflow ).toBeDefined();
         expect( workflow.start ).toBeFunction();
     } );
 
-} );
+    it( 'should allow deciders to be registered', function () {
+        workflow.registerDecider( deciderTaskList, 'test/deciders/simple-decider' );
+    } );
+});
 
+var accessKey = 'AKIAIIQOWQM6FFLQB2EQ';
+var secretKey = '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';
+var deciderTaskList = 'test/tasklist/decider';
 var workflowType = {
     domain : 'dev-migrate',
     name: 'io.migrate.transfers',

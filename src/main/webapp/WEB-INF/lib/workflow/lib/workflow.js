@@ -366,7 +366,7 @@ exports.Workflow = function ( workflowOptions, accessKey, secretKey ) {
         ['workflowId', 'workflowName', 'workflowVersion'].forEach( requires );
 
         var request = new RegisterActivityTypeRequest()
-            .withDomain( this.workflowType.domain )
+            .withDomain( workflowOptions.domain )
             .withName( options.name )
             .withVersion( options.version );
 
@@ -847,7 +847,7 @@ exports.Workflow = function ( workflowOptions, accessKey, secretKey ) {
 
         while ( nextTask.nextPageToken ) {
             request.setNextPageToken( nextTask.nextPageToken );
-            nextTask = this.getSwfClient().pollForDecisionTask( request );
+            nextTask = swfClient.pollForDecisionTask( request );
             task.events.addAll( nextTask.events );
         }
     }
@@ -966,9 +966,23 @@ exports.Workflow = function ( workflowOptions, accessKey, secretKey ) {
      *
      * @param {DeciderPoller|Array} deciderPoller
      */
-    function registerDecider( taskListName, decider ) {
+    function registerDecider( taskListName, deciderModuleId ) {
         log.debug( 'Workflow::registerDecider, {}', JSON.stringify( arguments ) );
-//        this.deciderPollers = this.deciderPollers.concat( deciderPoller );
+        var poller = deciderPollers[taskListName];
+        if (!poller) {
+            log.info( 'Registering new DeciderPoller for taskList [{}]', taskListName );
+            poller = new Worker( 'workflow/deciderPoller' );
+            poller.postMessage( {
+                command : 'start',
+                taskListName : taskListName,
+                workflow : this
+            } );
+            deciderPollers[taskListName] = poller;
+        }
+        poller.postMessage( {
+            command: 'registerDecider',
+            module: deciderModuleId
+        } );
     }
 
     /**
@@ -978,13 +992,13 @@ exports.Workflow = function ( workflowOptions, accessKey, secretKey ) {
      *
      * @param {String} taskListName The name of the task list with which to register
      *                 workers.
-     * @param {String|Array} workers The module id of the worker to register (or array)
+     * @param {String|Array} workerModuleIds The module id of the worker to register (or array)
      */
-    function registerWorkers( taskListName, workers ) {
+    function registerWorkers( taskListName, workerModuleIds ) {
         log.debug( 'Workflow::registerWorkers, {}', JSON.stringify( arguments ) );
         var poller = getWorkerPoller( taskListName );
-        [].concat( workers ).forEach( function ( worker ) {
-            registerWorker( poller, worker );
+        [].concat( workerModuleIds ).forEach( function ( workerModuleId ) {
+            registerWorker( poller, workerModuleId );
         } );
     }
 
@@ -1021,47 +1035,47 @@ exports.Workflow = function ( workflowOptions, accessKey, secretKey ) {
      * Start the workflow by ensuring that each decider and worker poller is started.
      */
     function start() {
-        this.deciderPollers.forEach( function ( poller ) {
-            poller.start();
-        } );
-        this.workerPollers.forEach( function ( poller ) {
-            poller.start();
-        } );
+        Object.keys(deciderPollers ).forEach(function(key) {
+            deciderPollers[key].start();
+        });
+        Object.keys(workerPollers ).forEach(function(key) {
+            workerPollers[key].start();
+        });
     }
 
     /**
      * Stop the workflow by ensuring that each decider and worker poller is stopped.
      */
     function stop() {
-        this.deciderPollers.forEach( function ( poller ) {
-            poller.stop();
-        } );
-        this.workerPollers.forEach( function ( poller ) {
-            poller.stop();
-        } );
+        Object.keys(deciderPollers ).forEach(function(key) {
+            deciderPollers[key].stop();
+        });
+        Object.keys(workerPollers ).forEach(function(key) {
+            workerPollers[key].stop();
+        });
     }
 
     /**
      * Shutdown the workflow by ensuring that each decider and worker poller is shutdown.
      */
     function shutdown() {
-        this.deciderPollers.forEach( function ( poller ) {
-            poller.shutdown();
-        } );
-        this.workerPollers.forEach( function ( poller ) {
-            poller.shutdown();
-        } );
+        Object.keys(deciderPollers ).forEach(function(key) {
+            deciderPollers[key].shutdown();
+        });
+        Object.keys(workerPollers ).forEach(function(key) {
+            workerPollers[key].shutdown();
+        });
     }
 
     function toJSON() {
         return {
-            workflow : this.workflowType
+            workflow : workflowOptions
         }
     }
 
     function toString() {
         return java.lang.String.format( 'Workflow[domain:%s, name:%s, version:%s]',
-            this.workflowType.domain, this.workflowType.name, this.workflowType.version );
+            workflowOptions.domain, workflowOptions.name, workflowOptions.version );
     }
 
     function init( workflowType, accessKey, secretKey ) {
