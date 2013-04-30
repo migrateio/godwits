@@ -17,6 +17,15 @@ load( baseDir + '/jasmine/jasmine.async.js' );
 load( baseDir + '/jasmine/jasmine.terminal_reporter.js' );
 load( baseDir + '/jasmine/jasmine.junit_reporter.js' );
 
+// Load helpers
+function loadHelpers(dir) {
+    return fs.listTree( dir ).forEach(function (name) {
+        var file = dir + '/' + name;
+        if (fs.isFile(file) && fs.extension( file ) === '.js') load( file );
+    });
+}
+
+
 function initializeJasmine( watcher, verbosity, junitDir ) {
     jasmineEnv = jasmine.getEnv();
 
@@ -55,6 +64,7 @@ function main( args ) {
     parser.addOption( 'w', 'watch', null, 'Enable to run tests when files change.' );
     parser.addOption( 'i', 'interval', 'interval', 'The number of milliseconds between polling for modified files.' );
     parser.addOption( 'v', 'verbosity', 'verbosity', 'How much logging from 0 - 3.' );
+    parser.addOption( 'l', 'helperDir', 'helperDir', 'Directory for Jasmine helper functions.' );
     parser.addOption( 'j', 'junitDir', 'junitDir', 'Directory for JUnit tests.' );
     parser.addOption( 's', 'sourceDirs', 'sourceDirs', 'Path to source files (can use comma to separate).' );
     parser.addOption( 't', 'testDirs', 'testDirs', 'Path to test files (can use comma to separate).' );
@@ -74,7 +84,9 @@ function main( args ) {
     var sourceDirs = options.sourceDirs && options.sourceDirs.trim().split( /[:;]/ );
     var testDirs = options.testDirs && options.testDirs.trim().split( /[:;]/ );
     var junitDir = options.junitDir && options.junitDir.trim();
+    var helperDir = options.helperDir && options.helperDir.trim();
 
+    if (helperDir) loadHelpers( helperDir );
     initializeJasmine( options.watch, options.verbosity, junitDir );
 
     if ( options.watch ) {

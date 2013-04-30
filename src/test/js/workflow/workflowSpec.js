@@ -29,6 +29,7 @@ describe( 'Workflow', function () {
         var workflow = new Workflow( workflowType,
             'AKIAIIQOWQM6FFLQB2EQ', 'ItTa0xaI9sey2SEGGEN8yVcA5slN95+qmNrf1TMd' );
         expect( workflow ).toBeDefined();
+        expect( workflow.start ).toBeFunction();
     } );
 
 } );

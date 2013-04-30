@@ -13,6 +13,12 @@ xdescribe( 'DeciderPoller', function () {
             w = new Worker( 'workflow/deciderPoller' );
         } );
 
+        afterEach( function () {
+            w.terminate();
+        } );
+
+
+
         async.it( 'should not be created without a decider property', function ( done ) {
             w.onerror = function ( e ) {
                 expect( e.data.status ).toEqual( 400 );

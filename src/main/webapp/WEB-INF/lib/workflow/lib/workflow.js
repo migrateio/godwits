@@ -28,9 +28,9 @@ var {BasicAWSCredentials} = Packages.com.amazonaws.auth;
  * todo: Will the Workflow object be the proxy for all api calls? Does the client need
  * to be exposed?
  *
- * The object also maintains a collection of DeciderPollers and ActivityPollers. The
+ * The object also maintains a collection of DeciderPollers and WorkerPollers. The
  * primary reason for keeping these references is so that the dev can start/stop the
- * workflow and all attached deciders and activities will have their lifecycles tied to the
+ * workflow and all attached deciders and workers will have their lifecycles tied to the
  * workflow.
  *
  * @type {Workflow}
@@ -43,7 +43,7 @@ var {BasicAWSCredentials} = Packages.com.amazonaws.auth;
 exports.Workflow = function ( workflowOptions, accessKey, secretKey ) {
 
     var swfClient;
-    var activityPollers = {};
+    var workerPollers = {};
     var deciderPollers = {};
 
     /**
@@ -154,7 +154,7 @@ exports.Workflow = function ( workflowOptions, accessKey, secretKey ) {
      * Each execution runs independently and you can provide each with its own set of
      * input data. When an execution is started, Amazon SWF schedules the initial
      * decision task. In response, your decider begins generating decisions which
-     * initiate activity tasks. Execution continues until your decider makes a decision
+     * initiate worker tasks. Execution continues until your decider makes a decision
      * to close the execution.
      *
      * Valid options that may be submitted along with the execution workflow are:
@@ -287,7 +287,7 @@ exports.Workflow = function ( workflowOptions, accessKey, secretKey ) {
     }
 
     /**
-     * Registers a new activity type along with its configuration settings in the
+     * Registers a new worker type along with its configuration settings in the
      * specified domain. (@see http://goo.gl/R2qD9)
      *
      * Valid options are:
@@ -394,7 +394,7 @@ exports.Workflow = function ( workflowOptions, accessKey, secretKey ) {
     }
 
     /**
-     * Used by activities to get an ActivityTask from the specified activity taskList. This
+     * Used by workers to get an ActivityTask from the specified activity taskList. This
      * initiates a long poll, where the service holds the HTTP connection open and
      * responds as soon as a task becomes available. The maximum time the service holds
      * on to the request before responding is 60 seconds. If no task is available within
@@ -522,7 +522,7 @@ exports.Workflow = function ( workflowOptions, accessKey, secretKey ) {
     }
 
     /**
-     * Used by activities to tell the service that the ActivityTask identified by the
+     * Used by workers to tell the service that the ActivityTask identified by the
      * taskToken completed successfully with a result (if provided). The result appears
      * in the ActivityTaskCompleted event in the workflow history.
      * (@see http://goo.gl/GvXuZ)
@@ -554,7 +554,7 @@ exports.Workflow = function ( workflowOptions, accessKey, secretKey ) {
     }
 
     /**
-     * Used by activities to tell the service that the ActivityTask identified by the
+     * Used by workers to tell the service that the ActivityTask identified by the
      * taskToken has failed with reason (if specified). The reason and details appear in
      * the ActivityTaskFailed event added to the workflow history.
      * (@see http://goo.gl/Yqxvq)
@@ -589,7 +589,7 @@ exports.Workflow = function ( workflowOptions, accessKey, secretKey ) {
     }
 
     /**
-     * Used by activities to tell the service that the ActivityTask identified by the
+     * Used by workers to tell the service that the ActivityTask identified by the
      * taskToken was successfully canceled. Additional details can be optionally provided
      * using the details argument.
      *
@@ -972,44 +972,44 @@ exports.Workflow = function ( workflowOptions, accessKey, secretKey ) {
     }
 
     /**
-     * Registers an Activity (or array of Activities) on the provided task list. The lifecycle
-     * of the activities are bound to the lifecycle of this workflow instance. Each worker
+     * Registers an Worker (or array of Workers) on the provided task list. The lifecycle
+     * of the workers are bound to the lifecycle of this workflow instance. Each worker
      * will export a property named 'ActivityType' which will be registered with the SWF.
      *
      * @param {String} taskListName The name of the task list with which to register
-     *                 activities.
-     * @param {String|Array} activities The module id of the worker to register (or array)
+     *                 workers.
+     * @param {String|Array} workers The module id of the worker to register (or array)
      */
-    function registerActivities( taskListName, activities ) {
-        log.debug( 'Workflow::registerActivities, {}', JSON.stringify( arguments ) );
-        var poller = getActivityPoller( taskListName );
-        [].concat( activities ).forEach( function ( activity ) {
-            registerActivity( poller, activity );
+    function registerWorkers( taskListName, workers ) {
+        log.debug( 'Workflow::registerWorkers, {}', JSON.stringify( arguments ) );
+        var poller = getWorkerPoller( taskListName );
+        [].concat( workers ).forEach( function ( worker ) {
+            registerWorker( poller, worker );
         } );
     }
 
-    function getActivityPoller( taskListName ) {
-        var poller = activityPollers[taskListName];
+    function getWorkerPoller( taskListName ) {
+        var poller = workerPollers[taskListName];
         if ( !poller ) {
-            log.info( 'Registering new ActivityPoller for taskList [{}]', taskListName );
-            poller = new Worker( 'workflow/activityPoller' );
+            log.info( 'Registering new WorkerPoller for taskList [{}]', taskListName );
+            poller = new Worker( 'workflow/workerPoller' );
             poller.postMessage( {
                 command : 'start',
                 taskListName : taskListName,
                 workflow : this
             } );
-            activityPollers[taskListName] = poller;
+            workerPollers[taskListName] = poller;
         }
         return poller;
     }
 
     /**
-     * Registers the activity and associates it with the poller.
+     * Registers the worker and associates it with the poller.
      *
      * @param poller
-     * @param activity
+     * @param worker
      */
-    function registerActivity(poller, moduleId ) {
+    function registerWorker(poller, moduleId ) {
         poller.postMessage( {
             command: 'registerWorker',
             module: moduleId
@@ -1018,37 +1018,37 @@ exports.Workflow = function ( workflowOptions, accessKey, secretKey ) {
 
 
     /**
-     * Start the workflow by ensuring that each decider and activity poller is started.
+     * Start the workflow by ensuring that each decider and worker poller is started.
      */
     function start() {
         this.deciderPollers.forEach( function ( poller ) {
             poller.start();
         } );
-        this.activityPollers.forEach( function ( poller ) {
+        this.workerPollers.forEach( function ( poller ) {
             poller.start();
         } );
     }
 
     /**
-     * Stop the workflow by ensuring that each decider and activity poller is stopped.
+     * Stop the workflow by ensuring that each decider and worker poller is stopped.
      */
     function stop() {
         this.deciderPollers.forEach( function ( poller ) {
             poller.stop();
         } );
-        this.activityPollers.forEach( function ( poller ) {
+        this.workerPollers.forEach( function ( poller ) {
             poller.stop();
         } );
     }
 
     /**
-     * Shutdown the workflow by ensuring that each decider and activity poller is shutdown.
+     * Shutdown the workflow by ensuring that each decider and worker poller is shutdown.
      */
     function shutdown() {
         this.deciderPollers.forEach( function ( poller ) {
             poller.shutdown();
         } );
-        this.activityPollers.forEach( function ( poller ) {
+        this.workerPollers.forEach( function ( poller ) {
             poller.shutdown();
         } );
     }
@@ -1103,8 +1103,10 @@ exports.Workflow = function ( workflowOptions, accessKey, secretKey ) {
         registerActivityType : registerActivityType,
 
         startWorkflow : startWorkflow,
+
         pollForDecisionTask : pollForDecisionTask,
         respondDecisionTaskCompleted : respondDecisionTaskCompleted,
+
         pollForActivityTask : pollForActivityTask,
         respondActivityTaskCompleted : respondActivityTaskCompleted,
         respondActivityTaskCanceled : respondActivityTaskCanceled,
@@ -1112,7 +1114,7 @@ exports.Workflow = function ( workflowOptions, accessKey, secretKey ) {
         recordActivityTaskHeartbeat : recordActivityTaskHeartbeat,
 
         registerDecider : registerDecider,
-        registerActivities : registerActivities,
+        registerWorkers : registerWorkers,
 
         start : start,
         stop : stop,
