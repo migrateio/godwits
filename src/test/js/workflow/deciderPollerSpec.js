@@ -1,65 +1,41 @@
 var log = require( 'ringo/logging' ).getLogger( module.id );
-
-var {Worker, WorkerPromise} = require( 'ringo/worker' );
+var {DeciderPoller} = require( 'workflow/deciderPoller' );
 
 describe( 'DeciderPoller', function () {
 
     describe( 'should have proper init values', function () {
 
-        var w;
+        var deciderModuleId = 'test/deciders/simple-decider';
+        var taskListName = 'test.migrate.decider';
 
-        beforeEach( function () {
-            w = new Worker( 'workflow/deciderPoller' );
-        } );
+        it( 'should not be created without a valid deciderModuleId property', function () {
+            expect( function() {
+                try {
+                    new DeciderPoller( undefined, taskListName, {} );
+                } catch ( e ) {
+                    log.error( 'Error', e );
+                }
+            } ).toThrow('DeciderPoller requires property [deciderModuleId].');
+        });
 
-        afterEach( function () {
-            w.terminate();
-        } );
-
-
-        it( 'should not be created without a decider property', function ( done ) {
-            w.onerror = function ( e ) {
+        xit( 'should not be created without a taskListName property', function ( done ) {
+            var poller = new DeciderPoller( undefined, {} );
+            poller.onerror = function ( e ) {
                 expect( e.data.status ).toEqual( 400 );
-                expect( e.data.message ).toMatch( /\[deciderModuleId\]/ );
+                expect( e.data.message ).toMatch( /\[taskListName\]/ );
                 done();
             };
-            w.postMessage( {
-                command : 'start',
-                workflow : {},
-                taskListName : 'tasklist'
-            } );
         }, 100 );
 
-        it( 'should not be created without a workflow property', function ( done ) {
-            w.onerror = function ( e ) {
+        xit( 'should not be created without a workflow property', function ( done ) {
+            var poller = new DeciderPoller( taskListName, undefined );
+            poller.onerror = function ( e ) {
                 log.info( 'onerror: ' + JSON.stringify( e ) );
                 expect( e.data.status ).toEqual( 400 );
                 expect( e.data.message ).toMatch( /\[workflow\]/ );
                 done();
             };
-            w.postMessage( {
-                command : 'start',
-                deciderModuleId : 'workflow/decider',
-                taskListName : 'tasklist'
-            } );
         }, 100 );
-
-        it( 'should not be created without a taskListName property', function ( done ) {
-            w.onerror = function ( e ) {
-                expect( e.data.status ).toEqual( 400 );
-                expect( e.data.message ).toMatch( /\[taskListName\]/ );
-                done();
-            };
-            w.postMessage( {
-                command : 'start',
-                deciderModuleId : 'workflow/decider',
-                workflow : {}
-            } );
-        }, 100 );
-
-    } );
-
-    describe( '', function () {
 
     } );
 } );
