@@ -20,7 +20,7 @@ exports.logic = function (emit, actions) {
                 _onEnter : function () {
                     log.info( 'initialized::onEnter' );
                     emit(
-                        actions.scheduleActivityTask( 'loadCustomer', {
+                        actions.scheduleActivityTask( 'load-customer', {
                             userId : this.job.userId
                         } )
                     );

@@ -2,8 +2,7 @@ var log = require( 'ringo/logging' ).getLogger( module.id );
 
 var {Worker, WorkerPromise} = require( 'ringo/worker' );
 
-xdescribe( 'DeciderPoller', function () {
-    var async = new AsyncSpec( this );
+describe( 'DeciderPoller', function () {
 
     describe( 'should have proper init values', function () {
 
@@ -18,9 +17,9 @@ xdescribe( 'DeciderPoller', function () {
         } );
 
 
-
-        async.it( 'should not be created without a decider property', function ( done ) {
+        it( 'should not be created without a decider property', function ( done ) {
             w.onerror = function ( e ) {
+                log.info( 'Result: ' + JSON.stringify( e ) );
                 expect( e.data.status ).toEqual( 400 );
                 expect( e.data.message ).toMatch( '[decider]' );
                 done();
@@ -30,9 +29,9 @@ xdescribe( 'DeciderPoller', function () {
                 workflow : {},
                 taskListName : 'tasklist'
             } );
-        } );
+        }, 100 );
 
-        async.it( 'should not be created without a workflow property', function ( done ) {
+        it( 'should not be created without a workflow property', function ( done ) {
             w.onerror = function ( e ) {
                 expect( e.data.status ).toEqual( 400 );
                 expect( e.data.message ).toMatch( '[workflow]' );
@@ -43,9 +42,9 @@ xdescribe( 'DeciderPoller', function () {
                 decider : 'workflow/decider',
                 taskListName : 'tasklist'
             } );
-        } );
+        }, 100 );
 
-        async.it( 'should not be created without a taskListName property', function ( done ) {
+        it( 'should not be created without a taskListName property', function ( done ) {
             w.onerror = function ( e ) {
                 expect( e.data.status ).toEqual( 400 );
                 expect( e.data.message ).toMatch( '[taskListName]' );
@@ -56,7 +55,7 @@ xdescribe( 'DeciderPoller', function () {
                 decider : 'workflow/decider',
                 workflow : {}
             } );
-        } );
+        }, 100 );
 
     } );
 

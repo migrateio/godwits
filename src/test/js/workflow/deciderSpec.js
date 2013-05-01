@@ -40,7 +40,7 @@ describe( 'Decider', function () {
             expect( data.decisions.length ).toEqual( 1 );
             expect( data.decisions[0].type ).toEqual( 'ScheduleActivityTask' );
             expect( data.decisions[0].activityId ).toBeDefined();
-            expect( data.decisions[0].activityType.name ).toEqual( 'loadCustomer' );
+            expect( data.decisions[0].activityType.name ).toEqual( 'load-customer' );
             expect( data.decisions[0].input ).toEqual( { userId : '123abc' } );
         } );
     }, 1000 );
