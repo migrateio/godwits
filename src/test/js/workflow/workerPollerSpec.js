@@ -1,34 +1,27 @@
 var log = require( 'ringo/logging' ).getLogger( module.id );
-var {DeciderPoller} = require( 'workflow/deciderPoller' );
+var {WorkerPoller} = require( 'workflow/workerPoller' );
 
-describe( 'DeciderPoller', function () {
+describe( 'WorkerPoller', function () {
 
-    var deciderModuleId = 'test/deciders/simple-decider';
     var taskListName = 'test.migrate.decider';
 
     describe( 'should have proper init values', function () {
 
-        it( 'should not be created without a valid deciderModuleId property', function () {
-            expect(function () {
-                new DeciderPoller( undefined, taskListName, {} );
-            } ).toThrow( 'DeciderPoller requires property [deciderModuleId]' );
-        } );
-
         it( 'should not be created without a taskListName property', function () {
             expect(function () {
-                new DeciderPoller( deciderModuleId, undefined, {} );
-            } ).toThrow( 'DeciderPoller requires property [taskListName]' );
+                new WorkerPoller( undefined, {} );
+            } ).toThrow( 'WorkerPoller requires property [taskListName]' );
         } );
 
         it( 'should not be created without a workflow property', function () {
             expect(function () {
-                new DeciderPoller( deciderModuleId, taskListName, undefined );
-            } ).toThrow( 'DeciderPoller requires property [workflow]' );
+                new WorkerPoller( taskListName, undefined );
+            } ).toThrow( 'WorkerPoller requires property [workflow]' );
         } );
 
     } );
 
-    describe( 'should be able to control polling behavior', function () {
+    xdescribe( 'should be able to control polling behavior', function () {
 
         var decider, workflow;
 

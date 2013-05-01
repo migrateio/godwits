@@ -1,6 +1,6 @@
 var {Workflow} = require( 'workflow/workflow' );
 
-xdescribe( 'Workflow', function () {
+describe( 'Workflow', function () {
 
     describe('requires valid initialization parameters', function() {
         beforeEach( function () {

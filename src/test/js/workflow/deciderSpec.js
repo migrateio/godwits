@@ -1,7 +1,7 @@
 var log = require( 'ringo/logging' ).getLogger( module.id );
 var {Decider} = require( 'workflow/decider' );
 
-xdescribe( 'Decider', function () {
+describe( 'Decider', function () {
 
     it( 'returns a promise', function ( done ) {
         var decider = new Decider( 'test/deciders/simple-decider', [] );

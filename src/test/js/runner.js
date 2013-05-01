@@ -1,4 +1,4 @@
-//var log = require( 'ringo/logging' ).getLogger( module.id );
+var log = require( 'ringo/logging' ).getLogger( module.id );
 var system = require( 'system' );
 var fs = require( 'fs' );
 var {Parser} = require( 'ringo/args' );
@@ -49,10 +49,16 @@ function initializeJasmine( watcher, verbosity, junitDir ) {
 
 function executeTests( testDirs ) {
 //    log.debug( '\n\nRunning tests at {}', new Date().toISOString() );
-    fs.listTree( testDirs ).forEach( function ( file ) {
+    var isSpec = function(file) {
+        return fs.isFile( file ) && /.+Spec\.js$/g.test( file );
+    };
+
+    if (isSpec( testDirs )) load( testDirs );
+    else fs.listTree( testDirs ).forEach( function(file) {
         var f = testDirs + '/' + file;
-        if ( fs.isFile( f ) && /.+Spec\.js$/g.test( file ) ) load( f );
+        if ( isSpec(f) ) load( f );
     } );
+
     jasmineEnv.execute();
 }
 
@@ -72,7 +78,7 @@ function main( args ) {
 
 //    log.info( 'Arguments: {}', JSON.stringify( args, null, 4 ) );
     var options = parser.parse( args );
-//    log.info( 'Options: {}', JSON.stringify( options, null, 4 ) );
+    log.info( 'Options: {}', JSON.stringify( options, null, 4 ) );
 
     if (options.help) {
         print( parser.help() );

@@ -251,13 +251,14 @@ function WorkerPoller( taskListName, workflow ) {
      */
     function init( taskListName, workflow ) {
         if ( !workflow )
-            throw { status : 400, message : 'Command [start] requires property [workflow].'};
+            throw { status : 400, message : 'WorkerPoller requires property [workflow]'};
         if ( !taskListName )
-            throw { status : 400, message : 'Command [start] requires property [taskListName].'};
+            throw { status : 400, message : 'WorkerPoller requires property [taskListName]'};
         setTimeout( poll, 0 );
     }
     init( taskListName, workflow)
 }
+exports.WorkerPoller = WorkerPoller;
 
 
 
