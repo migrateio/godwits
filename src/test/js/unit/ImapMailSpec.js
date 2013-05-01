@@ -156,13 +156,21 @@ function writeTests(service) {
             var attachmentTestPart, stringTestPart;
 
             for(var i=0; i<emailTestMultiPart.getCount(); i++ ) {
-                if(emailTestMultiPart.getBodyPart(i).getDisposition() === javax.mail.BodyPart.ATTACHMENT) {
+                if(emailTestMultiPart.getBodyPart(i).getDisposition()) {
                     attachmentTestPart = emailTestMultiPart.getBodyPart(i);
                 } else {
                     stringTestPart = emailTestMultiPart.getBodyPart(i);
                 }
             }
 
+            if(!attachmentTestPart) {
+                for(i=0; i<emailTestMultiPart.getCount(); i++) {
+                    log.info(service.email + ": " + emailTestMultiPart.getBodyPart(i).getContentType());
+                    log.info(service.email + ": " + emailTestMultiPart.getBodyPart(i).getDisposition());
+                }
+            }
+
+            expect(attachmentTestPart).toBeDefined();
             expect(attachmentTestPart.getDataHandler().getName()).toBe('test.json');
             expect(stringTestPart.getContent()).toBe('Test email w/ attachment.');
 
