@@ -178,7 +178,7 @@
                     item = items[j];
                     if (!item.passed()) {
                         logText += item.message + '\n';
-                        if (this.verbosity > 2) {
+                        if (this.verbosity > 2 && item.trace.stack) {
                             trace = item.trace.stack + '\n';
                         }
                     }
@@ -187,6 +187,18 @@
 
             if (passed && this.verbosity > 3) {
                 logText = 'Passed';
+            }
+
+            // Only log spec/suite descriptions at this verbosity level on failure
+            if( this.verbosity < 4 && this.verbosity > 1 && !passed ) {
+                this.log(
+                    this.indent(
+                        this.inColor(spec.suite.description, this.colors.suite)));
+                this.level++;
+                this.log(
+                    this.indent(
+                        this.inColor(spec.description, this.colors.spec)));
+                this.level++;
             }
 
             if (logText) {
