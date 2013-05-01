@@ -45,6 +45,8 @@
         <aws.secret_key>${migrate.aws.secret_key}</aws.secret_key>
 
         <watcher></watcher>
+        <test.verbosity>4</test.verbosity>
+        <test.testdir>${basedir}/src/test/js</test.testdir>
     </properties>
 
     <prerequisites>
@@ -262,9 +264,9 @@
                                     <!--<arg value="-V"/>-->
                                     <arg value="src/test/js/runner.js"/>
                                     <arg value="${watcher}"/>
-                                    <arg value="-v 4"/>
+                                    <arg value="-v ${test.verbosity}"/>
                                     <arg value="-l ${basedir}/src/test/js/jasmine/helpers"/>
-                                    <arg value="-t ${basedir}/src/test/js"/>
+                                    <arg value="-t ${test.testdir}"/>
                                     <arg value="-s ${basedir}/src/main/webapp/WEB-INF"/>
                                     <arg value="-j ${basedir}/target/surefire-reports/"/>
                                     <classpath refid="maven.test.classpath"/>

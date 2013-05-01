@@ -62,6 +62,12 @@ execute and dump the results to the console (and the XML reports).
 
     mvn clean test -P watch
 
+There may be times when the default verbosity level (4) is too wordy, or you want to
+narrow in the test directory a bit. These properties can be overridden from the command
+line like so:
+
+    mvn test -Dtest.verbosity=3 -Dtest.testdir=./src/test/js/workflow
+
 ### Integration Tests
 
 ### Acceptance Tests
