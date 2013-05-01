@@ -1,4 +1,5 @@
 target/
+html/
 .idea
 *.iml
 
