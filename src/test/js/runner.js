@@ -14,7 +14,8 @@ var baseDir = fs.directory(module.path);
 
 load( baseDir + '/jasmine/jasmine-1.3.1.js' );
 load( baseDir + '/jasmine/jasmine.async.js' );
-load( baseDir + '/jasmine/jasmine.terminal_reporter.js' );
+load( baseDir + '/jasmine/jasmine.tap_reporter.js' );
+load( baseDir + '/jasmine/jasmine.term_reporter.js' );
 load( baseDir + '/jasmine/jasmine.junit_reporter.js' );
 
 // Load helpers
@@ -29,9 +30,8 @@ function loadHelpers(dir) {
 function initializeJasmine( watcher, verbosity, junitDir ) {
     jasmineEnv = jasmine.getEnv();
 
-    var reporter = new jasmine.TerminalReporter( {
-        verbosity : verbosity,
-        color : true
+    var reporter = new jasmine.TermReporter( {
+        verbosity : verbosity
     } );
     jasmineEnv.addReporter( reporter );
 
