@@ -58,7 +58,21 @@
      * }));
      * jasmine.getEnv().execute();```
      *
-     * @constructor
+     * ### Verbosity Levels:
+     *
+     * - 0: Outputs nothing.
+     * - 1: Outputs pass/failures at end of all suites.
+     * - 2: Outputs failures as they happen, as well as all pass/failures at end.
+     * - 3: Same as level 2, but outputs stack trace of failures as well as the spec message.
+     * - 4: Outputs pass/failures as they happen.
+     *
+     * ### Colors object description:
+     *
+     * - error: used to color errors, defaults to red.
+     * - trace: used to color stack traces, defaults to yellow.
+     * - success: used to color successes, defaults to green.
+     * - suite: used to color suite descriptions, defaults to cyan.
+     * - spec: used to color spec descriptions, defaults to cyan.
      */
 
     var TermReporter = function (params) {
