@@ -495,8 +495,9 @@ if (isCommonJS) exports.spyOn = spyOn;
  * @param {String} desc description of this specification
  * @param {Function} func defines the preconditions and expectations of the spec
  */
-var it = function(desc, func) {
-  return jasmine.getEnv().it(desc, func);
+var it = function(desc, func, timeout) {
+  return jasmine.getEnv().it(desc, func, timeout);
+//  return jasmine.getEnv().it.apply(jasmine.getEnv(), arguments);
 };
 if (isCommonJS) exports.it = it;
 
@@ -567,8 +568,9 @@ if (isCommonJS) exports.waitsFor = waitsFor;
  *
  * @param {Function} beforeEachFunction
  */
-var beforeEach = function(beforeEachFunction) {
-  jasmine.getEnv().beforeEach(beforeEachFunction);
+var beforeEach = function(beforeEachFunction, timeout) {
+  jasmine.getEnv().beforeEach(beforeEachFunction, timeout);
+//  jasmine.getEnv().beforeEach.apply(jasmine.getEnv(), arguments);
 };
 if (isCommonJS) exports.beforeEach = beforeEach;
 
@@ -579,8 +581,9 @@ if (isCommonJS) exports.beforeEach = beforeEach;
  *
  * @param {Function} afterEachFunction
  */
-var afterEach = function(afterEachFunction) {
-  jasmine.getEnv().afterEach(afterEachFunction);
+var afterEach = function(afterEachFunction, timeout) {
+  jasmine.getEnv().afterEach(afterEachFunction, timeout);
+//  jasmine.getEnv().afterEach.apply(jasmine.getEnv(), arguments);
 };
 if (isCommonJS) exports.afterEach = afterEach;
 

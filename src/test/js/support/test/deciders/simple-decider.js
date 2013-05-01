@@ -1,15 +1,15 @@
 var log = require( 'ringo/logging' ).getLogger( module.id );
 
-exports.logic = function () {
+exports.logic = function (emit, actions) {
     return {
         initialState : 'uninitialized',
         states : {
             uninitialized : {
                 _onEnter : function () {
-                    log.info( 'uninitialized::onEnter: {}', JSON.stringify( arguments ) );
+                    log.info( 'uninitialized::onEnter' );
                 },
                 WorkflowExecutionStarted : function ( event ) {
-                    log.info( 'uninitialized::WorkflowExecutionStarted: {}', JSON.stringify( arguments ) );
+                    log.info( 'uninitialized::WorkflowExecutionStarted' );
                     this.job = event.input;
                     // Do the initialization work here
                     this.transition( 'initialized' );
@@ -18,9 +18,11 @@ exports.logic = function () {
 
             initialized : {
                 _onEnter : function () {
-                    log.info( 'initialized::onEnter: job: {}', JSON.stringify( this.job ) );
+                    log.info( 'initialized::onEnter' );
                     emit(
-                        scheduleActivityTask( 'loadCustomer', { userId : this.job.userId } )
+                        actions.scheduleActivityTask( 'loadCustomer', {
+                            userId : this.job.userId
+                        } )
                     );
                 }
             }

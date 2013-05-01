@@ -1,4 +1,4 @@
-var log = require( 'ringo/logging' ).getLogger( module.module.id );
+var log = require( 'ringo/logging' ).getLogger( module.id );
 
 function onmessage( e ) {
     var input = e.data.input;

@@ -21,6 +21,17 @@ beforeEach( function () {
             };
 
             return typeof actual === 'function';
+        },
+
+        toBeArray : function () {
+            var actual = this.actual;
+            var notText = this.isNot ? ' not' : '';
+
+            this.message = function () {
+                return 'Expected ' + actual + notText + ' to be an Array';
+            };
+
+            return Array.isArray( actual );
         }
 
     } );

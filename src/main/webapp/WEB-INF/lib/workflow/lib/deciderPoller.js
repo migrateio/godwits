@@ -42,12 +42,12 @@ var polling;
 var workerCount = 0;
 
 /**
- * The name of the decifer module to load when decisions have to be made.
+ * The name of the decider module to load when decisions have to be made.
  *
  * @type {String}
  */
 
-var decider = '';
+var deciderModuleId = '';
 
 /**
  * The name of the taskList this Poller will be retrieving decisions from.
@@ -82,10 +82,10 @@ function onmessage( e ) {
             // calling start more than once
             taskListName = taskListName || e.data.taskListName;
             workflow = workflow || e.data.workflow;
-            decider = decider || e.data.decider;
+            deciderModuleId = deciderModuleId || e.data.decider;
 
-            if ( !decider)
-                throw { status : 400, message : 'Command [start] requires property [decider].'};
+            if ( !deciderModuleId)
+                throw { status : 400, message : 'Command [start] requires property [deciderModuleId].'};
             if ( !workflow )
                 throw { status : 400, message : 'Command [start] requires property [workflow].'};
             if ( !taskListName )
@@ -118,6 +118,12 @@ function poll() {
         if ( task ) startTask( task );
     }
     if (!shuttingDown) setTimeout( poll, 1000 );
+
+    // Might be able to shutdown here if no tasks are pending
+    if (workerCount === 0) {
+        log.info( 'Passing message back from deciderPoller that we are ready to terminate' );
+        source.postMessage( { status : 200, message : 'Ready to terminate'} );
+    }
 }
 
 /**
@@ -202,10 +208,10 @@ function poll() {
  *
  * @param e
  */
-function workerSuccess( task, data ) {
+function workerSuccess( task, decisions ) {
     workflow.respondDecisionTaskCompleted( {
-        decisions: data.decisions || [],
-        executionContext: data.executionContext,
+        decisions: decisions,
+        executionContext: decisions.executionContext,
         taskToken: task.taskToken
     } );
 }
@@ -217,26 +223,43 @@ function workerSuccess( task, data ) {
  * @param task
  * @param data
  */
-function workerError( task, data ) {
+function workerError( task ) {
     log.fatal( 'Should not have a failure condition possible from the Decider. ' +
-        'Write more tests! Task Token: {}, Error: {}',
-        task.taskToken, JSON.stringify( data ) );
+        'Write more tests! Task Token: {}',
+        task.taskToken );
 }
 
+/**
+ * ## startTasker
+ *
+ * We have polled for a decision task and received one. Now we initialize the decider
+ * worker and feed it the decision which contains the execution workflow so far. Once the
+ * worker has decided the next course of action, it will pass us back a list of
+ * subsequent tasks to send to SWF.
+ *
+ * @param {Object} task The decider task returned from polling the task list.
+ */
 function startTask( task ) {
     log.info( 'DeciderPoller::startTask: {}', JSON.stringify( task ) );
-    var worker = new WorkerPromise( decider, task );
+    // Increment the number of workers we have spawned
     workerCount++;
+
+    // Create a worker
+    var worker = new WorkerPromise( deciderModuleId, task );
     worker
-        .then( function() {
-            workerSuccess( task, e.data );
+        .then( function( e ) {
+            // When the worker successfully completes, we are passed an array of
+            // decisions.
+            workerSuccess( task, e.decisions );
         }, function() {
-            workerError( task, e.data );
+            // In the case of an error,
+            workerError( task );
         })
         .then( function () {
             workerCount--;
             if (shuttingDown && workerCount === 0) {
-                source.postMessage( { code : 200, message : 'Ready to terminate'} );
+                log.info( 'Passing message back from deciderPoller that we are ready to terminate' );
+                source.postMessage( { status : 200, message : 'Ready to terminate'} );
             }
         });
 }

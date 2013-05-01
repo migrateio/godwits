@@ -1,60 +1,49 @@
-var {Decider} = require( 'workflow/v0.1.0/decider' );
+var log = require( 'ringo/logging' ).getLogger( module.id );
+var {Decider} = require( 'workflow/decider' );
 
-xdescribe( 'Decider', function () {
+describe( 'Decider', function () {
 
-    var decider;
-    var async = new AsyncSpec( this );
+    it( 'returns a promise', function ( done ) {
+        var decider = new Decider( 'test/deciders/simple-decider', [] );
+        expect( typeof decider.then === 'function' ).toBe( true );
+        decider.then( function () {
+            done();
+        } );
+    }, 2000 );
 
-    beforeEach( function () {
-    } );
-
-    
-    async.it( 'returns a promise', function (done) {
-        try {
-            var decider = new Decider([]);
-            expect( typeof decider.then === 'function' ).toBe( true );
-            decider.then( function () {
-                done();
-            } );
-        } catch ( e ) {
-            log.info( e );
-        }
-    } );
-
-    async.it( 'will be in initialized state after starting workflow', function (done) {
-        try {
-            var decider = new Decider( [
-                {
-                    "eventId" : 1,
-                    "eventTimestamp" : 1326592619.474,
-                    "eventType" : "WorkflowExecutionStarted",
-                    "workflowExecutionStartedEventAttributes" : {
-                        "input" : job,
-                        "parentInitiatedEventId" : 0,
-                        "tagList" : ["music purchase", "digital", "ricoh-the-dog"],
-                        "taskList" : {
-                            "name" : "specialTaskList"
-                        },
-                        "workflowType" : {
-                            "name" : "customerOrderWorkflow",
-                            "version" : "1.0"
-                        }
+    it( 'will be in initialized state after starting workflow', function ( done ) {
+        var decider = new Decider( 'test/deciders/simple-decider', [
+            {
+                "eventId" : 1,
+                "eventTimestamp" : 1326592619.474,
+                "eventType" : "WorkflowExecutionStarted",
+                "workflowExecutionStartedEventAttributes" : {
+                    "input" : job,
+                    "parentInitiatedEventId" : 0,
+                    "tagList" : ["music purchase", "digital", "ricoh-the-dog"],
+                    "taskList" : {
+                        "name" : "specialTaskList"
+                    },
+                    "workflowType" : {
+                        "name" : "customerOrderWorkflow",
+                        "version" : "1.0"
                     }
                 }
-            ] );
+            }
+        ] );
 
-            decider.then( function ( data ) {
-                expect( data.fsm.state ).toEqual( 'initialized' );
-                expect( data.task.type ).toEqual( 'ScheduleActivityTask' );
-                expect( data.task.activityId ).toBeDefined();
-                expect( data.task.activityType.name ).toEqual( 'loadCustomer' );
-                expect( data.task.input ).toEqual( { userId : '123abc' } );
-                done();
-            } );
-        } catch ( e ) {
-            log.error( e );
-        }
-    } );
+        decider.then( function ( data ) {
+            done();
+//            log.info( 'Promise returned: {}', JSON.stringify( data ) );
+            expect( data.fsm.state ).toEqual( 'initialized' );
+            expect( data.decisions ).toBeArray();
+            expect( data.decisions.length ).toEqual( 1 );
+            expect( data.decisions[0].type ).toEqual( 'ScheduleActivityTask' );
+            expect( data.decisions[0].activityId ).toBeDefined();
+            expect( data.decisions[0].activityType.name ).toEqual( 'loadCustomer' );
+            expect( data.decisions[0].input ).toEqual( { userId : '123abc' } );
+        } );
+    }, 1000 );
 
     var job = {
         jobId : '4N9w5',

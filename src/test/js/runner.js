@@ -1,11 +1,10 @@
+//var log = require( 'ringo/logging' ).getLogger( module.id );
 var system = require( 'system' );
 var fs = require( 'fs' );
 var {Parser} = require( 'ringo/args' );
 var {Worker} = require( 'ringo/worker' );
-var log = require( 'ringo/logging' ).getLogger( module.id );
 
 var jasmineEnv;
-var watcher;
 
 require.paths.push( module.resolve( '../../main/webapp/WEB-INF/api' ) );
 require.paths.push( module.resolve( '../../main/webapp/WEB-INF/lib' ) );
@@ -15,8 +14,8 @@ var baseDir = fs.directory(module.path);
 
 load( baseDir + '/jasmine/jasmine-1.3.1.js' );
 load( baseDir + '/jasmine/jasmine.async.js' );
-load( baseDir + '/jasmine/jasmine.tap_reporter.js' );
 load( baseDir + '/jasmine/jasmine.term_reporter.js' );
+load( baseDir + '/jasmine/async-callback.js' );
 load( baseDir + '/jasmine/jasmine.junit_reporter.js' );
 
 // Load helpers
@@ -26,7 +25,6 @@ function loadHelpers(dir) {
         if (fs.isFile(file) && fs.extension( file ) === '.js') load( file );
     });
 }
-
 
 function initializeJasmine( watcher, verbosity, junitDir ) {
     jasmineEnv = jasmine.getEnv();
@@ -44,14 +42,13 @@ function initializeJasmine( watcher, verbosity, junitDir ) {
 
     var oldCallback = jasmineEnv.currentRunner().finishCallback;
     jasmineEnv.currentRunner().finishCallback = function () {
-        log.info( 'Finish Callback' );
         oldCallback.apply( this, arguments );
         if ( !watcher && reporter.hasErrors() ) require( 'system' ).exit( -1 );
     };
 }
 
 function executeTests( testDirs ) {
-    log.debug( '\n\nRunning tests at {}', new Date().toISOString() );
+//    log.debug( '\n\nRunning tests at {}', new Date().toISOString() );
     fs.listTree( testDirs ).forEach( function ( file ) {
         var f = testDirs + '/' + file;
         if ( fs.isFile( f ) && /.+Spec\.js$/g.test( file ) ) load( f );

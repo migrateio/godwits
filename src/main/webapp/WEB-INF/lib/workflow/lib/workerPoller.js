@@ -128,14 +128,18 @@ function onmessage( e ) {
  *
  */
 function poll() {
-    while ( !shuttingDown ) {
-        while ( polling ) {
-            var task = workflow.pollForActivityTask( {
-                taskListName : taskListName
-            } );
-            if ( task ) startTask( task );
-        }
-        java.lang.Thread.sleep( 1000 );
+    if (polling) {
+        var task = workflow.pollForActivityTask( {
+            taskListName : taskListName
+        } );
+        if ( task ) startTask( task );
+    }
+    if (!shuttingDown) setTimeout( poll, 1000 );
+
+    // Might be able to shutdown here if no tasks are pending
+    if (workerCount === 0) {
+        log.info( 'Passing message back from workerPoller that we are ready to terminate' );
+        source.postMessage( { status : 200, message : 'Ready to terminate'} );
     }
 }
 
@@ -218,7 +222,7 @@ function startTask( task ) {
                 heartbeat.terminate();
                 workerCount--;
                 if (shuttingDown && workerCount === 0) {
-                    source.postMessage( { code : 200, message : 'Ready to terminate'} );
+                    source.postMessage( { status : 200, message : 'Ready to terminate'} );
                 }
             });
     }

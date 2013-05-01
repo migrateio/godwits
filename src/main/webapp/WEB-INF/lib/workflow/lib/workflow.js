@@ -968,21 +968,40 @@ exports.Workflow = function ( workflowOptions, accessKey, secretKey ) {
      */
     function registerDecider( taskListName, deciderModuleId ) {
         log.debug( 'Workflow::registerDecider, {}', JSON.stringify( arguments ) );
+        // Pollers are cached using the task list name as the key.
         var poller = deciderPollers[taskListName];
+
+        // This may be the first time the poller is accessed. In that case we will create
+        // a new poller and track it in the registry.
         if (!poller) {
             log.info( 'Registering new DeciderPoller for taskList [{}]', taskListName );
+
+            // Instantiate a new worker.
             poller = new Worker( 'workflow/deciderPoller' );
+
+            // Set up a handler for messages from the poller. When a shutdown request is
+            // made of the poller, it will immediately stop polling for new tasks, but
+            // will give its tasks in progress time to complete. Once they have all
+            // completed, the poller will notify us by passing a 200 status.
+            poller.onmessage = function( e ) {
+                if ( e.data.status === 200 ) {
+                    log.info( 'Terminating the deciderPoller for task list [{}]', taskListName );
+                    poller.terminate();
+                }
+            };
+
+            // Initialize the poller using the start command and the pertinent
+            // information.
             poller.postMessage( {
                 command : 'start',
                 taskListName : taskListName,
+                deciderModuleId: deciderModuleId,
                 workflow : this
             } );
+
+            // Add the poller to the registry.
             deciderPollers[taskListName] = poller;
         }
-        poller.postMessage( {
-            command: 'registerDecider',
-            module: deciderModuleId
-        } );
     }
 
     /**
@@ -1007,6 +1026,12 @@ exports.Workflow = function ( workflowOptions, accessKey, secretKey ) {
         if ( !poller ) {
             log.info( 'Registering new WorkerPoller for taskList [{}]', taskListName );
             poller = new Worker( 'workflow/workerPoller' );
+            poller.onmessage = function( e ) {
+                if ( e.data.status === 200 ) {
+                    log.info( 'Terminating the workerPoller for task list [{}]', taskListName );
+                    poller.terminate();
+                }
+            };
             poller.postMessage( {
                 command : 'start',
                 taskListName : taskListName,
@@ -1035,11 +1060,15 @@ exports.Workflow = function ( workflowOptions, accessKey, secretKey ) {
      * Start the workflow by ensuring that each decider and worker poller is started.
      */
     function start() {
-        Object.keys(deciderPollers ).forEach(function(key) {
-            deciderPollers[key].start();
-        });
+        Object.keys( deciderPollers ).forEach( function ( key ) {
+            deciderPollers[key].postMessage( {
+                command : 'start'
+            } );
+        } );
         Object.keys(workerPollers ).forEach(function(key) {
-            workerPollers[key].start();
+            workerPollers[key].postMessage( {
+                command : 'start'
+            } );
         });
     }
 
@@ -1047,11 +1076,15 @@ exports.Workflow = function ( workflowOptions, accessKey, secretKey ) {
      * Stop the workflow by ensuring that each decider and worker poller is stopped.
      */
     function stop() {
-        Object.keys(deciderPollers ).forEach(function(key) {
-            deciderPollers[key].stop();
-        });
+        Object.keys( deciderPollers ).forEach( function ( key ) {
+            deciderPollers[key].postMessage( {
+                command : 'stop'
+            } );
+        } );
         Object.keys(workerPollers ).forEach(function(key) {
-            workerPollers[key].stop();
+            workerPollers[key].postMessage( {
+                command : 'stop'
+            } );
         });
     }
 
@@ -1059,11 +1092,15 @@ exports.Workflow = function ( workflowOptions, accessKey, secretKey ) {
      * Shutdown the workflow by ensuring that each decider and worker poller is shutdown.
      */
     function shutdown() {
-        Object.keys(deciderPollers ).forEach(function(key) {
-            deciderPollers[key].shutdown();
-        });
+        Object.keys( deciderPollers ).forEach( function ( key ) {
+            deciderPollers[key].postMessage( {
+                command : 'shutdown'
+            } );
+        } );
         Object.keys(workerPollers ).forEach(function(key) {
-            workerPollers[key].shutdown();
+            workerPollers[key].postMessage( {
+                command : 'shutdown'
+            } );
         });
     }
 
