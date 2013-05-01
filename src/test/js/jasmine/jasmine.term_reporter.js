@@ -209,8 +209,7 @@
 
             if (trace) {
                 this.log(
-                    this.indent(
-                        this.inColor(trace, this.colors.trace)));
+                    this.inColor(trace, this.colors.trace));
             }
         },
 
