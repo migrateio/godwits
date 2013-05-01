@@ -19,9 +19,8 @@ describe( 'DeciderPoller', function () {
 
         it( 'should not be created without a decider property', function ( done ) {
             w.onerror = function ( e ) {
-                log.info( 'Result: ' + JSON.stringify( e ) );
                 expect( e.data.status ).toEqual( 400 );
-                expect( e.data.message ).toMatch( '[decider]' );
+                expect( e.data.message ).toMatch( /\[deciderModuleId\]/ );
                 done();
             };
             w.postMessage( {
@@ -33,13 +32,14 @@ describe( 'DeciderPoller', function () {
 
         it( 'should not be created without a workflow property', function ( done ) {
             w.onerror = function ( e ) {
+                log.info( 'onerror: ' + JSON.stringify( e ) );
                 expect( e.data.status ).toEqual( 400 );
-                expect( e.data.message ).toMatch( '[workflow]' );
+                expect( e.data.message ).toMatch( /\[workflow\]/ );
                 done();
             };
             w.postMessage( {
                 command : 'start',
-                decider : 'workflow/decider',
+                deciderModuleId : 'workflow/decider',
                 taskListName : 'tasklist'
             } );
         }, 100 );
@@ -47,12 +47,12 @@ describe( 'DeciderPoller', function () {
         it( 'should not be created without a taskListName property', function ( done ) {
             w.onerror = function ( e ) {
                 expect( e.data.status ).toEqual( 400 );
-                expect( e.data.message ).toMatch( '[taskListName]' );
+                expect( e.data.message ).toMatch( /\[taskListName\]/ );
                 done();
             };
             w.postMessage( {
                 command : 'start',
-                decider : 'workflow/decider',
+                deciderModuleId : 'workflow/decider',
                 workflow : {}
             } );
         }, 100 );

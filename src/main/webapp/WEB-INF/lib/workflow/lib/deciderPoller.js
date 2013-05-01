@@ -71,7 +71,8 @@ var source;
  * @param e
  */
 function onmessage( e ) {
-    log.info( 'onmessage: {}', JSON.stringify( arguments ) );
+    log.info( 'DeciderPoller::onmessage:{}, \nmodule: {}, tasklist: {}, workflow: {}',
+        JSON.stringify( e.data ), deciderModuleId, taskListName, workflow );
 
     if ( !e.data || !e.data.command )
         throw { status : 400, message : 'Invalid message. No command specified.'};
@@ -82,12 +83,12 @@ function onmessage( e ) {
             // calling start more than once
             taskListName = taskListName || e.data.taskListName;
             workflow = workflow || e.data.workflow;
-            deciderModuleId = deciderModuleId || e.data.decider;
+            deciderModuleId = deciderModuleId || e.data.deciderModuleId;
 
             if ( !deciderModuleId)
                 throw { status : 400, message : 'Command [start] requires property [deciderModuleId].'};
-            if ( !workflow )
-                throw { status : 400, message : 'Command [start] requires property [workflow].'};
+//            if ( !workflow )
+//                throw { status : 400, message : 'Command [start] requires property [workflow].'};
             if ( !taskListName )
                 throw { status : 400, message : 'Command [start] requires property [taskListName].'};
 
@@ -120,7 +121,7 @@ function poll() {
     if (!shuttingDown) setTimeout( poll, 1000 );
 
     // Might be able to shutdown here if no tasks are pending
-    if (workerCount === 0) {
+    else if (workerCount === 0) {
         log.info( 'Passing message back from deciderPoller that we are ready to terminate' );
         source.postMessage( { status : 200, message : 'Ready to terminate'} );
     }
