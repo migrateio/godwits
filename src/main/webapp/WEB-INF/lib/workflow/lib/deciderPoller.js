@@ -1,9 +1,10 @@
+// # Module workflow/deciderPoller
 var log = require( 'ringo/logging' ).getLogger( module.id );
 
 /**
- * # DeciderPoller
+ * ## DeciderPoller
  *
- * The DeciderPoller is a Worker object which will run in its own thread and react to
+ * The DeciderPoller is an object which will run in its own thread and react to
  * events published by Amazon Simple Workflow.
  *
  * 1. The DeciderPoller will continuously poll SWF for pending decisions.
@@ -21,7 +22,7 @@ var log = require( 'ringo/logging' ).getLogger( module.id );
  *     3. When the queue is empty, the Poller will send ACK to workflow which will
  *        terminate the Poller.
  */
-function DeciderPoller( taskListName, workflow ) {
+function DeciderPoller( deciderModuleId, taskListName, workflow ) {
 
     /**
      * Indicates whether the poller is trying to shutdown.
@@ -44,7 +45,7 @@ function DeciderPoller( taskListName, workflow ) {
     var workerCount = 0;
 
     /**
-     * **start()**
+     * ### **start()**
      * Starts the polling loop.
      */
     function start() {
@@ -52,7 +53,7 @@ function DeciderPoller( taskListName, workflow ) {
     }
 
     /**
-     * **stop()**
+     * ### **stop()**
      * Stops the polling loop.
      */
     function stop() {
@@ -60,7 +61,7 @@ function DeciderPoller( taskListName, workflow ) {
     }
 
     /**
-     * **shutdown()**
+     * ### **shutdown()**
      * Shuts down the polling loop and terminates once all workers have completed.
      */
     function shutdown() {
@@ -74,6 +75,7 @@ function DeciderPoller( taskListName, workflow ) {
      */
     function poll() {
         if ( polling ) {
+            log.info( 'Calling workflow.pollForDecisionTask, calls: {}', workflow.pollForDecisionTask.calls.length );
             var task = workflow.pollForDecisionTask( {
                 taskListName : taskListName
             } );
@@ -83,92 +85,97 @@ function DeciderPoller( taskListName, workflow ) {
 
         // Might be able to shutdown here if no tasks are pending
         else if ( workerCount === 0 ) {
-            log.info( 'Passing message back from deciderPoller that we are ready to terminate' );
-            source.postMessage( { status : 200, message : 'Ready to terminate'} );
+            log.info( 'DeciderPoller::terminated' );
         }
     }
 
     /**
+     * ### _workerSuccess()_
+     *
      * Called when the Decider finishes with a decision. Each decision will result in one or
      * more actions being returned. These actions will be represented by JSON objects and
      * there can be one or and array of them.
      *
-     * e.data {Object|Array}
-     *     [
-     *         {   type : 'CancelTimer',
-     *             timerId : ''
-     *         },
-     *         {   type : 'CancelWorkflowExecution',
-     *             details : ''
-     *         },
-     *         {   type : 'CompleteWorkflowExecution',
-     *             result : ''
-     *         },
-     *         {   type : 'ContinueAsNewWorkflowExecution',
-     *             childPolicy : '',
-     *             executionStartToCloseTimeout : '',
-     *             taskStartToCloseTimeout : ''
-     *             input : '',
-     *             tagList : [''],
-     *             taskListName : '',
-     *             workflowTypeVersion : ''
-     *         },
-     *         {   type : 'FailWorkflowExecution',
-     *             details : '',
-     *             reason : ''
-     *         },
-     *         {   type : 'RecordMarker',
-     *             details : '',
-     *             markerName : ''
-     *         },
-     *         {   type : 'RequestCancelActivityTask',
-     *             activityId : '',
-     *         },
-     *         {   type : 'RequestCancelExternalWorkflowExecution',
-     *             control : '',
-     *             runId : '',
-     *             workflowId : ''
-     *         },
-     *         {   type : 'ScheduleActivityTask',
-     *             activityId : '',
-     *             activityType : { name : '', version : '' },
-     *             control : '',
-     *             heartbeatTimeout : '',
-     *             input : '',
-     *             scheduleToStartTimeout : '',
-     *             scheduleToCloseTimeout : '',
-     *             startToCloseTimeout : ''
-     *             taskListName : ''
-     *         },
-     *         {   type : 'SignalExternalWorkflowExecution',
-     *             control : '',
-     *             input : '',
-     *             runId : '',
-     *             signalName : '',
-     *             workflowId : ''
-     *         },
-     *         {   type : 'StartChildWorkflowExecution',
-     *             childPolicy : '',
-     *             control : '',
-     *             executionStartToCloseTimeout : '',
-     *             taskStartToCloseTimeout : ''
-     *             input : '',
-     *             tagList : [''],
-     *             taskList : '',
-     *             workflowId : '',
-     *             workflowType : {
-     *                 name : '',
-     *                 version : ''
-     *             }
-     *         },
-     *         {   type : 'StartTimer',
-     *             control : '',
-     *             startToFireTimeout : ''
-     *             timerid : ''
-     *         }
-     *     ];
+     * Decisions will be an array of JSON objects, such as these:
      *
-     * @param e
+     * ```js
+     * [
+     *     {   type : 'CancelTimer',
+     *         timerId : ''
+     *     },
+     *     {   type : 'CancelWorkflowExecution',
+     *         details : ''
+     *     },
+     *     {   type : 'CompleteWorkflowExecution',
+     *         result : ''
+     *     },
+     *     {   type : 'ContinueAsNewWorkflowExecution',
+     *         childPolicy : '',
+     *         executionStartToCloseTimeout : '',
+     *         taskStartToCloseTimeout : ''
+     *         input : '',
+     *         tagList : [''],
+     *         taskListName : '',
+     *         workflowTypeVersion : ''
+     *     },
+     *     {   type : 'FailWorkflowExecution',
+     *         details : '',
+     *         reason : ''
+     *     },
+     *     {   type : 'RecordMarker',
+     *         details : '',
+     *         markerName : ''
+     *     },
+     *     {   type : 'RequestCancelActivityTask',
+     *         activityId : '',
+     *     },
+     *     {   type : 'RequestCancelExternalWorkflowExecution',
+     *         control : '',
+     *         runId : '',
+     *         workflowId : ''
+     *     },
+     *     {   type : 'ScheduleActivityTask',
+     *         activityId : '',
+     *         activityType : { name : '', version : '' },
+     *         control : '',
+     *         heartbeatTimeout : '',
+     *         input : '',
+     *         scheduleToStartTimeout : '',
+     *         scheduleToCloseTimeout : '',
+     *         startToCloseTimeout : ''
+     *         taskListName : ''
+     *     },
+     *     {   type : 'SignalExternalWorkflowExecution',
+     *         control : '',
+     *         input : '',
+     *         runId : '',
+     *         signalName : '',
+     *         workflowId : ''
+     *     },
+     *     {   type : 'StartChildWorkflowExecution',
+     *         childPolicy : '',
+     *         control : '',
+     *         executionStartToCloseTimeout : '',
+     *         taskStartToCloseTimeout : ''
+     *         input : '',
+     *         tagList : [''],
+     *         taskList : '',
+     *         workflowId : '',
+     *         workflowType : {
+     *             name : '',
+     *             version : ''
+     *         }
+     *     },
+     *     {   type : 'StartTimer',
+     *         control : '',
+     *         startToFireTimeout : ''
+     *         timerid : ''
+     *     }
+     * ];
+     * ```
+     *
+     * @param {Object} task The original decision task pulled from the task list
+     * @param {Array} decisions The resulting decisions generated by the FSM
      */
     function workerSuccess( task, decisions ) {
         workflow.respondDecisionTaskCompleted( {
@@ -179,11 +186,12 @@ function DeciderPoller( taskListName, workflow ) {
     }
 
     /**
+     * ### _workerError()_
+     *
      * There is no failure condition for a decision task. If we get here, then there is a
      * serious problem with our decision object.
      *
-     * @param task
-     * @param data
+     * @param {Object} task The original decision task pulled from the task list
      */
     function workerError( task ) {
         log.fatal( 'Should not have a failure condition possible from the Decider. ' +
@@ -191,7 +199,7 @@ function DeciderPoller( taskListName, workflow ) {
     }
 
     /**
-     * ## startTask
+     * ### _startTask()_
      *
      * We have polled for a decision task and received one. Now we initialize the decider
      * worker and feed it the decision which contains the execution workflow so far. Once the
@@ -239,25 +247,23 @@ function DeciderPoller( taskListName, workflow ) {
      * @param {Workflow} workflow The workflow object in which this poller resides.
      */
     function init( deciderModuleId, taskListName, workflow ) {
-        log.info( 'DeciderPoller::init:{}', JSON.stringify( arguments ) );
-
         if ( !deciderModuleId ) throw {
             status : 400,
-            message : 'DeciderPoller requires property [deciderModuleId].'
+            message : 'DeciderPoller requires property [deciderModuleId]'
         };
         if ( !workflow ) throw {
             status : 400,
-            message : 'DeciderPoller requires property [workflow].'
+            message : 'DeciderPoller requires property [workflow]'
         };
         if ( !taskListName ) throw {
             status : 400,
-            message : 'DeciderPoller requires property [taskListName].'
+            message : 'DeciderPoller requires property [taskListName]'
         };
 
         setTimeout( poll, 0 );
     }
 
-    init();
+    init( deciderModuleId, taskListName, workflow );
 
     return {
         start : start,
