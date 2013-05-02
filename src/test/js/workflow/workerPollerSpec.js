@@ -4,6 +4,7 @@ var {WorkerPoller} = require( 'workflow/workerPoller' );
 describe( 'WorkerPoller', function () {
 
     var taskListName = 'test.migrate.decider';
+    var deciderModuleId = 'test/0.0.0/deciders/simple-decider';
 
     describe( 'should have proper init values', function () {
 
@@ -21,7 +22,7 @@ describe( 'WorkerPoller', function () {
 
     } );
 
-    xdescribe( 'should be able to control polling behavior', function () {
+    describe( 'should be able to control polling behavior', function () {
 
         var decider, workflow;
 
