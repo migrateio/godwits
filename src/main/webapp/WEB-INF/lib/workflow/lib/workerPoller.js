@@ -83,7 +83,7 @@ function WorkerPoller( taskListName, workflow ) {
         var type = worker.ActivityType;
         if ( !type ) throw {
             status : 400,
-            message : 'The worker module [' + moduleid + '] must export property [ActivityType]'
+            message : 'The worker module [' + moduleId + '] must export property [ActivityType]'
         };
         if ( !type.name )
             throw {
@@ -97,6 +97,7 @@ function WorkerPoller( taskListName, workflow ) {
             };
 
         // Register the ActivityType with Amazon SWF
+        log.info( 'Registering activity type: {}', JSON.stringify( type ) );
         workflow.registerActivityType( type );
 
         // Store the moduleId so we can instantiate this module as a Worker later
@@ -256,7 +257,14 @@ function WorkerPoller( taskListName, workflow ) {
             throw { status : 400, message : 'WorkerPoller requires property [taskListName]'};
         setTimeout( poll, 0 );
     }
-    init( taskListName, workflow)
+    init( taskListName, workflow);
+
+    return {
+        registerWorker: registerWorker,
+        start: start,
+        stop: stop,
+        shutdown: shutdown
+    }
 }
 exports.WorkerPoller = WorkerPoller;
 

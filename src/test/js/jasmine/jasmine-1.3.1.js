@@ -669,24 +669,11 @@ jasmine.util.inherit = function(childClass, parentClass) {
 };
 
 jasmine.util.formatException = function(e) {
-  var lineNumber;
-  if (e.line) {
-    lineNumber = e.line;
-  }
-  else if (e.lineNumber) {
-    lineNumber = e.lineNumber;
-  }
+  var lineNumber = e.line || e.lineNumber;
+  var file = e.sourceURL || e.fileName;
 
-  var file;
-
-  if (e.sourceURL) {
-    file = e.sourceURL;
-  }
-  else if (e.fileName) {
-    file = e.fileName;
-  }
-
-  var message = (e.name && e.message) ? (e.name + ': ' + e.message) : e.toString();
+  var message = e.message || e.toString();
+  if (e.name && e.message) message = e.name + ': ' + e.message;
 
   if (file && lineNumber) {
     message += ' in ' + file + ' (line ' + lineNumber + ')';

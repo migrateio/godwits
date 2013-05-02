@@ -85,8 +85,8 @@ function main( args ) {
         system.exit(0);
     }
 
-    var sourceDirs = options.sourceDirs && options.sourceDirs.trim().split( /[:;]/ );
-    var testDirs = options.testDirs && options.testDirs.trim().split( /[:;]/ );
+    var sourceDirs = options.sourceDirs && options.sourceDirs.trim().split( /[,]/ );
+    var testDirs = options.testDirs && options.testDirs.trim().split( /[,]/ );
     var junitDir = options.junitDir && options.junitDir.trim();
     var helperDir = options.helperDir && options.helperDir.trim();
 

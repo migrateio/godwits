@@ -1,5 +1,9 @@
+/**
+ * # Module workflow/workflow
+ */
 var log = require( 'ringo/logging' ).getLogger( module.id );
-var {Worker} = require( 'ringo/worker' );
+var {WorkerPoller} = require( 'workflow/workerPoller' );
+var {DeciderPoller} = require( 'workflow/deciderPoller' );
 
 var {AmazonSimpleWorkflowClient} = Packages.com.amazonaws.services.simpleworkflow;
 var {
@@ -15,6 +19,8 @@ var {
 var {BasicAWSCredentials} = Packages.com.amazonaws.auth;
 
 /**
+ * ## Workflow
+ *
  * An instance of this class is the embodiment of an SWF Workflow which is a distributed
  * application composed of coordination logic and tasks that run asynchronously across
  * multiple computing devices. When this class is constructed, a n AWS Workflow Type will
@@ -33,9 +39,6 @@ var {BasicAWSCredentials} = Packages.com.amazonaws.auth;
  * workflow and all attached deciders and workers will have their lifecycles tied to the
  * workflow.
  *
- * @type {Workflow}
- * @constructor
- *
  * @param {Object} workflowOptions The JSON representation of an SWF Workflow Type
  * @param {String} accessKey The AWS access key for an authorized workflow account
  * @param {String} secretKey The AWS secret key for an authorized workflow account
@@ -47,6 +50,8 @@ exports.Workflow = function ( workflowOptions, accessKey, secretKey ) {
     var deciderPollers = {};
 
     /**
+     * ### _registerWorkflowType()_
+     *
      * Registers a new workflow type and its configuration settings in the specified
      * domain. The retention period for the workflow history is set by the RegisterDomain
      * action.The options object will contain the following properties:
@@ -67,12 +72,13 @@ exports.Workflow = function ( workflowOptions, accessKey, secretKey ) {
      * > default can be overridden when starting a workflow execution using the
      * > StartWorkflowExecution action or the StartChildWorkflowExecution Decision.
      * > The supported child policies are:
-     * > > **TERMINATE**: the child executions will be terminated.
-     * > > **REQUEST_CANCEL**: a request to cancel will be attempted for each child
-     * > > execution by recording a WorkflowExecutionCancelRequested event in its
-     * > > history. It is up to the decider to take appropriate actions when it receives
-     * > > an execution history with this event.
-     * > **ABANDON**: no action will be taken. The child executions will continue to run.
+     *
+     * > * **TERMINATE**: the child executions will be terminated.
+     * > * **REQUEST_CANCEL**: a request to cancel will be attempted for each child
+     * >   execution by recording a WorkflowExecutionCancelRequested event in its
+     * >   history. It is up to the decider to take appropriate actions when it receives
+     * >   an execution history with this event.
+     * > * **ABANDON**: no action will be taken. The child executions will continue to run.
      *
      * _defaultTaskListName_ {String}
      * > If set, specifies the default task list to use for scheduling decision tasks for
@@ -104,7 +110,7 @@ exports.Workflow = function ( workflowOptions, accessKey, secretKey ) {
      * > be used to specify the duration in seconds while NONE can be used to specify
      * > unlimited duration.
      *
-     * @param options
+     * @param {Object} options The options are listed above.
      */
     function registerWorkflowType( options ) {
         log.debug( 'Workflow::registerWorkflow[{}]', JSON.stringify( options ) );
@@ -148,6 +154,7 @@ exports.Workflow = function ( workflowOptions, accessKey, secretKey ) {
     }
 
     /**
+     * ### _startWorkflow()_
      * Starts an execution of the workflow type in the specified domain using the
      * provided workflowId and input data.
      *
@@ -287,6 +294,8 @@ exports.Workflow = function ( workflowOptions, accessKey, secretKey ) {
     }
 
     /**
+     * ### _registerActivityType()_
+     *
      * Registers a new worker type along with its configuration settings in the
      * specified domain. (@see http://goo.gl/R2qD9)
      *
@@ -394,6 +403,8 @@ exports.Workflow = function ( workflowOptions, accessKey, secretKey ) {
     }
 
     /**
+     * ### _pollForActivityTask()_
+     *
      * Used by workers to get an ActivityTask from the specified activity taskList. This
      * initiates a long poll, where the service holds the HTTP connection open and
      * responds as soon as a task becomes available. The maximum time the service holds
@@ -417,7 +428,7 @@ exports.Workflow = function ( workflowOptions, accessKey, secretKey ) {
      * > ActivityTaskStarted event in the workflow history. This enables diagnostic
      * > tracing when problems arise. The form of this identity is user defined.
      *
-     * @param options
+     * @param {Object} options The options are listed above.
      */
     function pollForActivityTask( options ) {
         log.debug( 'Workflow::pollForActivityTask', JSON.stringify( options ) );
@@ -441,6 +452,8 @@ exports.Workflow = function ( workflowOptions, accessKey, secretKey ) {
 
 
     /**
+     * ### _pollForDecisionTask()_
+     *
      * Used by deciders to get a DecisionTask from the specified decision taskList. A
      * decision task may be returned for any open workflow execution that is using the
      * specified task list. The task includes a paginated view of the history of the
@@ -490,7 +503,7 @@ exports.Workflow = function ( workflowOptions, accessKey, secretKey ) {
      * > When set to true, returns the events in reverse order. By default the results
      * > are returned in ascending order of the eventTimestamp of the events.
      *
-     * @param {Object} options
+     * @param {Object} options The options are listed above.
      * @param {Boolean} fullHistory If true, the execution history is returned complete
      * @return {Object} Returns a json representation of the task, or null if no task
      */
@@ -522,6 +535,8 @@ exports.Workflow = function ( workflowOptions, accessKey, secretKey ) {
     }
 
     /**
+     * ### _respondActivityTaskCompleted()_
+     *
      * Used by workers to tell the service that the ActivityTask identified by the
      * taskToken completed successfully with a result (if provided). The result appears
      * in the ActivityTaskCompleted event in the workflow history.
@@ -536,7 +551,7 @@ exports.Workflow = function ( workflowOptions, accessKey, secretKey ) {
      * > The result of the activity task. It is a free form string that is implementation
      * > specific.
      *
-     * @param options
+     * @param {Object} options The options are listed above.
      */
     function respondActivityTaskCompleted( options ) {
         log.debug( 'Workflow::respondActivityTaskCompleted', JSON.stringify( options ) );
@@ -554,6 +569,8 @@ exports.Workflow = function ( workflowOptions, accessKey, secretKey ) {
     }
 
     /**
+     * ### _respondActivityTaskFailed()_
+     *
      * Used by workers to tell the service that the ActivityTask identified by the
      * taskToken has failed with reason (if specified). The reason and details appear in
      * the ActivityTaskFailed event added to the workflow history.
@@ -570,7 +587,7 @@ exports.Workflow = function ( workflowOptions, accessKey, secretKey ) {
      * _reason_ {String}
      * > Description of the error that may assist in diagnostics.
      *
-     * @param options
+     * @param {Object} options The options are listed above.
      */
     function respondActivityTaskFailed( options ) {
         log.debug( 'Workflow::respondActivityTaskFailed', JSON.stringify( options ) );
@@ -589,6 +606,8 @@ exports.Workflow = function ( workflowOptions, accessKey, secretKey ) {
     }
 
     /**
+     * ### _respondActivityTaskCanceled()_
+     *
      * Used by workers to tell the service that the ActivityTask identified by the
      * taskToken was successfully canceled. Additional details can be optionally provided
      * using the details argument.
@@ -608,7 +627,7 @@ exports.Workflow = function ( workflowOptions, accessKey, secretKey ) {
      * _details_ {String}
      * > Optional detailed information about the cancelure.
      *
-     * @param options
+     * @param {Object} options The options are listed above.
      */
     function respondActivityTaskCanceled( options ) {
         log.debug( 'Workflow::respondActivityTaskCanceled', JSON.stringify( options ) );
@@ -626,6 +645,8 @@ exports.Workflow = function ( workflowOptions, accessKey, secretKey ) {
     }
 
     /**
+     * _respondDecisionTaskCompleted()_
+     *
      * Used by deciders to tell the service that the DecisionTask identified by the
      * taskToken has successfully completed. The decisions argument specifies the list of
      * decisions made while processing the task.
@@ -721,8 +742,7 @@ exports.Workflow = function ( workflowOptions, accessKey, secretKey ) {
      * >         }
      * >     ];
      *
-     *
-     * @param options
+     * @param {Object} options The options are listed above.
      */
     function respondDecisionTaskCompleted( options ) {
         log.debug( 'Workflow::respondDecisionTaskCompleted', JSON.stringify( options ) );
@@ -755,6 +775,8 @@ exports.Workflow = function ( workflowOptions, accessKey, secretKey ) {
 
 
     /**
+     * _recordActivityTaskHeartbeat()_
+     *
      * Used by activity to report to the service that the ActivityTask
      * represented by the specified taskToken is still making progress. The worker can
      * also (optionally) specify details of the progress, for example percent complete,
@@ -772,7 +794,7 @@ exports.Workflow = function ( workflowOptions, accessKey, secretKey ) {
      * _details_ {String}
      * > If specified, contains details about the progress of the task.
      *
-     * @param options
+     * @param {Object} options The options are listed above.
      * @return {Boolean} True if the workflow is requesting the activity to be cancelled
      */
     function recordActivityTaskHeartbeat( options ) {
@@ -792,6 +814,8 @@ exports.Workflow = function ( workflowOptions, accessKey, secretKey ) {
     }
 
     /**
+     * ### _convertDecisionFromJson()_
+     *
      * Uses Java package naming conventions to build the Java Decision object which
      * corresponds with the Json definition.
      *
@@ -837,6 +861,8 @@ exports.Workflow = function ( workflowOptions, accessKey, secretKey ) {
     }
 
     /**
+     * ### _completeDeciderHistory()_
+     *
      * Iterate over the pages of task events to retrieve the full execution history.
      *
      * @param {PollForDecisionTaskRequest} request
@@ -853,6 +879,8 @@ exports.Workflow = function ( workflowOptions, accessKey, secretKey ) {
     }
 
     /**
+     * ### _convertDeciderTaskToJson()_
+     *
      * Convert the DecisionTask into a JSON object.
      *
      * @param {DecisionTask} task
@@ -939,6 +967,7 @@ exports.Workflow = function ( workflowOptions, accessKey, secretKey ) {
     }
 
     /**
+     * ### _convertActivityTaskToJson()_
      * Convert the ActivityTask into a JSON object.
      *
      * @param {ActivityTask} task
@@ -960,6 +989,8 @@ exports.Workflow = function ( workflowOptions, accessKey, secretKey ) {
     }
 
     /**
+     * ### _registerDecider()_
+     *
      * Adds a DeciderPoller (or array of DeciderPollers) to the internal list of
      * pollers. The lifecycle of these pollers will be tied to the lifecycle of this
      * Workflow instance.
@@ -968,6 +999,7 @@ exports.Workflow = function ( workflowOptions, accessKey, secretKey ) {
      */
     function registerDecider( taskListName, deciderModuleId ) {
         log.debug( 'Workflow::registerDecider, {}', JSON.stringify( arguments ) );
+
         // Pollers are cached using the task list name as the key.
         var poller = deciderPollers[taskListName];
 
@@ -975,29 +1007,8 @@ exports.Workflow = function ( workflowOptions, accessKey, secretKey ) {
         // a new poller and track it in the registry.
         if (!poller) {
             log.info( 'Registering new DeciderPoller for taskList [{}]', taskListName );
-
             // Instantiate a new worker.
-            poller = new Worker( 'workflow/deciderPoller' );
-
-            // Set up a handler for messages from the poller. When a shutdown request is
-            // made of the poller, it will immediately stop polling for new tasks, but
-            // will give its tasks in progress time to complete. Once they have all
-            // completed, the poller will notify us by passing a 200 status.
-            poller.onmessage = function( e ) {
-                if ( e.data.status === 200 ) {
-                    log.info( 'Terminating the deciderPoller for task list [{}]', taskListName );
-                    poller.terminate();
-                }
-            };
-
-            // Initialize the poller using the start command and the pertinent
-            // information.
-            poller.postMessage( {
-                command : 'start',
-                taskListName : taskListName,
-                deciderModuleId: deciderModuleId,
-                workflow : this
-            } );
+            poller = new DeciderPoller( taskListName, deciderModuleId, this );
 
             // Add the poller to the registry.
             deciderPollers[taskListName] = poller;
@@ -1005,6 +1016,8 @@ exports.Workflow = function ( workflowOptions, accessKey, secretKey ) {
     }
 
     /**
+     * ### **registerWorkers()**
+     *
      * Registers an Worker (or array of Workers) on the provided task list. The lifecycle
      * of the workers are bound to the lifecycle of this workflow instance. Each worker
      * will export a property named 'ActivityType' which will be registered with the SWF.
@@ -1015,92 +1028,57 @@ exports.Workflow = function ( workflowOptions, accessKey, secretKey ) {
      */
     function registerWorkers( taskListName, workerModuleIds ) {
         log.debug( 'Workflow::registerWorkers, {}', JSON.stringify( arguments ) );
-        var poller = getWorkerPoller( taskListName );
-        [].concat( workerModuleIds ).forEach( function ( workerModuleId ) {
-            registerWorker( poller, workerModuleId );
-        } );
-    }
-
-    function getWorkerPoller( taskListName ) {
         var poller = workerPollers[taskListName];
         if ( !poller ) {
             log.info( 'Registering new WorkerPoller for taskList [{}]', taskListName );
-            poller = new Worker( 'workflow/workerPoller' );
-            poller.onmessage = function( e ) {
-                if ( e.data.status === 200 ) {
-                    log.info( 'Terminating the workerPoller for task list [{}]', taskListName );
-                    poller.terminate();
-                }
-            };
-            poller.postMessage( {
-                command : 'start',
-                taskListName : taskListName,
-                workflow : this
-            } );
+            poller = new WorkerPoller( taskListName, this );
             workerPollers[taskListName] = poller;
         }
-        return poller;
-    }
-
-    /**
-     * Registers the worker and associates it with the poller.
-     *
-     * @param poller
-     * @param worker
-     */
-    function registerWorker(poller, moduleId ) {
-        poller.postMessage( {
-            command: 'registerWorker',
-            module: moduleId
+        [].concat( workerModuleIds ).forEach( function ( workerModuleId ) {
+            log.info( 'Registering activity worker [{}]', workerModuleId );
+            poller.registerWorker( workerModuleId );
         } );
     }
 
-
     /**
+     * ### _start()_
+     *
      * Start the workflow by ensuring that each decider and worker poller is started.
      */
     function start() {
         Object.keys( deciderPollers ).forEach( function ( key ) {
-            deciderPollers[key].postMessage( {
-                command : 'start'
-            } );
+            deciderPollers[key].start();
         } );
         Object.keys(workerPollers ).forEach(function(key) {
-            workerPollers[key].postMessage( {
-                command : 'start'
-            } );
+            workerPollers[key].start();
         });
     }
 
     /**
+     * ### _stop()_
+     *
      * Stop the workflow by ensuring that each decider and worker poller is stopped.
      */
     function stop() {
         Object.keys( deciderPollers ).forEach( function ( key ) {
-            deciderPollers[key].postMessage( {
-                command : 'stop'
-            } );
+            deciderPollers[key].stop();
         } );
         Object.keys(workerPollers ).forEach(function(key) {
-            workerPollers[key].postMessage( {
-                command : 'stop'
-            } );
+            workerPollers[key].stop();
         });
     }
 
     /**
+     * _shutdown()_
+     *
      * Shutdown the workflow by ensuring that each decider and worker poller is shutdown.
      */
     function shutdown() {
         Object.keys( deciderPollers ).forEach( function ( key ) {
-            deciderPollers[key].postMessage( {
-                command : 'shutdown'
-            } );
+            deciderPollers[key].shutdown();
         } );
         Object.keys(workerPollers ).forEach(function(key) {
-            workerPollers[key].postMessage( {
-                command : 'shutdown'
-            } );
+            workerPollers[key].shutdown();
         });
     }
 
@@ -1135,9 +1113,7 @@ exports.Workflow = function ( workflowOptions, accessKey, secretKey ) {
             log.debug( "Workflow::init, establishing AWS SWF Client using access key: {}, secret key: {}",
                 accessKey, secretKey );
             var credentials = new BasicAWSCredentials( accessKey, secretKey );
-            log.info( 'Creating SWF Client: {}', credentials );
             swfClient = new AmazonSimpleWorkflowClient( credentials );
-            log.info( 'Done Creating SWF Client' );
         } catch ( e ) {
             log.info( 'init::error', e );
             throw e;

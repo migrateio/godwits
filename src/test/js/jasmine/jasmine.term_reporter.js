@@ -150,7 +150,6 @@
          * @param spec
          */
         reportSpecResults: function (spec) {
-
             this.lastSuite = spec.suite.description;
 
             var results = spec.results();
