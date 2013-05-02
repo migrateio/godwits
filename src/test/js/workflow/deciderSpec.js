@@ -4,7 +4,7 @@ var {Decider} = require( 'workflow/decider' );
 describe( 'Decider', function () {
 
     it( 'returns a promise', function ( done ) {
-        var decider = new Decider( 'test/deciders/simple-decider', [] );
+        var decider = new Decider( 'test/0.0.0/deciders/simple-decider', [] );
         expect( typeof decider.then === 'function' ).toBe( true );
         decider.then( function () {
             done();
@@ -12,7 +12,7 @@ describe( 'Decider', function () {
     }, 2000 );
 
     it( 'will be in initialized state after starting workflow', function ( done ) {
-        var decider = new Decider( 'test/deciders/simple-decider', [
+        var decider = new Decider( 'test/0.0.0/deciders/simple-decider', [
             {
                 "eventId" : 1,
                 "eventTimestamp" : 1326592619.474,

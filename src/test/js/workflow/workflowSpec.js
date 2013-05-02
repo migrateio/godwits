@@ -42,7 +42,7 @@ describe( 'Workflow', function () {
 
         it( 'will create a proper workflow object', function () {
             expect( workflow ).toBeDefined();
-            expect( workflow.start ).toBeFunction();
+            expect( workflow.start ).toEqual(jasmine.any(Function));
         } );
 
         it( 'should allow deciders to be registered', function () {
