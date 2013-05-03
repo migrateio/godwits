@@ -1,6 +1,6 @@
 var log = require( 'ringo/logging' ).getLogger( module.id );
 
-exports.logic = function () {
+exports.logic = function (emit, ) {
     return {
         initialState : 'uninitialized',
         states : {
@@ -12,15 +12,15 @@ exports.logic = function () {
                     log.info( 'uninitialized::WorkflowExecutionStarted: {}', JSON.stringify( arguments ) );
                     this.job = event.input;
                     // Do the initialization work here
-                    this.transition( 'initialized' );
+                    this.transition( 'identification' );
                 }
             },
 
-            initialized : {
+            identification : {
                 _onEnter : function () {
-                    log.info( 'initialized::onEnter: job: {}', JSON.stringify( this.job ) );
+                    log.info( 'identification::onEnter: job: {}', JSON.stringify( this.job ) );
                     emit(
-                        scheduleActivityTask( 'loadCustomer', { userId : this.job.userId } )
+                        scheduleActivityTask( 'loadUser', { userId : this.job.userId } )
                     );
                 }
             }

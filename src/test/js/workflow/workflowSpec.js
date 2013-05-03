@@ -1,12 +1,11 @@
 var {Workflow} = require( 'workflow/workflow' );
 var {WorkerPoller} = require( 'workflow/workerPoller' );
 
-describe( 'Workflow', function () {
+xdescribe( 'Workflow', function () {
 
     describe( 'requires valid initialization parameters', function () {
         beforeEach( function () {
         } );
-
 
         it( 'will throw an exception if instantiated without aws credentials', function () {
             expect(function () {
@@ -19,7 +18,6 @@ describe( 'Workflow', function () {
                 new Workflow( 'nogood', 'accessKey', 'secretKey' );
             } ).toThrow( 'Workflow instance requires a [workflowType] parameter as an object.' );
         } );
-
 
         it( 'will throw an exception if instantiated with invalid aws credentials', function () {
             expect(function () {
@@ -46,7 +44,7 @@ describe( 'Workflow', function () {
         } );
 
         it( 'should allow deciders to be registered', function () {
-            workflow.registerDecider( deciderTaskList, 'test/deciders/simple-decider' );
+            workflow.registerDecider( deciderTaskList, deciderModuleId );
         } );
     } );
 
@@ -64,8 +62,8 @@ describe( 'Workflow', function () {
         } );
 
         it( 'will allow a single worker to be registered', function () {
-            workflow.registerWorkers( workerTaskList, activities.loadCustomer );
-            var activity = require( activities.loadCustomer );
+            workflow.registerWorkers( workerTaskList, activities.loadUser );
+            var activity = require( activities.loadUser );
             expect( activity ).toBeDefined();
             expect( activity.ActivityType ).toBeDefined();
             expect( workflow.registerActivityType )
@@ -74,7 +72,7 @@ describe( 'Workflow', function () {
 
         it( 'will allow a multiple workers to be registered', function () {
             var workers = [
-                activities.loadCustomer, activities.authPayment,
+                activities.loadUser, activities.authPayment,
                 activities.capturePayment
             ];
             workflow.registerWorkers( workerTaskList, workers );
@@ -90,13 +88,39 @@ describe( 'Workflow', function () {
 } );
 
 
+describe('Workflow', function() {
+
+    beforeEach(function() {
+        workflow = new Workflow( workflowType, accessKey, secretKey );
+        spyOn( workflow, 'registerActivityType' ).andCallThrough();
+        var workers = [
+            activities.loadUser, activities.authPayment,
+            activities.doWork, activities.capturePayment
+        ];
+        workflow.registerWorkers( workerTaskList, workers );
+        workflow.registerDecider( deciderTaskList, deciderModuleId );
+        workflow.start();
+    });
+
+    afterEach(function() {
+        workflow.shutdown();
+    });
+
+    it('will simulate an actual workflow', function() {
+        workflow.startWorkflow(job);
+        expect( workflow.registerActivityType.calls.length ).toEqual( 4 );
+    });
+});
+
 var accessKey = 'AKIAIIQOWQM6FFLQB2EQ';
 var secretKey = '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';
 var workerTaskList = 'test/0.0.0/tasklist/worker';
 var deciderTaskList = 'test/0.0.0/tasklist/decider';
+var deciderModuleId = 'test/0.0.0/deciders/simple-decider';
 var activities = {
-    loadCustomer: 'test/0.0.0/workers/load-customer',
+    loadUser: 'test/0.0.0/workers/load-user',
     authPayment: 'test/0.0.0/workers/auth-payment',
+    doWork: 'test/0.0.0/workers/do-work',
     capturePayment: 'test/0.0.0/workers/capture-payment'
 };
 var workflowType = {
@@ -109,3 +133,34 @@ var workflowType = {
     defaultExecutionStartToCloseTimeout : '2592000', // 1 month
     defaultTaskStartToCloseTimeout : 'NONE'
 };
+
+var job = {
+    jobId : '4N9w5',
+    userId : '123abc',
+    source : {
+        service : 'yahoo',
+        principal : 'oravecz@yahoo.com',
+        credential : '<secret>',
+        display : 'oravecz@yahoo.com'
+    },
+    destination : {
+        service : 'google',
+        principal : 'jcook@pykl.com',
+        credential : '<secret>',
+        display : 'jcook@pykl.com'
+    },
+    types : {
+        email : true,
+        contacts : true,
+        documents : false,
+        calendar : false,
+        media : false
+    },
+    payment : {
+        service : 'stripe',
+        amount : 15,
+        currency : 'usd',
+        customer : 'cus_1Jf98WUwZxuKfj'
+    }
+};
+

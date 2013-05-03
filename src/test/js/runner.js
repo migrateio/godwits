@@ -112,5 +112,16 @@ function main( args ) {
 }
 
 if ( require.main === module ) {
-    main( system.args );
+    var {Workflow} = require( 'workflow/workflow' );
+    var workflow = new Workflow( {
+        domain : 'dev-migrate',
+        name : 'io.migrate.transfers',
+        version : '0.0.0',
+        defaultChildPolicy : 'TERMINATE',
+        defaultTaskListName : 'transfer-decisions',
+        description : 'The primary workflow used for a transfer Run.',
+        defaultExecutionStartToCloseTimeout : '2592000', // 1 month
+        defaultTaskStartToCloseTimeout : 'NONE'
+    }, 'AKIAIIQOWQM6FFLQB2EQ', 'ItTa0xaI9sey2SEGGEN8yVcA5slN95+qmNrf1TMd' );
+//    main( system.args );
 }

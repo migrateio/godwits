@@ -9,6 +9,8 @@ var log = require( 'ringo/logging' ).getLogger( module.id );
  * The WorkerPoller is an object which will run in its own thread and react to
  * events published by Amazon Simple Workflow.
  *
+ * <a href="http://goo.gl/EkjDH" target="_blank"><img src="http://goo.gl/EkjDH" width="100%"/></a>
+ *
  * 1. The Poller will con`tinuously poll SWF for pending activity tasks on the provided
  *    task list.
  * 2. When a task has been received, the Poller will:
@@ -26,7 +28,7 @@ var log = require( 'ringo/logging' ).getLogger( module.id );
  *     3. When the queue is empty, the Poller will send ACK to workflow which will
  *        terminate the Poller.
  */
-function WorkerPoller( taskListName, workflow ) {
+function WorkerPoller( taskListName, swfClient ) {
 
     /**
      * Indicates whether the poller is trying to shutdown.
@@ -66,7 +68,7 @@ function WorkerPoller( taskListName, workflow ) {
     var registry = {};
 
     /**
-     * ### **registerWorker()**
+     * ### **registerWorker**
      *
      * The Activity Worker identified by moduleId is registered as an activity with SWF and
      * entered into the registry of activity workers maintained by this class.
@@ -98,7 +100,7 @@ function WorkerPoller( taskListName, workflow ) {
 
         // Register the ActivityType with Amazon SWF
         log.info( 'Registering activity type: {}', JSON.stringify( type ) );
-        workflow.registerActivityType( type );
+        swfClient.registerActivityType( type ).wait(5000);
 
         // Store the moduleId so we can instantiate this module as a Worker later
         var key = type.name + '/' + type.version;
@@ -106,29 +108,32 @@ function WorkerPoller( taskListName, workflow ) {
     }
 
     function start() {
+        log.debug( 'start()' );
         polling = true;
     }
 
     function stop() {
+        log.debug( 'stop()' );
         polling = false;
     }
 
     function shutdown() {
+        log.debug( 'shutdown()' );
         shuttingDown = true;
         polling = false;
     }
 
     /**
-     * ### _poll()_
+     * ### _poll_
      *
      * Will poll for activity tasks from the task list as long as polling is true until
      * shutting down is set to false.
      */
     function poll() {
         if ( polling ) {
-            var task = workflow.pollForActivityTask( {
+            var task = swfClient.pollForActivityTask( {
                 taskListName : taskListName
-            } );
+            } ).wait(70000);
             if ( task ) startTask( task );
         }
         if ( !shuttingDown ) setTimeout( poll, 1000 );
@@ -140,7 +145,7 @@ function WorkerPoller( taskListName, workflow ) {
     }
 
     /**
-     * ### _workerSuccess()_
+     * ### _workerSuccess_
      *
      * Called when the worker finishes with a task. Each task will result in a JSON
      * response which is passed along to SWF and included in the execution workflow
@@ -150,14 +155,14 @@ function WorkerPoller( taskListName, workflow ) {
      * @param {Object} data The result of the task's operation in JSON format
      */
     function workerSuccess( task, data ) {
-        workflow.respondActivityTaskCompleted( {
+        swfClient.respondActivityTaskCompleted( {
             result : JSON.stringify( data ),
             taskToken : task.taskToken
-        } );
+        } ).wait(5000);
     }
 
     /**
-     * ### _workerError()_
+     * ### _workerError_
      *
      * An exception thrown in the worker will trigger this handler. The exception will be
      * a JSON object (data) and will expose the following properties (which are
@@ -178,28 +183,28 @@ function WorkerPoller( taskListName, workflow ) {
      */
     function workerError( task, data ) {
         if ( data.cancelled ) {
-            workflow.respondActivityTaskCanceled( {
+            swfClient.respondActivityTaskCanceled( {
                 details : data.details,
                 taskToken : task.taskToken
-            } );
+            } ).wait(5000);
         } else {
-            workflow.respondActivityTaskFailed( {
+            swfClient.respondActivityTaskFailed( {
                 details : data.details,
                 reason : data.reason,
                 taskToken : task.taskToken
-            } );
+            } ).wait();
         }
     }
 
     /**
-     * ### _getActivityWorker()_
+     * ### _getActivityWorker_
      *
      * Looks up the task's activity type to match it with a registered ActivityWorker. If
      * that worker is found it is returned.
      *
      * @param {Object} task The original workflow task that triggered the worker thread
      */
-    function getActivityWorker( task ) {
+    function getWorkerModuleid( task ) {
         var key = task.activityType.name + '/' + task.activityType.version;
         var workerModule = registry[key] || null;
         log.info( 'Obtaining worker from registry {}, key: {}',
@@ -212,7 +217,7 @@ function WorkerPoller( taskListName, workflow ) {
     }
 
     /**
-     * ### _startTask()_
+     * ### _startTask_
      *
      * Uses the information in the activity task to locate the appropriate worker module
      * and instantiate it with the task data. A heartbeat thread is also started which
@@ -221,7 +226,7 @@ function WorkerPoller( taskListName, workflow ) {
      * @param {Object} task The workflow task retrieved from the task list
      */
     function startTask( task ) {
-        var workerModule = getActivityWorker( task );
+        var workerModule = getWorkerModuleid( task );
         if ( workerModule ) {
             workerCount++;
             var worker = new WorkerPromise( workerModule, task );
@@ -248,16 +253,16 @@ function WorkerPoller( taskListName, workflow ) {
      *
      * @param {String} taskListName The name of the taskList from which this poller will
      * be retrieving activity tasks.
-     * @param {Workflow} workflow The workflow object associated with this poller.
+     * @param {SwfClient} swfClient The swfClient object associated with this poller.
      */
-    function init( taskListName, workflow ) {
-        if ( !workflow )
-            throw { status : 400, message : 'WorkerPoller requires property [workflow]'};
+    function init( taskListName, swfClient ) {
+        if ( !swfClient )
+            throw { status : 400, message : 'WorkerPoller requires property [swfClient]'};
         if ( !taskListName )
             throw { status : 400, message : 'WorkerPoller requires property [taskListName]'};
         setTimeout( poll, 0 );
     }
-    init( taskListName, workflow);
+    init( taskListName, swfClient);
 
     return {
         registerWorker: registerWorker,
