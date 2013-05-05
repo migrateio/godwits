@@ -11,6 +11,5 @@ beforeEach( function () {
 
             return Array.isArray( actual );
         }
-
     } );
 } );

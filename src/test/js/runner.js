@@ -53,7 +53,7 @@ function executeTests( testDirs ) {
         return fs.isFile( file ) && /.+Spec\.js$/g.test( file );
     };
 
-    if (isSpec( testDirs )) load( testDirs );
+    if (fs.isFile( testDirs )) load( testDirs );
     else fs.listTree( testDirs ).forEach( function(file) {
         var f = testDirs + '/' + file;
         if ( isSpec(f) ) load( f );
