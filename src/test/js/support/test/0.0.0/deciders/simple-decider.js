@@ -14,6 +14,12 @@ exports.logic = function (emit, actions) {
                 WorkflowExecutionStarted : function ( event ) {
                     log.info( 'uninitialized::WorkflowExecutionStarted' );
                     job = event.input;
+
+                    if (!job) throw {
+                        status: 400,
+                        message: 'No job was included in workflow task'
+                    };
+
                     // Do the initialization work here
                     this.transition( 'identification' );
                 }
@@ -23,7 +29,7 @@ exports.logic = function (emit, actions) {
                 _onEnter : function () {
                     log.info( 'identification::onEnter' );
                     emit(
-                        actions.scheduleActivityTask( 'load-user', {
+                        actions.scheduleActivityTask( 'load-user', '0.0.5', {
                             userId : job.userId
                         } )
                     );

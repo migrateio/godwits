@@ -6,16 +6,6 @@ var {SwfClient} = require( './swfClient' );
 var {WorkerPoller} = require( './workerPoller' );
 var {DeciderPoller} = require( './deciderPoller' );
 
-var {
-    ActivityType, Decision, PollForDecisionTaskRequest, PollForActivityTaskRequest,
-    RecordActivityTaskHeartbeatRequest,
-    RegisterActivityTypeRequest, RegisterWorkflowTypeRequest,
-    RespondActivityTaskCompletedRequest, RespondActivityTaskFailedRequest,
-    RespondActivityTaskCanceledRequest,
-    RespondDecisionTaskCompletedRequest, StartWorkflowExecutionRequest,
-    TaskList, TypeAlreadyExistsException, WorkflowType
-    } = Packages.com.amazonaws.services.simpleworkflow.model;
-
 
 /**
  * ## Workflow
@@ -94,6 +84,112 @@ exports.Workflow = function ( workflowOptions, accessKey, secretKey ) {
             log.info( 'Registering activity worker [{}]', workerModuleId );
             poller.registerWorker( workerModuleId );
         } );
+    }
+
+    /**
+     * Starts an execution of the workflow type in the specified domain using the
+     * provided workflowId and input data.
+     *
+     * Each execution runs independently and you can provide each with its own set of
+     * input data. When an execution is started, Amazon SWF schedules the initial
+     * decision task. In response, your decider begins generating decisions which
+     * initiate worker tasks. Execution continues until your decider makes a decision
+     * to close the execution.
+     *
+     * Valid options that may be submitted along with the execution workflow are:
+     *
+     * **workflowId** {String}
+     * > The user defined identifier associated with the workflow execution. You can
+     * > use this to associate a custom identifier with the workflow execution. You may
+     * > specify the same identifier if a workflow execution is logically a restart of
+     * > a previous execution. You cannot have two open workflow executions with the
+     * > same workflowId at the same time.
+     * > >
+     * > The specified string must not start or end with whitespace. It must not
+     * > contain a : (colon), / (slash), | (vertical bar), or any control characters
+     * > (\u0000-\u001f | \u007f - \u009f). Also, it must not contain the literal
+     * > string "arn".
+     *
+     * **workflowName** {String}
+     * > The name of the workflow type to start.
+     *
+     * **workflowVersion** {String}
+     * > The version of the workflow type to start.
+     *
+     * _childPolicy_ {String}
+     * > If set, specifies the policy to use for the child workflow executions of this
+     * > workflow execution if it is terminated, by calling the
+     * > TerminateWorkflowExecution action explicitly or due to an expired timeout. This
+     * > policy overrides the default child policy specified when registering the
+     * > workflow type using RegisterWorkflowType. The supported child policies are:
+     * > > TERMINATE: the child executions will be terminated.
+     * > > REQUEST_CANCEL: a request to cancel will be attempted for each child execution
+     * > > by recording a WorkflowExecutionCancelRequested event in its history. It is up
+     * > > to the decider to take appropriate actions when it receives an execution
+     * > > history with this event.
+     * > > ABANDON: no action will be taken. The child executions will continue to run.
+     * > Note: A child policy for this workflow execution must be specified either as a
+     * > default for the workflow type or through this parameter. If neither this
+     * > parameter is set nor a default child policy was specified at registration time
+     * > then a fault will be returned.
+     *
+     * _domain_ {String}
+     * > The name of the domain in which the workflow execution is created. Typically
+     * > this field is used to override the default domain specified when creating the
+     * > workflow.
+     *
+     * _tagList_ {Array[String]}
+     * > The list of tags to associate with the workflow execution. You can specify a
+     * > maximum of 5 tags. You can list workflow executions with a specific tag by
+     * > calling ListOpenWorkflowExecutions or ListClosedWorkflowExecutions and
+     * > specifying a TagFilter.
+     *
+     * _taskListName_ {String}
+     * > The task list to use for the decision tasks generated for this workflow
+     * > execution. This overrides the defaultTaskList specified when registering the
+     * > workflow type.
+     * >
+     * > **Note** A task list for this workflow execution must be specified either as a
+     * > default for the workflow type or through this parameter. If neither this
+     * > parameter is set nor a default task list was specified at registration time then
+     * > a fault will be returned.
+     *
+     * _executionStartToCloseTimeout_ {String}
+     * > The total duration for this workflow execution. This overrides the
+     * > defaultExecutionStartToCloseTimeout specified when registering the workflow
+     * > type. The duration is specified in seconds. The valid values are integers
+     * > greater than or equal to 0. Exceeding this limit will cause the workflow
+     * > execution to time out. Unlike some of the other timeout parameters in Amazon
+     * > SWF, you cannot specify a value of "NONE" for this timeout; there is a one-year
+     * > max limit on the time that a workflow execution can run.
+     * >
+     * > Note: An execution start-to-close timeout must be specified either through this
+     * > parameter or as a default when the workflow type is registered. If neither this
+     * > parameter nor a default execution start-to-close timeout is specified, a fault
+     * > is returned.
+     *
+     * _taskStartToCloseTimeout_ {String}
+     * > The total duration for this workflow execution. This overrides the
+     * > defaultExecutionStartToCloseTimeout specified when registering the workflow
+     * > type. The duration is specified in seconds. The valid values are integers
+     * > greater than or equal to 0. Exceeding this limit will cause the workflow
+     * > execution to time out. Unlike some of the other timeout parameters in Amazon
+     * > SWF, you cannot specify a value of "NONE" for this timeout; there is a one-year
+     * > max limit on the time that a workflow execution can run.
+     * >
+     * > Note: An execution start-to-close timeout must be specified either through this
+     * > parameter or as a default when the workflow type is registered. If neither this
+     * > parameter nor a default execution start-to-close timeout is specified, a fault
+     * > is returned.
+     *
+     * @param {Object} [options] A list of options that will affect the process execution
+     * @param {Object} input A JSON representation of the workflow execution state
+     * @return {String} A Run Id that is used to identify this workflow execution
+     */
+    function startWorkflow( options, input ) {
+        log.debug( 'Workflow::startWorkflow, arg count: {}, {}',
+            arguments.length, JSON.stringify( arguments ) );
+        return swfClient.startWorkflow.apply( this, Array.slice( arguments ) );
     }
 
     /**
@@ -187,16 +283,12 @@ exports.Workflow = function ( workflowOptions, accessKey, secretKey ) {
             message: 'Workflow instance requires an [secretKey] parameter as a string.'
         };
 
-        var swfClient = new SwfClient( workflowType, accessKey, secretKey );
+        swfClient = new SwfClient( workflowType, accessKey, secretKey );
         log.info( 'Preparing to register workflowtype: {}', JSON.stringify( workflowType ) );
-        try {
-            swfClient.registerWorkflowType( workflowType ).then(function() {
-                log.info( 'Call done' );
-            });
-            log.info( 'Completed the registration of workflowtype: {}', JSON.stringify( workflowType ) );
-        } catch ( e ) {
-            log.error( 'Error while registering workflow', e );
-        }
+
+        var result = swfClient.registerWorkflowType( workflowType ).wait(5000);
+        log.info( 'Completed the registration of workflowtype: {}, result: {}',
+            JSON.stringify( workflowType ), JSON.stringify( result ) );
     }
 
     init( workflowOptions, accessKey, secretKey );
@@ -219,6 +311,10 @@ exports.Workflow = function ( workflowOptions, accessKey, secretKey ) {
     return {
         registerDecider : registerDecider,
         registerWorkers : registerWorkers,
+        startWorkflow : startWorkflow,
+
+        // Gotta be a better way than exposing this for testing purposes only (spies)
+        swfClient: swfClient,
 
         start : start,
         stop : stop,

@@ -7,6 +7,19 @@ var {Deferred} = require( 'ringo/promise' );
 var {AmazonSimpleWorkflowClient} = Packages.com.amazonaws.services.simpleworkflow;
 var {BasicAWSCredentials} = Packages.com.amazonaws.auth;
 
+var ISO_FORMAT = new java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+
+var {
+    ActivityType, Decision, DescribeWorkflowExecutionRequest, PollForDecisionTaskRequest,
+    PollForActivityTaskRequest, RecordActivityTaskHeartbeatRequest,
+    RegisterActivityTypeRequest, RegisterWorkflowTypeRequest,
+    RespondActivityTaskCompletedRequest, RespondActivityTaskFailedRequest,
+    RespondActivityTaskCanceledRequest, RespondDecisionTaskCompletedRequest,
+    StartWorkflowExecutionRequest, TaskList, TypeAlreadyExistsException,
+    UnknownResourceException, WorkflowExecution, WorkflowType
+    } = Packages.com.amazonaws.services.simpleworkflow.model;
+
+
 /**
  * ## SwfClient
  *
@@ -14,7 +27,7 @@ var {BasicAWSCredentials} = Packages.com.amazonaws.auth;
  *
  * @constructor
  */
-function SwfClient( options, accessKey, secretKey ) {
+function SwfClient( workflowOptions, accessKey, secretKey ) {
 
     var swfClient;
 
@@ -82,8 +95,7 @@ function SwfClient( options, accessKey, secretKey ) {
      * @param {Object} options The options are listed above.
      */
     function registerWorkflowType( options ) {
-        log.debug( 'Workflow::registerWorkflowType[{}]', JSON.stringify( arguments ) );
-        log.debug( 'Workflow::registerWorkflowType, this[{}]', this.toSource() );
+        log.debug( 'SwfClient::registerWorkflowType[{}]', JSON.stringify( arguments ) );
 
         function requires( prop ) {
             if ( !options[prop] ) throw {
@@ -92,7 +104,6 @@ function SwfClient( options, accessKey, secretKey ) {
             }
         }
 
-        log.debug( 'HERE!!!');
         ['domain', 'name', 'version'].forEach( requires );
 
         var request = new RegisterWorkflowTypeRequest()
@@ -227,12 +238,12 @@ function SwfClient( options, accessKey, secretKey ) {
      * @return {String} A Run Id that is used to identify this workflow execution
      */
     function startWorkflow( options, input ) {
-        log.debug( 'Workflow::startWorkflow, {}', JSON.stringify( [options, input] ) );
+        log.debug( 'SwfClient::startWorkflow, {}', JSON.stringify( arguments ) );
 
         // Account for the optional `options` parameter.
-        var args = Array.prototype.slice.call( arguments, 0 );
-        if ( args.length > 1 ) options = args.shift();
-        input = args.shift();
+        var args = Array.slice( arguments );
+        options = args.length > 1 ? args.shift() : {};
+        input = args.shift() || {};
 
         // We will auto-generate a workflowId if one is not provided, and the Workflow
         // object's name and version number are used if not specified.
@@ -255,7 +266,7 @@ function SwfClient( options, accessKey, secretKey ) {
             options.setTaskList( taskList );
         }
 
-        if ( options.input ) request.setInput( JSON.stringify( options.input ) );
+        if ( input ) request.setInput( JSON.stringify( input ) );
 
         if ( options.childPolicy ) request.setChildPolicy( options.childPolicy );
         if ( options.tagList ) request.setTagList( options.tagList );
@@ -266,7 +277,10 @@ function SwfClient( options, accessKey, secretKey ) {
 
         log.info( 'StartWorkflowExecutionRequest: {}', request.toString() );
         var run = swfClient.startWorkflowExecution( request );
-        return run.getRunId();
+        return {
+            runId: run.runId,
+            workflowId: workflowId
+        }
     }
 
     /**
@@ -329,7 +343,7 @@ function SwfClient( options, accessKey, secretKey ) {
      * > this field is used to override the default domain specified when creating the
      * > workflow.
      *
-     * _taskList_
+     * _taskListName_
      * > If set, specifies the default task list to use for scheduling tasks of this
      * > activity type. This default task list is used if a task list is not provided
      * > when a task is scheduled through the ScheduleActivityTask Decision.
@@ -341,7 +355,7 @@ function SwfClient( options, accessKey, secretKey ) {
      * @param {Object} options Configuration options for the RegisterActivityType action
      */
     function registerActivityType( options ) {
-        log.debug( 'Workflow::registerActivityType', JSON.stringify( options ) );
+        log.debug( 'SwfClient::registerActivityType', JSON.stringify( options ) );
 
         // The Workflow object's name and version number are used if not specified.
         var version = options.version || workflowOptions.version;
@@ -359,8 +373,8 @@ function SwfClient( options, accessKey, secretKey ) {
 
         if ( options.description ) request.setDescription( options.description );
 
-        if ( options.taskList ) {
-            var taskList = new TaskList().withName( options.taskList );
+        if ( options.taskListName ) {
+            var taskList = new TaskList().withName( options.taskListName );
             request.setDefaultTaskList( taskList );
         }
         if ( options.defaultTaskHeartbeatTimeout )
@@ -410,7 +424,7 @@ function SwfClient( options, accessKey, secretKey ) {
      * @param {Object} options The options are listed above.
      */
     function pollForActivityTask( options ) {
-        log.debug( 'Workflow::pollForActivityTask', JSON.stringify( options ) );
+        log.debug( 'SwfClient::pollForActivityTask', JSON.stringify( options ) );
 
         if ( !options.taskListName ) throw {
             status : 400,
@@ -486,7 +500,7 @@ function SwfClient( options, accessKey, secretKey ) {
      * @return {Object} Returns a json representation of the task, or null if no task
      */
     function pollForDecisionTask( options, fullHistory ) {
-        log.debug( 'Workflow::pollForDecisionTask', JSON.stringify( options ) );
+        log.debug( 'SwfClient::pollForDecisionTask', JSON.stringify( options ) );
 
         if ( !options.taskListName ) throw {
             status : 400,
@@ -532,7 +546,7 @@ function SwfClient( options, accessKey, secretKey ) {
      * @param {Object} options The options are listed above.
      */
     function respondActivityTaskCompleted( options ) {
-        log.debug( 'Workflow::respondActivityTaskCompleted', JSON.stringify( options ) );
+        log.debug( 'SwfClient::respondActivityTaskCompleted', JSON.stringify( options ) );
 
         if ( !options.taskToken ) throw {
             status : 400,
@@ -568,7 +582,7 @@ function SwfClient( options, accessKey, secretKey ) {
      * @param {Object} options The options are listed above.
      */
     function respondActivityTaskFailed( options ) {
-        log.debug( 'Workflow::respondActivityTaskFailed', JSON.stringify( options ) );
+        log.debug( 'SwfClient::respondActivityTaskFailed', JSON.stringify( options ) );
 
         if ( !options.taskToken ) throw {
             status : 400,
@@ -580,7 +594,11 @@ function SwfClient( options, accessKey, secretKey ) {
         if ( options.details ) request.setDetails( options.details );
         if ( options.reason ) request.setReason( options.reason );
 
-        swfClient.respondActivityTaskFailed( request );
+        try {
+            swfClient.respondActivityTaskFailed( request );
+        } catch ( e if e.javaException instanceof UnknownResourceException ) {
+            log.debug( 'Perhaps the resource has already failed because of timeout.' );
+        }
     }
 
     /**
@@ -608,7 +626,7 @@ function SwfClient( options, accessKey, secretKey ) {
      * @param {Object} options The options are listed above.
      */
     function respondActivityTaskCanceled( options ) {
-        log.debug( 'Workflow::respondActivityTaskCanceled', JSON.stringify( options ) );
+        log.debug( 'SwfClient::respondActivityTaskCanceled', JSON.stringify( options ) );
 
         if ( !options.taskToken ) throw {
             status : 400,
@@ -723,7 +741,7 @@ function SwfClient( options, accessKey, secretKey ) {
      * @param {Object} options The options are listed above.
      */
     function respondDecisionTaskCompleted( options ) {
-        log.debug( 'Workflow::respondDecisionTaskCompleted', JSON.stringify( options ) );
+        log.debug( 'SwfClient::respondDecisionTaskCompleted', JSON.stringify( options ) );
 
         if ( !options.taskToken ) throw {
             status : 400,
@@ -775,7 +793,7 @@ function SwfClient( options, accessKey, secretKey ) {
      * @return {Boolean} True if the workflow is requesting the activity to be cancelled
      */
     function recordActivityTaskHeartbeat( options ) {
-        log.debug( 'Workflow::recordActivityTaskHeartbeat', JSON.stringify( options ) );
+        log.debug( 'SwfClient::recordActivityTaskHeartbeat', JSON.stringify( options ) );
 
         if ( !options.taskToken ) throw {
             status : 400,
@@ -787,8 +805,98 @@ function SwfClient( options, accessKey, secretKey ) {
 
         if ( options.details ) request.setDetails( options.details );
         var response = swfClient.recordActivityTaskHeartbeat( request );
-        return response.isCancelRequested().booleanValue();
+        return response.isCancelRequested();
     }
+
+    function describeWorkflowExecution( options ) {
+        log.debug( 'SwfClient::describeWorkflowExecution', JSON.stringify( options ) );
+
+        if ( !options.domain ) throw {
+            status : 400,
+            message : 'DescribeWorkflowExecutionRequest requires a [domain] property'
+        };
+
+        if ( !options.runId ) throw {
+            status : 400,
+            message : 'DescribeWorkflowExecutionRequest requires a [runId] property'
+        };
+
+        if ( !options.workflowId ) throw {
+            status : 400,
+            message : 'DescribeWorkflowExecutionRequest requires a [workflowId] property'
+        };
+
+        var execution = new WorkflowExecution()
+            .withWorkflowId( options.workflowId )
+            .withRunId( options.runId );
+
+        var request = new DescribeWorkflowExecutionRequest()
+            .withDomain( options.domain || workflowOptions.domain )
+            .withExecution( execution );
+
+        var response = swfClient.describeWorkflowExecution( request );
+        return convertExecutionToJson( response );
+    }
+
+
+    function convertExecutionToJson( detail ) {
+        var result = {};
+
+        // WorkflowExecutionDetail::WorkflowExecutionConfiguration
+        var config = detail.executionConfiguration;
+        result.executionConfiguration = {
+            childPolicy : config.childPolicy,
+            executionStartToCloseTimeout : config.executionStartToCloseTimeout,
+            taskList : {
+                name : config.taskList.name
+            },
+            taskStartToCloseTimeout : config.taskStartToCloseTimeout
+        };
+
+        // WorkflowExecutionDetail::WorkflowExecutionInfo
+        var info = detail.executionInfo;
+        result.executionInfo = {
+            execution: {
+                runId: (info.execution && info.execution.runId) || null,
+                workflowId: (info.execution && info.execution.workflowId) || null
+            },
+            workflowType: {
+                name: info.workflowType.name,
+                version: info.workflowType.version
+            },
+            startTimestamp: info.startTimestamp
+                ? new Date(info.startTimestamp).toISOString() : null,
+            closeTimestamp: info.closeTimestamp
+                ? new Date(info.closeTimestamp).toISOString() : null,
+            executionStatus: info.executionStatus,
+            closeStatus: info.closeStatus,
+            parent: info.parent ? {
+                runId: info.parent.runId,
+                workflowId: info.parent.workflowId
+            } : null,
+            tagList: [],
+            cancelRequested: info.isCancelRequested()
+        };
+        for (var i = info.tagList.iterator(); i.hasNext();) {
+            result.executionInfo.tagList.push( i.next() );
+        }
+
+        // WorkflowExecutionDetail::WorkflowExecutionOpenCounts
+        var open = detail.openCounts;
+        result.open = {
+            openActivityTasks: open.openActivityTasks,
+            openDecisionTasks: open.openDecisionTasks,
+            openTimers: open.openTimers,
+            openChildWorkflowExecutions: open.openChildWorkflowExecutions
+        };
+
+        result.latestActivityTaskTimestamp = detail.latestActivityTaskTimestamp
+            ? new Date(detail.latestActivityTaskTimestamp).toISOString() : null;
+        result.latestExecutionContext = detail.latestExecutionContext;
+
+        return result;
+    }
+
 
     /**
      * ### _convertDecisionFromJson()
@@ -805,14 +913,14 @@ function SwfClient( options, accessKey, secretKey ) {
             return parts.length == 0 ? next : loadClass( next, parts );
         }
 
-        log.debug( 'Decider::createDecision[{}]', JSON.stringify( decisionJson ) );
+//        log.debug( 'Decider::createDecision[{}]', JSON.stringify( decisionJson ) );
         if ( !decisionJson.type ) return null;
 
         var attrName = decisionJson.type + 'DecisionAttributes';
         var className = 'com.amazonaws.services.simpleworkflow.model.' + attrName;
         var classParts = className.split( '.' );
         var classDef = loadClass( Packages, classParts );
-        log.debug( 'Decider::createDecision, classDef[{}]', classDef );
+//        log.debug( 'Decider::createDecision, classDef[{}]', classDef );
         var clazz = new classDef();
         if ( !clazz ) return null;
 
@@ -863,6 +971,7 @@ function SwfClient( options, accessKey, secretKey ) {
      * @param {DecisionTask} task
      */
     function convertDeciderTaskToJson( task ) {
+        log.info( 'Converting decider task to json: {}', task.toString() );
         var result = {
             events : [],
             previousStartedEventId : task.getPreviousStartedEventId(),
@@ -893,22 +1002,25 @@ function SwfClient( options, accessKey, secretKey ) {
             var e = {
                 eventType : event.getEventType(),
                 eventId : event.getEventId(),
-                eventTimestamp : ISO_FORMAT.format( event.getEventTimestamp() )
+                eventTimestamp : new Date( event.getEventTimestamp() ).toISOString()
             };
 
             // The attributes for this event are retrieved by calling a getter
             // made from the event type name
-            var attrs = event['get' + e.eventType + 'EventAttributes']();
+            var attrName = e.eventType + 'EventAttributes';
+            var attrs = event['get' + attrName]();
+            e[attrName] = {};
+
             Object.keys( attrs ).forEach( function ( key ) {
                 // We only care about properties that don't start with 'with'...
                 if ( /^with/.test( key ) ) return;
                 // ... but have a 'withXXX' match
                 if ( !attrs['with' + key.charAt( 0 ).toUpperCase() + key.slice( 1 )] ) return;
-                log.info( 'DeciderPoller::processEvents, eventType: {}, key: {}', e.eventType, key );
+//                log.info( 'SwfClient::processEvents, eventType: {}, key: {}', e.eventType, key );
                 var value = attrs[key];
                 // If value is null, bail now
                 if ( value == null ) {
-                    log.warn( 'DeciderPoller::processEvents, eventType: {}, key: {}, value: null',
+                    log.warn( 'SwfClient::processEvents, eventType: {}, key: {}, value: null',
                         e.eventType, key );
                     return;
                 }
@@ -935,9 +1047,10 @@ function SwfClient( options, accessKey, secretKey ) {
                         workflowId : value.getWorkflowId()
                     }
                 }
-                e[key] = value;
+                e[attrName][key] = value;
                 JSON.stringify( e );
             } );
+
             result.events.push( e );
         } );
 
@@ -980,21 +1093,24 @@ function SwfClient( options, accessKey, secretKey ) {
 
     function threadIt( f, args ) {
         var deferred = new Deferred();
-        log.info( 'Made it to threadIt' );
-        setTimeout( function () {
-            log.info( 'here' );
-            log.info( 'Calling {} with args: {}', f.name, JSON.stringify( args ) );
-            var result = f.apply( this, args );
-            log.info( 'Got result from {}: {}', f.name, JSON.stringify( result ) );
-            deferred.resolve( result );
-        }, 10 );
-        log.info( 'Returning promise' );
+
+        new java.lang.Thread( new java.lang.Runnable({
+            run: function() {
+                try {
+                    var result = f.apply( this, args );
+                    log.info( 'SwfClient::{}, result: {}', f.name, JSON.stringify( result ) );
+                    deferred.resolve( result );
+                } catch ( e ) {
+                    deferred.resolve( {message : e.message || e.toString() }, true );
+                }
+            }
+        }) ).start();
+
         return deferred.promise;
     }
 
     return {
         registerWorkflowType : function () {
-            log.info( 'Made it to SwfClient' );
             return threadIt( registerWorkflowType, arguments );
         },
         startWorkflow : function () {
@@ -1023,6 +1139,9 @@ function SwfClient( options, accessKey, secretKey ) {
         },
         recordActivityTaskHeartbeat : function () {
             return threadIt( recordActivityTaskHeartbeat, arguments );
+        },
+        describeWorkflowExecution : function () {
+            return threadIt( describeWorkflowExecution, arguments );
         }
 
     }

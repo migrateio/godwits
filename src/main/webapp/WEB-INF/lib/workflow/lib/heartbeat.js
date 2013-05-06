@@ -1,6 +1,6 @@
 function onmessage ( e ) {
 
-    var workflow = e.data.workflow;
+    var swfClient = e.data.swfClient;
     var interval = e.data.interval || '120';
     var beatInterval = parseInt( interval ) * 1000;
 
@@ -9,7 +9,7 @@ function onmessage ( e ) {
     };
 
     function beat() {
-        workflow.recordActivityTaskHeartbeat( opts );
+        swfClient.recordActivityTaskHeartbeat( opts );
         setTimeout(beat, beatInterval)
     }
 

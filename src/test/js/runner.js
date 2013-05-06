@@ -112,6 +112,7 @@ function main( args ) {
 }
 
 if ( require.main === module ) {
+/*
     var {Workflow} = require( 'workflow/workflow' );
     var workflow = new Workflow( {
         domain : 'dev-migrate',
@@ -123,5 +124,6 @@ if ( require.main === module ) {
         defaultExecutionStartToCloseTimeout : '2592000', // 1 month
         defaultTaskStartToCloseTimeout : 'NONE'
     }, 'AKIAIIQOWQM6FFLQB2EQ', 'ItTa0xaI9sey2SEGGEN8yVcA5slN95+qmNrf1TMd' );
-//    main( system.args );
+*/
+    main( system.args );
 }

@@ -2,6 +2,7 @@
  * # Module workflow/workerPoller
  */
 var log = require( 'ringo/logging' ).getLogger( module.id );
+var {Worker, WorkerPromise} = require( 'ringo/worker' );
 
 /**
  * ## WorkerPoller
@@ -129,20 +130,57 @@ function WorkerPoller( taskListName, swfClient ) {
      * Will poll for activity tasks from the task list as long as polling is true until
      * shutting down is set to false.
      */
-    function poll() {
-        if ( polling ) {
-            var task = swfClient.pollForActivityTask( {
-                taskListName : taskListName
-            } ).wait(70000);
-            if ( task ) startTask( task );
-        }
-        if ( !shuttingDown ) setTimeout( poll, 1000 );
+    var poll = java.lang.Runnable( {
+        run : function () {
+            log.debug( 'WorkerPoller::poll, entry' );
+            while ( !shuttingDown ) {
+                while ( polling ) {
+                    log.debug( 'WorkerPoller::poll, is polling' );
+                    var task = swfClient
+                        .pollForActivityTask( { taskListName : taskListName } )
+                        .wait();
 
-        // Might be able to shutdown here if no tasks are pending
-        else if ( workerCount === 0 ) {
-            log.info( 'WorkerPoller [{}] is terminated', taskListName );
+                    log.info( 'WorkerPoller::poll, task: {}', JSON.stringify( task ) );
+                    if ( task && task.taskToken ) {
+                        (function() {
+                            const thisTask = task;
+                            setTimeout( function () {
+                                startTask( thisTask );
+                            }, 0 );
+                        })();
+                    }
+
+                    if ( shuttingDown ) {
+                        if ( workerCount === 0 )
+                            log.info( 'WorkerPoller [{}] is terminated', taskListName );
+                    }
+                }
+                java.lang.Thread.sleep( 1000 );
+            }
+        }
+    } );
+    /*
+    function poll() {
+        log.debug( 'WorkerPoller::poll, entry' );
+        if ( polling ) {
+            log.debug( 'WorkerPoller::poll, is polling' );
+            var task = swfClient
+                .pollForActivityTask( { taskListName : taskListName } )
+                .wait();
+
+            log.info( 'WorkerPoller::poll, task: {}', JSON.stringify( task ) );
+            if (task.taskToken) {
+                startTask( task );
+            }
+
+            if (shuttingDown && workerCount === 0 ) {
+                log.info( 'WorkerPoller [{}] is terminated', taskListName );
+            }
+
+            if (!shuttingDown) setTimeout( poll, 0 );
         }
     }
+*/
 
     /**
      * ### _workerSuccess_
@@ -155,6 +193,7 @@ function WorkerPoller( taskListName, swfClient ) {
      * @param {Object} data The result of the task's operation in JSON format
      */
     function workerSuccess( task, data ) {
+        log.debug( 'WorkerPoller::workerSuccess {}', JSON.stringify( arguments ) );
         swfClient.respondActivityTaskCompleted( {
             result : JSON.stringify( data ),
             taskToken : task.taskToken
@@ -182,29 +221,30 @@ function WorkerPoller( taskListName, swfClient ) {
      * @param {Object} data Optional data that can be included in an error response
      */
     function workerError( task, data ) {
-        if ( data.cancelled ) {
+        log.debug( 'WorkerPoller::workerError {}', JSON.stringify( arguments ) );
+        if ( data && data.cancelled ) {
             swfClient.respondActivityTaskCanceled( {
                 details : data.details,
                 taskToken : task.taskToken
             } ).wait(5000);
         } else {
             swfClient.respondActivityTaskFailed( {
-                details : data.details,
-                reason : data.reason,
+                details : (data && data.details) || 'Unknown',
+                reason : (data && data.reason) || undefined,
                 taskToken : task.taskToken
             } ).wait();
         }
     }
 
     /**
-     * ### _getActivityWorker_
+     * ### _getWorkerModuleId_
      *
      * Looks up the task's activity type to match it with a registered ActivityWorker. If
      * that worker is found it is returned.
      *
      * @param {Object} task The original workflow task that triggered the worker thread
      */
-    function getWorkerModuleid( task ) {
+    function getWorkerModuleId( task ) {
         var key = task.activityType.name + '/' + task.activityType.version;
         var workerModule = registry[key] || null;
         log.info( 'Obtaining worker from registry {}, key: {}',
@@ -226,20 +266,28 @@ function WorkerPoller( taskListName, swfClient ) {
      * @param {Object} task The workflow task retrieved from the task list
      */
     function startTask( task ) {
-        var workerModule = getWorkerModuleid( task );
+        log.info( 'WorkerPoller::startTask {}', JSON.stringify( arguments ) );
+        var workerModule = getWorkerModuleId( task );
         if ( workerModule ) {
             workerCount++;
+            log.info( 'WorkerPoller::startTask, creating worker {}', workerModule );
             var worker = new WorkerPromise( workerModule, task );
+/*
             var heartbeat = new Worker( 'workflow/heartbeat' );
-            heartbeat.postMessage( { taskToken : task.taskToken } );
+            heartbeat.postMessage( {
+                swfClient: swfClient,
+                interval: '5',
+                taskToken : task.taskToken
+            } );
+*/
             worker
-                .then( function () {
+                .then( function ( e ) {
                     workerSuccess( task, e.data );
-                }, function () {
+                }, function ( e ) {
                     workerError( task, e.data );
                 } )
                 .then( function () {
-                    heartbeat.terminate();
+//                    heartbeat.terminate();
                     workerCount--;
                     if ( shuttingDown && workerCount === 0 ) {
                         log.info( 'WorkerPoller [{}] is terminated', taskListName );
@@ -260,7 +308,10 @@ function WorkerPoller( taskListName, swfClient ) {
             throw { status : 400, message : 'WorkerPoller requires property [swfClient]'};
         if ( !taskListName )
             throw { status : 400, message : 'WorkerPoller requires property [taskListName]'};
-        setTimeout( poll, 0 );
+
+        var threadName = 'workerPoller-' + taskListName;
+        log.debug( 'WorkerPoller::init, starting worker poller thread: {}', threadName );
+        new java.lang.Thread( poll, threadName ).start();
     }
     init( taskListName, swfClient);
 

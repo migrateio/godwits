@@ -155,6 +155,7 @@ exports.Decider = function ( deciderModuleId, events ) {
          * @param {Object} [control]
          */
         scheduleActivityTask : function ( activityName, activityVersion, input, control ) {
+            log.info( 'Decider::scheduleActivityTask, {}', JSON.stringify( arguments ) );
             // Process the arguments to take care of optional parameters
             var args = Array.prototype.slice.call( arguments, 0 );
             activityName = args.shift();
@@ -167,8 +168,8 @@ exports.Decider = function ( deciderModuleId, events ) {
                 type : 'ScheduleActivityTask',
                 activityId : uuid(),
                 activityType : { name : activityName, version : activityVersion },
-                control : control,
-                input : input
+                control : JSON.stringify( control ),
+                input : JSON.stringify( input )
             };
         },
 
@@ -215,9 +216,9 @@ exports.Decider = function ( deciderModuleId, events ) {
      *
      * @param {Array} events List of events from SWF
      */
-    function replay( events ) {
+    function replay( events, deferred ) {
         var event, resolution;
-        log.info( 'Replaying {} event(s)', events.length );
+        log.info( 'Decider::replay, replaying {} event(s)', events.length );
 
         // Loop through all events in the workflow execution, except for the current one.
         // The fsm will 'emit' messages for each decision, but no one is listening to
@@ -235,11 +236,13 @@ exports.Decider = function ( deciderModuleId, events ) {
             // Create a listener and register it with the FSM
             machina.on( 'decision', resolution = function ( decisions ) {
                 log.info( 'FSM Decisions: {}', JSON.stringify( arguments ) );
-                // todo: _Pretty sure the caller is never going to need the fsm. may remove
+                // todo: Pretty sure the caller is never going to need the fsm. may remove
                 // and replace with just the fsm state_
                 deferred.resolve( {fsm : fsm, decisions : decisions} );
             } );
             try {
+                log.info( 'Decider::replay, handling primary event: {}',
+                    JSON.stringify( event ) );
                 fsm.handle( event.eventType, event );
             } finally {
                 // Be sure to remove our listener.
@@ -260,6 +263,7 @@ exports.Decider = function ( deciderModuleId, events ) {
      * @param {String} deciderModuleId The module id for the decider to use.
      */
     function init( deciderModuleId ) {
+        log.debug( 'Decider::init, {}', JSON.stringify( arguments ) );
         var decider = require( deciderModuleId );
 
         if ( !decider ) throw {
@@ -271,11 +275,13 @@ exports.Decider = function ( deciderModuleId, events ) {
             message : 'Module [' + deciderModuleId + '] must export the function [logic]'
         };
 
+        log.info( 'Decider::init, initializing FSM' );
         return new machina.Fsm( decider.logic( emit, decisionActions ) );
     }
 
     // Instantiate the FSM based on the contents of the decider module.
     var fsm = init( deciderModuleId );
+    log.info( 'Decider::init, FSM initialized' );
 
     // The Decision class is a Promise, so callers can invoke the then() function to
     // asynchronously obtain the resulting decisions.
@@ -286,11 +292,17 @@ exports.Decider = function ( deciderModuleId, events ) {
         return new Event( event );
     } );
 
-    setTimeout( function () {
-        replay( [].concat( events ) );
-    }, 0 );
+    // Pop off events that pertain to decision tasks
+    while (events.length > 0 && /DecisionTaskStarted|DecisionTaskScheduled/
+        .test(events[events.length-1].eventType)) events.pop();
 
-    log.info( 'Deferred: {}, Promise: {}', deferred, deferred.promise );
+    log.debug( 'Decider::init, kicking off timer to replay events' );
+    new java.lang.Thread( new java.lang.Runnable( {
+        run : function () {
+            replay( [].concat( events ), deferred );
+        }
+    } ) ).start();
+
     return deferred.promise;
 };
 
@@ -318,7 +330,8 @@ function Event( event ) {
         get : function () {
             if ( input ) return input;
             if ( /WorkflowExecutionStarted/.test( event.eventType ) ) {
-                input = event.workflowExecutionStartedEventAttributes.input;
+                log.info( 'Event::input, event: {}', JSON.stringify( event ) );
+                input = event.WorkflowExecutionStartedEventAttributes.input;
             }
             return input;
         }

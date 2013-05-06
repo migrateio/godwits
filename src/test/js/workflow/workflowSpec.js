@@ -1,3 +1,4 @@
+var log = require( 'ringo/logging' ).getLogger( module.id );
 var {Workflow} = require( 'workflow/workflow' );
 var {WorkerPoller} = require( 'workflow/workerPoller' );
 
@@ -40,7 +41,7 @@ xdescribe( 'Workflow', function () {
 
         it( 'will create a proper workflow object', function () {
             expect( workflow ).toBeDefined();
-            expect( workflow.start ).toEqual(jasmine.any(Function));
+            expect( workflow.start ).toEqual( jasmine.any( Function ) );
         } );
 
         it( 'should allow deciders to be registered', function () {
@@ -54,7 +55,7 @@ xdescribe( 'Workflow', function () {
 
         beforeEach( function () {
             workflow = new Workflow( workflowType, accessKey, secretKey );
-            spyOn( workflow, 'registerActivityType' );
+            spyOn( workflow.swfClient, 'registerActivityType' );
         } );
 
         afterEach( function () {
@@ -66,7 +67,7 @@ xdescribe( 'Workflow', function () {
             var activity = require( activities.loadUser );
             expect( activity ).toBeDefined();
             expect( activity.ActivityType ).toBeDefined();
-            expect( workflow.registerActivityType )
+            expect( workflow.swfClient.registerActivityType )
                 .toHaveBeenCalledWith( activity.ActivityType );
         } );
 
@@ -76,59 +77,80 @@ xdescribe( 'Workflow', function () {
                 activities.capturePayment
             ];
             workflow.registerWorkers( workerTaskList, workers );
-            workers.forEach(function(worker) {
+            workers.forEach( function ( worker ) {
                 var activity = require( worker );
                 expect( activity ).toBeDefined();
                 expect( activity.ActivityType ).toBeDefined();
-                expect( workflow.registerActivityType )
+                expect( workflow.swfClient.registerActivityType )
                     .toHaveBeenCalledWith( activity.ActivityType );
-            });
+            } );
         } );
     } )
 } );
 
 
-describe('Workflow', function() {
+describe( 'Workflow', function () {
 
-    beforeEach(function() {
+    beforeEach( function () {
         workflow = new Workflow( workflowType, accessKey, secretKey );
-        spyOn( workflow, 'registerActivityType' ).andCallThrough();
+        expect( workflow ).toBeDefined();
+        spyOn( workflow.swfClient, 'registerActivityType' ).andCallThrough();
         var workers = [
             activities.loadUser, activities.authPayment,
             activities.doWork, activities.capturePayment
         ];
         workflow.registerWorkers( workerTaskList, workers );
         workflow.registerDecider( deciderTaskList, deciderModuleId );
+        expect( workflow.swfClient.registerActivityType.calls.length ).toEqual( 4 );
         workflow.start();
-    });
+    } );
 
-    afterEach(function() {
+    afterEach( function () {
         workflow.shutdown();
-    });
+    } );
 
-    it('will simulate an actual workflow', function() {
-        workflow.startWorkflow(job);
-        expect( workflow.registerActivityType.calls.length ).toEqual( 4 );
-    });
-});
+    it( 'will simulate an actual workflow', function (done) {
+        var result = workflow.startWorkflow( job ).wait( 10000 );
+        expect( result.runId ).toEqual( jasmine.any( String ) );
+        expect( result.workflowId ).toEqual( jasmine.any( String ) );
+
+        function checkForDone() {
+            log.info( 'Retrieving executions status' );
+            var execution = workflow.swfClient.describeWorkflowExecution( {
+                domain : workflowType.domain,
+                workflowId : result.workflowId,
+                runId : result.runId
+            } ).wait( 10000 );
+            log.info( 'Execution Status: {}', JSON.stringify( execution, null, 4 ) );
+            if (execution && execution.executionInfo.executionStatus === 'CLOSED') {
+                done();
+            }
+            setTimeout( checkForDone, 10000 );
+        }
+
+        log.info( 'Starting to check for done' );
+        setTimeout(checkForDone, 0);
+
+    }, 100000 );
+} );
 
 var accessKey = 'AKIAIIQOWQM6FFLQB2EQ';
 var secretKey = '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';
-var workerTaskList = 'test/0.0.0/tasklist/worker';
-var deciderTaskList = 'test/0.0.0/tasklist/decider';
+var workerTaskList = 'test-tasklist-worker';
+var deciderTaskList = 'test-tasklist-decider';
 var deciderModuleId = 'test/0.0.0/deciders/simple-decider';
 var activities = {
-    loadUser: 'test/0.0.0/workers/load-user',
-    authPayment: 'test/0.0.0/workers/auth-payment',
-    doWork: 'test/0.0.0/workers/do-work',
-    capturePayment: 'test/0.0.0/workers/capture-payment'
+    loadUser : 'test/0.0.0/workers/load-user',
+    authPayment : 'test/0.0.0/workers/auth-payment',
+    doWork : 'test/0.0.0/workers/do-work',
+    capturePayment : 'test/0.0.0/workers/capture-payment'
 };
 var workflowType = {
     domain : 'dev-migrate',
     name : 'io.migrate.transfers',
-    version : '0.0.0',
+    version : '0.0.3',
     defaultChildPolicy : 'TERMINATE',
-    defaultTaskListName : 'transfer-decisions',
+    defaultTaskListName : deciderTaskList,
     description : 'The primary workflow used for a transfer Run.',
     defaultExecutionStartToCloseTimeout : '2592000', // 1 month
     defaultTaskStartToCloseTimeout : 'NONE'

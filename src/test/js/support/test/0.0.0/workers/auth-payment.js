@@ -18,9 +18,10 @@ function onmessage(e) {
 
 exports.ActivityType = {
     name: 'auth-payment',
-    version: '0.0.0',
+    version: '0.0.5',
     defaultTaskHeartbeatTimeout: '15',
     defaultTaskScheduleToCloseTimeout: 'NONE',
     defaultTaskScheduleToStartTimeout: 'NONE',
-    defaultTaskStartToCloseTimeout: '10'
+    defaultTaskStartToCloseTimeout: '10',
+    taskListName: 'test-tasklist-worker'
 };
