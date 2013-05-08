@@ -21,7 +21,9 @@ exports.Users = function ( name, map, pk, schema ) {
 
     var js = new JsonSchema();
     var validateSchema = function( obj ) {
-        return js.validate( obj, schema )
+        log.info( 'Validating\n{}\nagainst schema\n{}',
+            JSON.stringify( obj, null, 4 ), JSON.stringify( schema ) );
+        return js.validate( obj, schema );
     };
     var generateDefaults = function ( obj ) {
         return js.generate( obj, schema );
@@ -55,6 +57,7 @@ exports.Users = function ( name, map, pk, schema ) {
         // Persist the object if validation succeeds
         map.put( pk(newObj), newObj );
 
+        log.info( 'successful validation' );
         return newObj
     }
 

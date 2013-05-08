@@ -128,20 +128,20 @@
          *
          * @param spec
          */
-        reportSpecStarting: function (spec) {
+        reportSpecStarting : function ( spec ) {
             this.executed_specs++;
-            if (this.lastSuite !== spec.suite.description) {
-                if (this.verbosity > 3) {
+            if ( this.lastSuite !== spec.suite.description ) {
+                if ( this.verbosity > 3 ) {
                     this.log(
                         this.indent(
-                            this.inColor(spec.suite.description, this.colors.suite)));
-                    this.level++;
-                    this.log(
-                        this.indent(
-                            this.inColor(spec.description, this.colors.spec)));
+                            this.inColor( spec.suite.description, this.colors.suite ) ) );
                     this.level++;
                 }
-
+            }
+            if ( this.verbosity > 3 ) {
+                this.log(
+                    this.indent(
+                        this.inColor( spec.description, this.colors.spec ) ) );
             }
         },
 

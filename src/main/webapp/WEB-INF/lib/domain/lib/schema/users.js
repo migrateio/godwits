@@ -14,7 +14,7 @@ exports.schema = {
                     format: 'email'
                 }
             },
-            required: ['status'],
+            required: ['status', 'address'],
             default: {},
             additionalProperties: false
         },

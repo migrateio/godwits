@@ -43,7 +43,7 @@ describe( 'User Domain', function () {
     it( 'should fail if no email is included', function () {
         expect(function () {
             users.create( {} );
-        } ).toThrow( 'IllegalArgumentException, map.put requires the first parameter to be a string or an object.' );
+        } ).toThrowMatch( 'Missing required property: address' );
     } );
 
     it( 'should default the email status', function () {
