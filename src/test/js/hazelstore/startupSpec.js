@@ -4,35 +4,32 @@ var uuid = require( 'hazelstore/utils' );
 
 var {Hazelcast} = Packages.com.hazelcast.core;
 
-xdescribe( 'Hazelstore startup', function () {
+describe( 'Hazelstore startup', function () {
 
 
     beforeEach( function () {
         log.info( 'beforeEach 1' );
+        store.shutdown();
         expect( Hazelcast.allHazelcastInstances.size() ).toEqual( 0 );
     } );
 
-    xit( 'should initialize with no options', function () {
+    it( 'should initialize with no options', function () {
         store.init();
         expect( Hazelcast.allHazelcastInstances.size() ).toEqual( 1 );
     } );
 
 
-    xit( 'should initialize with options', function () {
+    it( 'should initialize with options', function () {
         store.init( 'hazelcast-dynamo.xml', {
             name : uuid.generateId()
         } );
         expect( Hazelcast.allHazelcastInstances.size() ).toEqual( 1 );
     } );
 
-    afterEach( function ( done ) {
+    afterEach( function () {
         log.info( 'afterEach 1' );
-        try {
-            Hazelcast.shutdownAll();
-            expect( Hazelcast.allHazelcastInstances.size() ).toEqual( 0 );
-        } catch ( e ) {
-            log.error( 'ERROR', e );
-        }
+        store.shutdown();
+        expect( Hazelcast.allHazelcastInstances.size() ).toEqual( 0 );
     } );
 } );
 
@@ -49,11 +46,7 @@ describe( 'Hazelcast map operations with dynamo ', function () {
             }
         );
         map = store.getMap( 'dev-users' );
-    } );
-
-    xit( 'should allow us to create a map', function (  ) {
-        var result = map.get( '123' );
-        expect( result ).toBeNull();
+        expect(map ).toBeDefined();
     } );
 
     it( 'should allow us to store and retrieve', function (  ) {

@@ -38,14 +38,13 @@ exports.init = function () {
     var configFileName, options;
     var args = Array.slice( arguments );
     if ( typeof args[0] === 'string' ) configFileName = args.shift();
-    if ( typeof args[0] === 'object' ) options = args.shift();
+    options = typeof args[0] === 'object' ? args.shift() : {};
+    if ( !configFileName ) configFileName = options.config;
+
+    log.debug( 'init::hazelcast, config file: {}, options: {}',
+        configFileName, JSON.stringify( options ) );
 
     var config;
-
-    if (!configFileName) configFileName = options.config;
-    log.debug( 'init::hazelcast, config file: {}, options: {}',
-        configFileName, JSON.stringify( options ));
-
     if ( configFileName ) {
         var configurationUrl = java.lang.Thread.currentThread().contextClassLoader
             .getResource( configFileName );
@@ -63,7 +62,7 @@ exports.init = function () {
         config = new XmlConfigBuilder().build();
     }
 
-    if (options.name) config.groupConfig.setName( options.name );
+    if ( options.name ) config.groupConfig.setName( options.name );
 
     // Iterate over map configs and setup those map stores that need it.
     config.mapConfigs.entrySet().toArray().forEach( initializeMapStores );
