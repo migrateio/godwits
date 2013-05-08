@@ -15,13 +15,17 @@ var maps = module.singleton( "maps", function () {
 } );
 */
 
+var hazelcast;
 var maps = {};
-
 var sets = {};
 var entryListeners = [];
 
-exports.shutdown = function() {
-    Hazelcast.shutdownAll();
+exports.shutdown = function () {
+    log.debug( 'shutdown::hazelcast instance: {}', hazelcast);
+    if ( hazelcast )
+        hazelcast.lifecycleService.shutdown();
+//    hazelcast.shutdownAll();
+    hazelcast = null;
 };
 
 /**
@@ -39,6 +43,8 @@ exports.init = function () {
     var config;
 
     if (!configFileName) configFileName = options.config;
+    log.debug( 'init::hazelcast, config file: {}, options: {}',
+        configFileName, JSON.stringify( options ));
 
     if ( configFileName ) {
         var configurationUrl = java.lang.Thread.currentThread().contextClassLoader
@@ -62,7 +68,7 @@ exports.init = function () {
     // Iterate over map configs and setup those map stores that need it.
     config.mapConfigs.entrySet().toArray().forEach( initializeMapStores );
 
-    Hazelcast.init( config );
+    hazelcast = Hazelcast.newHazelcastInstance( config );
 };
 
 /**
@@ -92,7 +98,7 @@ exports.getMap = function ( mapName ) {
     var result = maps[mapName];
     if ( !result ) {
         log.debug( 'getMap::cache miss, mapName: {}', mapName );
-        result = maps[mapName] = new Map( mapName );
+        result = maps[mapName] = new Map( hazelcast, mapName );
         applyListeners( result );
     }
     return result;
@@ -103,7 +109,7 @@ exports.getSet = function ( name ) {
     var result = sets[name];
     if ( !result ) {
         log.debug( 'getSet::cache miss: ' + name );
-        result = sets[name] = new Set( name );
+        result = sets[name] = new Set( hazelcast, name );
     }
     return result;
 };
@@ -114,7 +120,7 @@ exports.lock = function ( map, func, delay ) {
 
     var result = null;
     var hzMap = map.hzObject;
-    var hzLock = Hazelcast.getLock( hzMap );
+    var hzLock = hazelcast.getLock( hzMap );
 
     if ( hzLock.tryLock( delay, TimeUnit.MILLISECONDS ) ) {
         try {
@@ -129,7 +135,7 @@ exports.lock = function ( map, func, delay ) {
 
 // Not tested
 exports.inTransaction = function ( func ) {
-    var txn = Hazelcast.getTransaction();
+    var txn = hazelcast.getTransaction();
     txn.begin();
     try {
         func.call( this );
@@ -208,4 +214,4 @@ function applyListeners( maps, listeners ) {
 exports.clearListeners = function () {
     entryListeners = [];
     for each ( var map in maps ) map.clearEntryListeners();
-}
+};

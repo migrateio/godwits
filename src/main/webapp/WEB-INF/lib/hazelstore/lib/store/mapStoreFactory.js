@@ -52,7 +52,7 @@ exports.DelegatingMapStoreFactory = function ( options ) {
      * or MapStore
      */
     function newMapStore(mapName, props) {
-        mapParts = mapName.split( ':' );
+        var mapParts = mapName.split( ':' );
         if (mapParts.length > 0) mapName = mapParts[1];
         log.debug( 'DelegatingMapStoreFactory::newMapStore', mapName );
         var options = convertPropsToMap( props );

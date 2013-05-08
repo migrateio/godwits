@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<configuration scan="true" scanPeriod="5 seconds">
+<configuration debug="false" scan="true" scanPeriod="5 seconds">
     <appender name="stdout" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
             <pattern>%date{HH:mm:ss:SSS} %5p [%8.8t] %30.30logger{30} %5.5line - %m%n</pattern>
@@ -8,8 +8,9 @@
     </appender>
 
     <logger name="org.apache.http" level="WARN"/>
+    <logger name="ch.qos.logback" level="WARN"/>
 
-    <root level="WARN">
+    <root level="DEBUG">
         <appender-ref ref="stdout"/>
     </root>
 </configuration>

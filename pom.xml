@@ -307,14 +307,17 @@
                 <directory>${basedir}/src/main/resources</directory>
             </resource>
             <resource>
-                <filtering>true</filtering>
-                <directory>${basedir}/src/test/resources</directory>
-            </resource>
-            <resource>
                 <filtering>false</filtering>
                 <directory>${basedir}/misc/sigar/lib</directory>
             </resource>
         </resources>
+
+        <testResources>
+            <testResource>
+                <filtering>true</filtering>
+                <directory>${basedir}/src/test/resources</directory>
+            </testResource>
+        </testResources>
     </build>
 
     <profiles>

@@ -4,7 +4,7 @@
 var log = require('ringo/logging').getLogger(module.id);
 var {generateId} = require('./../utils');
 
-var hazelcast = Packages.com.hazelcast.core.Hazelcast;
+//var hazelcast = Packages.com.hazelcast.core.Hazelcast;
 
 exports.Map = Map;
 
@@ -16,7 +16,7 @@ var executor = module.singleton(module.id, function() {
     return new Packages.com.zocia.platform.AsyncExecutorService(MAX_THREADS);
 });
 
-function Map(mapName) {
+function Map(hazelcast, mapName) {
 
     // Constants -------------------------------------------------------------------
 

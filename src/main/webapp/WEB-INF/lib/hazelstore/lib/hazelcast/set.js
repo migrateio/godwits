@@ -6,11 +6,9 @@ var {format} = java.lang.String;
 
 var {generateId} = require('./../utils');
 
-var hazelcast = Packages.com.hazelcast.core.Hazelcast;
-
 exports.Set = Set;
 
-function Set(name) {
+function Set(hazelcast, name) {
 
 	// Instances -------------------------------------------------------------------
 
@@ -158,7 +156,7 @@ function Set(name) {
 
 
 	var toString = function() {
-		return 'Hazelcast Map [' + name + ']';
+		return 'Hazelcast Set [' + name + ']';
 	};
 
 	// Constructors ----------------------------------------------------------------
