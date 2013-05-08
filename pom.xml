@@ -44,6 +44,8 @@
         <aws.access_key>${migrate.aws.access_key}</aws.access_key>
         <aws.secret_key>${migrate.aws.secret_key}</aws.secret_key>
 
+        <tv4-version>1.0.1</tv4-version>
+
         <watcher></watcher>
         <test.verbosity>4</test.verbosity>
         <test.testdir>${basedir}/src/test/js</test.testdir>
@@ -80,6 +82,19 @@
             <artifactId>spring-ext</artifactId>
             <version>${springext-version}</version>
         </dependency>
+
+        <dependency>
+            <groupId>com.zocia.platform</groupId>
+            <artifactId>store-js</artifactId>
+            <version>${store-version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-log4j12</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
 
         <!-- Jetty's HTTP Client -->
 
@@ -143,7 +158,7 @@
         <dependency>
             <groupId>org.pykl</groupId>
             <artifactId>tv4</artifactId>
-            <version>1.0.1</version>
+            <version>${tv4-version}</version>
         </dependency>
 
         <dependency>
@@ -290,6 +305,10 @@
             <resource>
                 <filtering>true</filtering>
                 <directory>${basedir}/src/main/resources</directory>
+            </resource>
+            <resource>
+                <filtering>true</filtering>
+                <directory>${basedir}/src/test/resources</directory>
             </resource>
             <resource>
                 <filtering>false</filtering>
