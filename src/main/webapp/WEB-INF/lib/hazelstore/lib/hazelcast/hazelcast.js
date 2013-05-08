@@ -35,6 +35,11 @@ exports.shutdown = function () {
  * @param {Object} options
  */
 exports.init = function () {
+    if (hazelcast) {
+        log.info( 'init::bazelcast instance is already running' );
+        return;
+    }
+
     var configFileName, options;
     var args = Array.slice( arguments );
     if ( typeof args[0] === 'string' ) configFileName = args.shift();

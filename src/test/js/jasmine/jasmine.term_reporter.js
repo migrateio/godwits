@@ -311,8 +311,11 @@
             res += string;
 
             return res;
-        }
+        },
 
+        hasErrors: function() {
+            return this.executed_specs - this.passed_specs > 0;
+        }
     };
 
     // export public

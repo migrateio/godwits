@@ -10,7 +10,7 @@ require.paths.push( module.resolve( '../../main/webapp/WEB-INF/api' ) );
 require.paths.push( module.resolve( '../../main/webapp/WEB-INF/lib' ) );
 require.paths.push( module.resolve( './support' ) );
 
-var baseDir = fs.directory(module.path);
+var baseDir = fs.directory( module.path );
 
 load( baseDir + '/jasmine/jasmine-1.3.1.js' );
 load( baseDir + '/jasmine/async-callback.js' );
@@ -19,11 +19,11 @@ load( baseDir + '/jasmine/async-callback.js' );
 load( baseDir + '/jasmine/jasmine.junit_reporter.js' );
 
 // Load helpers
-function loadHelpers(dir) {
-    return fs.listTree( dir ).forEach(function (name) {
+function loadHelpers( dir ) {
+    return fs.listTree( dir ).forEach( function ( name ) {
         var file = dir + '/' + name;
-        if (fs.isFile(file) && fs.extension( file ) === '.js') load( file );
-    });
+        if ( fs.isFile( file ) && fs.extension( file ) === '.js' ) load( file );
+    } );
 }
 
 function initializeJasmine( watcher, verbosity, junitDir ) {
@@ -42,21 +42,25 @@ function initializeJasmine( watcher, verbosity, junitDir ) {
 
     var oldCallback = jasmineEnv.currentRunner().finishCallback;
     jasmineEnv.currentRunner().finishCallback = function () {
+        log.info( 'Finished' );
         oldCallback.apply( this, arguments );
-        if ( !watcher && reporter.hasErrors() ) require( 'system' ).exit( -1 );
+        if ( !watcher ) {
+            var result = reporter.hasErrors() ? -1 : 0;
+            require( 'system' ).exit( result );
+        }
     };
 }
 
 function executeTests( testDirs ) {
 //    log.debug( '\n\nRunning tests at {}', new Date().toISOString() );
-    var isSpec = function(file) {
+    var isSpec = function ( file ) {
         return fs.isFile( file ) && /.+Spec\.js$/g.test( file );
     };
 
-    if (fs.isFile( testDirs )) load( testDirs );
-    else fs.listTree( testDirs ).forEach( function(file) {
+    if ( fs.isFile( testDirs ) ) load( testDirs );
+    else fs.listTree( testDirs ).forEach( function ( file ) {
         var f = testDirs + '/' + file;
-        if ( isSpec(f) ) load( f );
+        if ( isSpec( f ) ) load( f );
     } );
 
     jasmineEnv.execute();
@@ -74,15 +78,17 @@ function main( args ) {
     parser.addOption( 't', 'testDirs', 'testDirs', 'Path to test files (can use comma to separate).' );
 
     args.shift();
-    args = args.filter(function(arg) { return !!arg });
+    args = args.filter( function ( arg ) {
+        return !!arg
+    } );
 
 //    log.info( 'Arguments: {}', JSON.stringify( args, null, 4 ) );
     var options = parser.parse( args );
     log.info( 'Options: {}', JSON.stringify( options, null, 4 ) );
 
-    if (options.help) {
+    if ( options.help ) {
         print( parser.help() );
-        system.exit(0);
+        system.exit( 0 );
     }
 
     var sourceDirs = options.sourceDirs && options.sourceDirs.trim().split( /[,]/ );
@@ -90,7 +96,7 @@ function main( args ) {
     var junitDir = options.junitDir && options.junitDir.trim();
     var helperDir = options.helperDir && options.helperDir.trim();
 
-    if (helperDir) loadHelpers( helperDir );
+    if ( helperDir ) loadHelpers( helperDir );
     initializeJasmine( options.watch, options.verbosity, junitDir );
 
     if ( options.watch ) {
