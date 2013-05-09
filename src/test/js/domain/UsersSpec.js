@@ -4,7 +4,7 @@ var store = require( 'hazelstore' );
 var domain = require( 'domain' );
 
 beforeEach( function () {
-    store.init( 'hazelcast-dynamo.xml' );
+    store.init( 'hazelcast-simpledb.xml' );
 } );
 
 describe( 'User Domain', function () {
