@@ -4,13 +4,7 @@ var store = require( 'hazelstore' );
 var domain = require( 'domain' );
 
 beforeEach( function () {
-    log.info( 'Before each (outer)' );
     store.init( 'hazelcast-dynamo.xml' );
-} );
-
-afterEach( function () {
-    log.info( 'After each (outer)' );
-//    store.shutdown();
 } );
 
 describe( 'User Domain', function () {
@@ -18,16 +12,10 @@ describe( 'User Domain', function () {
     var users, map;
 
     beforeEach( function () {
-        log.info( 'Before each (inner)' );
-
-        var {schema} = require( 'domain/schema/users.js' );
-        map = store.getMap( 'dev-users' );
-        var pk = function(user) {
-            return user.email.address;
-        };
-
-        users = new domain.Users( 'Users', map, pk, schema );
+        users = new domain.Users();
         expect( users ).toBeDefined();
+
+        map = users.backingMap();
     } );
 
     afterEach( function () {
