@@ -2,6 +2,7 @@ var log = require( 'ringo/logging' ).getLogger( module.id );
 
 var {MapStoreFactory} = Packages.com.hazelcast.core;
 var {DynamoDBStore} = require( './dynamo' );
+var {SimpleDBStore} = require( './simpledb' );
 var {convertPropsToMap} = require( '../utils' );
 
 exports.DelegatingMapStoreFactory = function ( options ) {
@@ -33,9 +34,12 @@ exports.DelegatingMapStoreFactory = function ( options ) {
                 case 'dynamo':
                     return new DynamoDBStore(mapName, options);
                     break;
+                case 'simpledb':
+                    return new SimpleDBStore(mapName, options);
+                    break;
                 default:
-                    throw { status : 400, message : 'Unknown storeEngine [' + storeEngine
-                        + '] specified in hazelcast config'};
+                    throw { status : 400, message : 'Unknown storeEngine ['
+                        + storeEngine + '] specified in hazelcast config'};
                     break;
             }
         }

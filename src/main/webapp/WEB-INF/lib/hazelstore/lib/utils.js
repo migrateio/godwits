@@ -36,7 +36,7 @@ exports.jsonToProps = function ( json, delim ) {
 
 //            // Take care of empty arrays
             if ( isArray && keys.length === 0 )
-                result[getKey('', prefix, isArray)] = '';
+                result[getKey( '', prefix, isArray )] = '';
 
             keys.forEach( function ( key ) {
                 var value = js[key];
@@ -54,13 +54,13 @@ exports.jsonToProps = function ( json, delim ) {
                     case 'object':
                         prefix.push( getKey( key, [], isArray ) );
                         toProps( result, prefix, value );
-                        if (isArray) prefix.pop();
+                        if ( isArray ) prefix.pop();
                         break;
                 }
 //                log.error('Result: {}, type: {}, prefix: {}, array: {}',
 //                    JSON.stringify( result ), type, JSON.stringify( prefix ), isArray);
             } );
-            if (isArray) prefix.pop();
+            if ( isArray ) prefix.pop();
         }
         return result;
     };
@@ -70,27 +70,58 @@ exports.jsonToProps = function ( json, delim ) {
 };
 
 exports.propsToJson = function ( props, delim ) {
-    var result = {};
-    var isArray = /\[([0..9]*)\]/;
+    var isArray, next;
+    var regex = /\[([0-9]*)\]/;
+    var iso8601 = /\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.*\d*Z/;
     if ( !delim ) delim = '.';
 
-    function addProp(result, keys, value, isArray) {
-        var key = keys.shift();
-        if (keys.length === 0) result[key] = value;
-        else {
-            var match = key.match( regex );
-            if (match) {
-                result[match[0]] = value;
-            } else {
-                result[key] = {};
-            }
-            addProp( result, keys, value );
+    function addProp( node, keys, value, start ) {
+        // First pass through result is null, and we are just trying to figure out
+        // whether we have an object or array as the root element.
+        if ( !start ) {
+            // Check to see if we have an array coming up
+            isArray = regex.exec( keys[0] );
+            start = isArray ? [] : {};
+            addProp( start, keys, value, start );
+            return start;
         }
+
+        // Get the first key part from the split, and determine if it is an array element
+        var key = keys.shift();
+        isArray = regex.exec( key );
+        if ( isArray ) {
+            // Handle empty array syntax
+            if (key.length === 2) {
+                return start;
+            }
+            key = parseInt( isArray[1] );
+        }
+
+        // If this key is the last in the chain, we have to set the value
+        if ( keys.length === 0 ) {
+            // Value may be a date
+            if (iso8601.test(value)) {
+                value = new Date(Date.parse( value ) );
+            }
+            node[key] = value;
+            return start;
+        }
+
+        // If there are more keys to come, we have to dig down into the object heirachy
+        next = node[key] = isArray ? node[key] || [] : node[key] || {};
+        addProp( next, keys, value, start );
+        return node;
     }
 
-
-    Object.keys( props ).forEach( function ( key ) {
-        addProp( result, key.split(delim), props[key] );
+    var list = Object.keys( props ).map( function ( key ) {
+        return {key : key, value : props[key]};
+    } );
+    list.sort( function ( a, b ) {
+        return a.key.localeCompare( b.key );
+    } );
+    var result = null;
+    list.forEach( function ( item ) {
+        result = addProp( result, item.key.split( delim ), item.value, result );
     } );
 
     return result;

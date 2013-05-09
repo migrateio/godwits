@@ -1,15 +1,22 @@
 'use strict';
 
 var log = require( 'ringo/logging' ).getLogger( module.id );
+var {jsonToProps} = require( '../utils' );
+
 var {MapStore} = Packages.com.hazelcast.core;
 var {BasicAWSCredentials} = Packages.com.amazonaws.auth;
 var {
     AmazonSimpleDBClient
     } = Packages.com.amazonaws.services.simpledb;
+var {
+    DomainMetadataRequest, BatchDeleteAttributesRequest, DeletableItem,
+    DeleteAttributesRequest, BatchPutAttributesRequest, ReplaceableItem,
+    PutAttributesRequest, GetAttributesRequest, ReplaceableAttribute
+    } = Packages.com.amazonaws.services.simpledb.model;
 
 exports.SimpleDBStore = function ( mapName, options ) {
 
-    var dynamoDB;
+    var client;
     var tableName = mapName;
 
     /**
@@ -25,23 +32,28 @@ exports.SimpleDBStore = function ( mapName, options ) {
         log.debug( 'SimpleDBStore::load, table: {}, key: {}',
             tableName, JSON.stringify( key ) );
 
-        // If the key is an object, it is a json
-        if (typeof key === 'object') {
+        var attrs = new java.util.ArrayList();
+        attrs.add( '_value' );
 
-        }
+        var request = new GetAttributesRequest()
+            .withDomainName( tableName )
+            .withItemName( key )
+            .withConsistentRead(true)
+            .withAttributeNames( attrs );
+
         try {
-            var map = new java.util.HashMap();
-            map.put( "key", new AttributeValue().withS( key.toString() ) );
-
-            var request = new GetItemRequest()
-                .withTableName( tableName )
-                .withKey( map );
-            var result = dynamoDB.getItem( request );
-            var attrVals = result.getItem();
-            if (!attrVals) return null;
-            var value = attrVals.get( 'value' );
-            return value ? value.getS() : null;
-        } catch ( e if e.javaException instanceof ResourceNotFoundException ) {
+            var result = client.getAttributes( request );
+            attrs = result.attributes;
+            for ( var i = attrs.iterator(); i.hasNext(); ) {
+                var attr = i.next();
+                log.debug( 'SimpleDBStore::load, attrs: ', attr );
+                if ( attr.name === '_value' ) {
+                    return attr.value;
+                }
+            }
+        } catch ( e ) {
+            log.error( 'SimpleDBStore::store', e );
+            throw e;
         }
 
         return null;
@@ -81,11 +93,19 @@ exports.SimpleDBStore = function ( mapName, options ) {
     function store(key, value) {
         log.debug( 'SimpleDBStore::store', JSON.stringify( arguments ) );
 
-        var item = new java.util.HashMap();
-        item.put("key", new AttributeValue(key.toString()));
-        item.put("value", new AttributeValue(new java.lang.String(value)));
-        var request = new PutItemRequest(tableName, item);
-        dynamoDB.putItem(request);
+        // The json object to be stored will be flattened into an attribute list
+        var attrs = jsonToAttributes( value );
+        var request = PutAttributesRequest()
+            .withDomainName( tableName )
+            .withItemName( key )
+            .withAttributes( attrs );
+
+        try {
+            client.putAttributes( request );
+        } catch ( e ) {
+            log.error( 'SimpleDBStore::store', e );
+            throw e;
+        }
     }
 
     /**
@@ -95,9 +115,23 @@ exports.SimpleDBStore = function ( mapName, options ) {
      * @param map map of entries to store
      */
     function storeAll(map) {
+        var items = new java.util.ArrayList();
         map.entrySet().toArray().forEach(function(entry){
-            store( entry.key, entry.value );
+            items.add(
+                new ReplaceableItem( entry.key, jsonToAttributes( entry.value ) )
+            );
         });
+
+        var request = BatchPutAttributesRequest()
+            .withDomainName( tableName )
+            .withItems( items );
+
+        try {
+            client.batchPutAttributes( request );
+        } catch ( e ) {
+            log.error( 'SimpleDBStore::storeAll', e);
+            throw e;
+        }
     }
 
     /**
@@ -107,17 +141,17 @@ exports.SimpleDBStore = function ( mapName, options ) {
      */
     function del(key) {
         log.debug( 'SimpleDBStore::delete', JSON.stringify( arguments ) );
-        var map = new java.util.HashMap();
-        map.put("key", new AttributeValue().withS(key.toString()));
 
-        var request = new DeleteItemRequest()
-            .withTableName(tableName)
-            .withKey(map);
+        // The json object to be stored will be flattened into an attribute list
+        var request = DeleteAttributesRequest()
+            .withDomainName( tableName )
+            .withItemName( key );
 
         try {
-            dynamoDB.deleteItem(request);
-        } catch ( e if e.javaException instanceof ResourceNotFoundException ) {
-            // Not really a problem
+            client.deleteAttributes( request );
+        } catch ( e ) {
+            log.error( 'SimpleDBStore::delete', e );
+            throw e;
         }
     }
 
@@ -127,15 +161,51 @@ exports.SimpleDBStore = function ( mapName, options ) {
      * @param keys keys of the entries to delete.
      */
     function deleteAll(keys) {
-        log.debug( 'SimpleDBStore::deleteAll' );
-        keys.toArray().forEach( del );
+        var items = new java.util.ArrayList();
+        map.entrySet().toArray().forEach(function(entry){
+            items.add(
+                new DeletableItem( entry.key )
+            );
+        });
+
+        var request = BatchDeleteAttributesRequest()
+            .withDomainName( tableName )
+            .withItems( items );
+
+        try {
+            client.batchDeleteAttributes( request );
+        } catch ( e ) {
+            log.error( 'SimpleDBStore::deleteAll', e );
+            throw e;
+        }
+    }
+
+    function jsonToAttributes(value) {
+        var json = typeof value === 'string' ? JSON.parse( value ) : value;
+        var props = jsonToProps( json );
+        log.info( 'Making pmvn clean testrops: {}', JSON.stringify( props ) );
+
+        var attrs = new java.util.ArrayList();
+        attrs.add( new ReplaceableAttribute( '_value', value, true ) );
+        Object.keys( props ).forEach( function ( key ) {
+            log.info( 'Entry key: {}, value: {}',
+                JSON.stringify( key ), JSON.stringify( props[key] ) );
+            attrs.add(
+                new ReplaceableAttribute()
+                    .withReplace( true )
+                    .withName( key )
+                    .withValue( props[key] )
+            );
+        } );
+
+        return attrs;
     }
 
     function tableExists( tableName ) {
 
         var request = new DomainMetadataRequest().withDomainName( tableName );
         try {
-            dynamoDB.domainMetadata( request );
+            client.domainMetadata( request );
         } catch ( e if e.javaException instanceof NoSuchDomainException ) {
             return false;
         }
@@ -160,8 +230,8 @@ exports.SimpleDBStore = function ( mapName, options ) {
         log.debug( 'SimpleDBStore::init, authenticating to Amazon AWS using access key: {}, secret key: {}',
             accessKey, '<secret>' );
         var credentials = new BasicAWSCredentials( accessKey, secretKey );
-        dynamoDB = new AmazonSimpleDBClient( credentials );
-        log.debug( "SimpleDBStore::init, handle to db client: {}", dynamoDB );
+        client = new AmazonSimpleDBClient( credentials );
+        log.debug( "SimpleDBStore::init, handle to db client: {}", client );
 
         if ( !tableExists( tableName ) ) {
             throw {

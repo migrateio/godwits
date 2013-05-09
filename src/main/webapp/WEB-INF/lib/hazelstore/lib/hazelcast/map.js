@@ -152,8 +152,8 @@ function Map( hazelcast, mapName ) {
      */
     var get = function ( key ) {
         if ( typeof key === 'object' ) return queryGet( key );
-        log.debug( 'Getting from map [{}]: {}', mapName, key );
         var value = map.get( key );
+        log.debug( 'Getting from map [{}/{}]: {}', mapName, key, value );
         if ( typeof value === 'string' ) {
             return JSON.parse( value );
         } else {
