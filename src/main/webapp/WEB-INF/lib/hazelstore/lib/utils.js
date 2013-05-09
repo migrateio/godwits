@@ -1,3 +1,5 @@
+"use strict";
+var log = require( 'ringo/logging' ).getLogger( module.id );
 var uuid = Packages.java.util.UUID;
 
 /**
@@ -22,6 +24,77 @@ exports.convertPropsToMap = function ( properties ) {
     return result;
 };
 
+exports.jsonToProps = function ( json, delim ) {
+    var getKey = function ( key, prefix, isArray ) {
+        var k = prefix.length > 0 ? prefix.join( delim ) + delim : '';
+        return isArray ? k + '[' + key + ']' : k + key;
+    };
+    var toProps = function ( result, prefix, js ) {
+        if ( typeof js === 'object' ) {
+            var isArray = Array.isArray( js );
+            var keys = Object.keys( js );
+
+//            // Take care of empty arrays
+            if ( isArray && keys.length === 0 )
+                result[getKey('', prefix, isArray)] = '';
+
+            keys.forEach( function ( key ) {
+                var value = js[key];
+                var type = typeof value === 'object' && toString.call( value ) === '[object Date]'
+                    ? 'date' : typeof value;
+                switch ( type ) {
+                    case 'number':
+                    case 'boolean':
+                    case 'string':
+                        result[getKey( key, prefix, isArray )] = value;
+                        break;
+                    case 'date':
+                        result[getKey( key, prefix, isArray )] = value.toISOString();
+                        break;
+                    case 'object':
+                        prefix.push( getKey( key, [], isArray ) );
+                        toProps( result, prefix, value );
+                        if (isArray) prefix.pop();
+                        break;
+                }
+//                log.error('Result: {}, type: {}, prefix: {}, array: {}',
+//                    JSON.stringify( result ), type, JSON.stringify( prefix ), isArray);
+            } );
+            if (isArray) prefix.pop();
+        }
+        return result;
+    };
+
+    if ( !delim ) delim = '.';
+    return toProps( {}, [], json );
+};
+
+exports.propsToJson = function ( props, delim ) {
+    var result = {};
+    var isArray = /\[([0..9]*)\]/;
+    if ( !delim ) delim = '.';
+
+    function addProp(result, keys, value, isArray) {
+        var key = keys.shift();
+        if (keys.length === 0) result[key] = value;
+        else {
+            var match = key.match( regex );
+            if (match) {
+                result[match[0]] = value;
+            } else {
+                result[key] = {};
+            }
+            addProp( result, keys, value );
+        }
+    }
+
+
+    Object.keys( props ).forEach( function ( key ) {
+        addProp( result, key.split(delim), props[key] );
+    } );
+
+    return result;
+};
 
 /**
  * Generates a base62 UUID. Saves 10 bytes.
