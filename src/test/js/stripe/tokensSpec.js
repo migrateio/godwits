@@ -22,35 +22,35 @@ describe( 'Stripe tokens', function () {
     }, 10000 );
 
 
-    describe('should retrieve card by token', function() {
+    describe( 'should retrieve card by token', function () {
 
         var tokenId;
 
-        beforeEach(function(done) {
+        beforeEach( function ( done ) {
             stripe.token.create( {
                 card : { number : "4242424242424242",
                     exp_month : 1,
                     exp_year : 2021,
                     name : "J. Ester"
                 }
-            } ).then( function(token) {
+            } ).then( function ( token ) {
                     expect( token ).toBeDefined();
                     expect( token.id ).toBeDefined();
                     tokenId = token.id;
                     done();
                 } );
-        });
+        } );
 
         it( 'will retrieve card by token', function ( done ) {
             stripe.token.retrieve( tokenId ).then(
-                function(card) {
-                    expect(card ).toBeDefined();
+                function ( card ) {
+                    expect( card ).toBeDefined();
                     expect( card.object ).toEqual( 'token' );
                     expect( card.id ).toEqual( tokenId );
                     done();
                 }
             );
         }, 10000 );
-    });
+    } );
 } );
 

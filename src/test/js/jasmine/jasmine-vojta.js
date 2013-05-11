@@ -594,7 +594,7 @@ if (isCommonJS) exports.waitsFor = waitsFor;
  * @param {Function} beforeEachFunction
  */
 var beforeEach = function(beforeEachFunction) {
-    jasmine.getEnv().beforeEach(beforeEachFunction);
+    jasmine.getEnv().beforeEach( beforeEachFunction );
 };
 if (isCommonJS) exports.beforeEach = beforeEach;
 
@@ -626,7 +626,7 @@ if (isCommonJS) exports.afterEach = afterEach;
  * @param {Function} specDefinitions function that defines several specs.
  */
 var describe = function(description, specDefinitions) {
-    return jasmine.getEnv().describe(description, specDefinitions);
+    return jasmine.getEnv().describe( description, specDefinitions );
 };
 if (isCommonJS) exports.describe = describe;
 
@@ -907,9 +907,9 @@ jasmine.Env.prototype.ddescribe = function(description, specDefinitions) {
 
 jasmine.Env.prototype.beforeEach = function(beforeEachFunction) {
     if (this.currentSuite) {
-        this.currentSuite.beforeEach(beforeEachFunction);
+        this.currentSuite.beforeEach( beforeEachFunction );
     } else {
-        this.currentRunner_.beforeEach(beforeEachFunction);
+        this.currentRunner_.beforeEach( beforeEachFunction );
     }
 };
 

@@ -78,4 +78,4 @@ describe( 'WorkerPoller', function () {
             }, 'pollForDecisionTask to be called', 1000 );
         } );
     } );
-});
+} );

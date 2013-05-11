@@ -41,10 +41,10 @@ describe( 'Hazelcast map operations with dynamo ', function () {
             }
         );
         map = store.getMap( 'dev-users' );
-        expect(map ).toBeDefined();
+        expect( map ).toBeDefined();
     } );
 
-    it( 'should allow us to store and retrieve', function (  ) {
+    it( 'should allow us to store and retrieve', function () {
         var result, user = { name : 'Fred Flintstone'};
 
         result = map.get( '123' );
@@ -60,8 +60,8 @@ describe( 'Hazelcast map operations with dynamo ', function () {
         expect( result ).toEqual( user );
     } );
 
-    afterEach( function (  ) {
+    afterEach( function () {
         log.info( 'afterEach 1' );
-            map.clear();
+        map.clear();
     } );
 } );

@@ -1,0 +1,9 @@
+var require = function( s ) {};
+var Packages = {};
+describe = function ( s, f ){};
+it = function ( s, f ){};
+xdescribe = function ( s, f ){};
+xit = function( s, f ){};
+expect = function ( f ){};
+beforeEach = function ( f ){};
+afterEach = function( f ){};

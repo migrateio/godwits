@@ -2,11 +2,9 @@ var log = require( 'ringo/logging' ).getLogger( module.id );
 
 function onmessage( e ) {
     var user = JSON.parse( e.data.input );
-    log.info( 'Beginning work in module [{}]: {}', module.id, JSON.stringify( user ) );
 
 
     function doWork() {
-        log.info( 'Performed the work, e: {}', JSON.stringify( e ) );
         var result = {
             data : {
                 userId : user.userId,
@@ -16,7 +14,7 @@ function onmessage( e ) {
             module : module.id,
             success : true
         };
-        log.info( 'Returning data: {}', JSON.stringify( result ) );
+        log.info( 'load-user::doWork, result: {}', JSON.stringify( result ) );
         e.source.postMessage( result, true );
     }
 

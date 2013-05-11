@@ -100,7 +100,6 @@ function WorkerPoller( taskListName, swfClient ) {
             };
 
         // Register the ActivityType with Amazon SWF
-        log.info( 'Registering activity type: {}', JSON.stringify( type ) );
         swfClient.registerActivityType( type ).wait(5000);
 
         // Store the moduleId so we can instantiate this module as a Worker later
@@ -140,7 +139,7 @@ function WorkerPoller( taskListName, swfClient ) {
                         .pollForActivityTask( { taskListName : taskListName } )
                         .wait();
 
-                    log.info( 'WorkerPoller::poll, task: {}', JSON.stringify( task ) );
+                    log.debug( 'WorkerPoller::poll, task: {}', JSON.stringify( task ) );
                     if ( task && task.taskToken ) {
                         (function() {
                             const thisTask = task;
@@ -159,27 +158,34 @@ function WorkerPoller( taskListName, swfClient ) {
             }
         }
     } );
-    /*
-    function poll() {
-        log.debug( 'WorkerPoller::poll, entry' );
-        if ( polling ) {
-            log.debug( 'WorkerPoller::poll, is polling' );
-            var task = swfClient
-                .pollForActivityTask( { taskListName : taskListName } )
-                .wait();
+/*
+    var poll = java.lang.Runnable( {
+        run : function () {
+            while ( !shuttingDown ) {
+                while ( polling ) {
+                    try {
+                        var task = swfClient
+                            .pollForActivityTask( { taskListName : taskListName } )
+                            .wait();
+                    } catch ( e ) {
+                        log.error( 'WorkerPoller::poll', JSON.stringify( e ) );
+                    }
 
-            log.info( 'WorkerPoller::poll, task: {}', JSON.stringify( task ) );
-            if (task.taskToken) {
-                startTask( task );
+                    if ( task && task.taskToken ) startTask( task );
+                    else log.debug( 'WorkerPoller::poll, no task found on list [{}]',
+                        taskListName );
+
+                    if ( shuttingDown ) {
+                        if ( workerCount === 0 )
+                            log.debug( 'WorkerPoller [{}] is terminated', taskListName );
+                        break;
+                    }
+                }
+                // todo: comment this out and see if it starves other threads
+                java.lang.Thread.sleep( 1000 );
             }
-
-            if (shuttingDown && workerCount === 0 ) {
-                log.info( 'WorkerPoller [{}] is terminated', taskListName );
-            }
-
-            if (!shuttingDown) setTimeout( poll, 0 );
         }
-    }
+    } );
 */
 
     /**
@@ -195,9 +201,12 @@ function WorkerPoller( taskListName, swfClient ) {
     function workerSuccess( task, data ) {
         log.debug( 'WorkerPoller::workerSuccess {}', JSON.stringify( arguments ) );
         swfClient.respondActivityTaskCompleted( {
-            result : JSON.stringify( data ),
+            result : {
+                status: 200,
+                data: data
+            },
             taskToken : task.taskToken
-        } ).wait(5000);
+        } );
     }
 
     /**
@@ -226,13 +235,13 @@ function WorkerPoller( taskListName, swfClient ) {
             swfClient.respondActivityTaskCanceled( {
                 details : data.details,
                 taskToken : task.taskToken
-            } ).wait(5000);
+            } );
         } else {
             swfClient.respondActivityTaskFailed( {
-                details : (data && data.details) || 'Unknown',
+                details : (data && data.details) || undefined,
                 reason : (data && data.reason) || undefined,
                 taskToken : task.taskToken
-            } ).wait();
+            } );
         }
     }
 
@@ -247,12 +256,9 @@ function WorkerPoller( taskListName, swfClient ) {
     function getWorkerModuleId( task ) {
         var key = task.activityType.name + '/' + task.activityType.version;
         var workerModule = registry[key] || null;
-        log.info( 'Obtaining worker from registry {}, key: {}',
-            workerModule ? 'succeeded' : 'failed', key );
         if ( !workerModule )
             workerError( task, {
-                reason : 'The activity poller did not have a worker for activity type ['
-                    + key + ']' } );
+                reason : 'No worker registered to handle activity Type [' + key + ']' } );
         return workerModule;
     }
 
@@ -266,11 +272,10 @@ function WorkerPoller( taskListName, swfClient ) {
      * @param {Object} task The workflow task retrieved from the task list
      */
     function startTask( task ) {
-        log.info( 'WorkerPoller::startTask {}', JSON.stringify( arguments ) );
         var workerModule = getWorkerModuleId( task );
         if ( workerModule ) {
             workerCount++;
-            log.info( 'WorkerPoller::startTask, creating worker {}', workerModule );
+            log.info( 'WorkerPoller::startTask, {}', JSON.stringify( task, null, 4 ) );
             var worker = new WorkerPromise( workerModule, task );
 /*
             var heartbeat = new Worker( 'workflow/heartbeat' );

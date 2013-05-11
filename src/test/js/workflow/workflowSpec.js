@@ -91,6 +91,8 @@ xdescribe( 'Workflow', function () {
 
 describe( 'Workflow', function () {
 
+    var workflow;
+
     beforeEach( function () {
         workflow = new Workflow( workflowType, accessKey, secretKey );
         expect( workflow ).toBeDefined();
@@ -100,7 +102,9 @@ describe( 'Workflow', function () {
             activities.doWork, activities.capturePayment
         ];
         workflow.registerWorkers( workerTaskList, workers );
-        workflow.registerDecider( deciderTaskList, deciderModuleId );
+        workflow.registerDecider( deciderTaskList, function() {
+            return deciderModuleId;
+        } );
         expect( workflow.swfClient.registerActivityType.calls.length ).toEqual( 4 );
         workflow.start();
     } );
@@ -109,27 +113,29 @@ describe( 'Workflow', function () {
         workflow.shutdown();
     } );
 
-    it( 'will simulate an actual workflow', function (done) {
+    it( 'will simulate an actual workflow', function ( done ) {
         var result = workflow.startWorkflow( job ).wait( 10000 );
+        log.info( 'Workflow started: {}', JSON.stringify( result ) );
+
         expect( result.runId ).toEqual( jasmine.any( String ) );
         expect( result.workflowId ).toEqual( jasmine.any( String ) );
 
         function checkForDone() {
-            log.info( 'Retrieving executions status' );
+//            log.info( 'Retrieving executions status' );
             var execution = workflow.swfClient.describeWorkflowExecution( {
                 domain : workflowType.domain,
                 workflowId : result.workflowId,
                 runId : result.runId
             } ).wait( 10000 );
-            log.info( 'Execution Status: {}', JSON.stringify( execution, null, 4 ) );
-            if (execution && execution.executionInfo.executionStatus === 'CLOSED') {
+//            log.info( 'Execution Status: {}', JSON.stringify( execution, null, 4 ) );
+            if ( execution && execution.executionInfo.executionStatus === 'CLOSED' ) {
                 done();
             }
             setTimeout( checkForDone, 10000 );
         }
 
         log.info( 'Starting to check for done' );
-        setTimeout(checkForDone, 0);
+        setTimeout( checkForDone, 0 );
 
     }, 100000 );
 } );

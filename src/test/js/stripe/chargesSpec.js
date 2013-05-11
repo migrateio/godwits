@@ -75,7 +75,7 @@ describe( "Charges API with uncaptured amount", function () {
         charge = stripe.charges.create( {
             amount : 50,
             currency : "usd",
-            capture: false,
+            capture : false,
             card : {
                 number : "4242424242424242",
                 exp_month : 12,

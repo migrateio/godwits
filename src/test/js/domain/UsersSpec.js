@@ -35,7 +35,7 @@ describe( 'User Domain', function () {
     } );
 
     it( 'should default the email status', function () {
-        var result = users.create( { email: { address: 'fred@bedrock.com' } } );
+        var result = users.create( { email : { address : 'fred@bedrock.com' } } );
         expect( result.email.status ).toEqual( 'candidate' );
     } );
 

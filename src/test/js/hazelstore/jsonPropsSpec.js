@@ -44,9 +44,9 @@ describe( 'Json to Props Conversion', function () {
             associate : {
                 name : 'barney',
                 rel : 'friend',
-                spouse: {
-                    name: 'betty',
-                    rel: 'wife'
+                spouse : {
+                    name : 'betty',
+                    rel : 'wife'
                 }
             }
         },
@@ -66,7 +66,7 @@ describe( 'Json to Props Conversion', function () {
             'fred', 'barney', 'wilma'
         ],
         {
-            '[0]': 'fred',
+            '[0]' : 'fred',
             '[1]' : 'barney',
             '[2]' : 'wilma'
         }
@@ -76,131 +76,141 @@ describe( 'Json to Props Conversion', function () {
     convertCheck( 'should be able to convert the simplest array',
         [],
         {
-            '[]': ''
+            '[]' : ''
         }
     );
 
     convertCheck( 'should be able to convert 2d arrays',
-        [[
-            'fred', 'barney', 'wilma'
-        ]],
+        [
+            [
+                'fred', 'barney', 'wilma'
+            ]
+        ],
         {
-            '[0].[0]': 'fred',
+            '[0].[0]' : 'fred',
             '[0].[1]' : 'barney',
             '[0].[2]' : 'wilma'
         }
     );
 
-        convertCheck( 'should be able to handle deeply nested arrays',
-            [[[[[
-                'fred', 'barney', 'wilma'
-            ]]]]],
-            {
-                '[0].[0].[0].[0].[0]': 'fred',
-                '[0].[0].[0].[0].[1]': 'barney',
-                '[0].[0].[0].[0].[2]': 'wilma'
-            }
-        );
-
-     convertCheck( 'should be able to handle numbers',
-            {
-                name : 'fred',
-                age : 42,
-                'bowling-avg' : 209.12
-            },
-            {
-                name : 'fred',
-                age : 42,
-                'bowling-avg' : 209.12
-            }
-        );
-
-
-     convertCheck( 'should be able to handle dates',
-            (function () {
-                var d = new Date();
-                d.setUTCFullYear( 1992 );
-                d.setUTCMonth( 9 );
-                d.setUTCDate( 3 );
-                d.setUTCHours( 16 );
-                d.setUTCMinutes( 20 );
-                d.setUTCSeconds( 2 );
-                d.setUTCMilliseconds( 153 );
-
-                return {
-                    name : 'fred',
-                    dob : d
-                };
-            })(),
-            {
-                name : 'fred',
-                dob : '1992-10-03T16:20:02.153Z'
-            }
-        );
-
-
-     convertCheck( 'should be able to handle arrays',
-            {
-                name : 'fred',
-                city : 'bedrock',
-                friends : ['barney', 'betty']
-            },
-            {
-                name : 'fred',
-                city : 'bedrock',
-                'friends.[0]' : 'barney',
-                'friends.[1]' : 'betty'
-            }
-        );
-
-     convertCheck( 'should be able to handle complex values',
-            {
-                name : 'fred',
-                city : 'bedrock',
-                pets : ['dino'],
-                associates : {
-                    friends : [
-                        {
-                            name : 'barney',
-                            family : [
-                                { name : 'betty', male: false, age : 26 },
-                                { name : 'bambam', male: true, age : 3 }
-                            ]
-                        }
-                    ],
-                    work : [
-                        {
-                            name : 'barney',
-                            family : [
-                                { name : 'betty', age : 26 },
-                                { name : 'bambam', age : 3 }
-                            ]
-                        },
-                        {
-                            name : 'slate',
-                            family : []
-                        }
+    convertCheck( 'should be able to handle deeply nested arrays',
+        [
+            [
+                [
+                    [
+                        [
+                            'fred', 'barney', 'wilma'
+                        ]
                     ]
-                }
-            },
-            {
+                ]
+            ]
+        ],
+        {
+            '[0].[0].[0].[0].[0]' : 'fred',
+            '[0].[0].[0].[0].[1]' : 'barney',
+            '[0].[0].[0].[0].[2]' : 'wilma'
+        }
+    );
+
+    convertCheck( 'should be able to handle numbers',
+        {
+            name : 'fred',
+            age : 42,
+            'bowling-avg' : 209.12
+        },
+        {
+            name : 'fred',
+            age : 42,
+            'bowling-avg' : 209.12
+        }
+    );
+
+
+    convertCheck( 'should be able to handle dates',
+        (function () {
+            var d = new Date();
+            d.setUTCFullYear( 1992 );
+            d.setUTCMonth( 9 );
+            d.setUTCDate( 3 );
+            d.setUTCHours( 16 );
+            d.setUTCMinutes( 20 );
+            d.setUTCSeconds( 2 );
+            d.setUTCMilliseconds( 153 );
+
+            return {
                 name : 'fred',
-                city : 'bedrock',
-                'pets.[0]' : 'dino',
-                'associates.friends.[0].name' : 'barney',
-                'associates.friends.[0].family.[0].name' : 'betty',
-                'associates.friends.[0].family.[0].male' : false,
-                'associates.friends.[0].family.[0].age' : 26,
-                'associates.friends.[0].family.[1].name' : 'bambam',
-                'associates.friends.[0].family.[1].male' : true,
-                'associates.friends.[0].family.[1].age' : 3,
-                'associates.work.[0].name' : 'barney',
-                'associates.work.[0].family.[0].name' : 'betty',
-                'associates.work.[0].family.[0].age' : 26,
-                'associates.work.[0].family.[1].name' : 'bambam',
-                'associates.work.[0].family.[1].age' : 3,
-                'associates.work.[1].name' : 'slate',
-                'associates.work.[1].family.[]' : ''
+                dob : d
+            };
+        })(),
+        {
+            name : 'fred',
+            dob : '1992-10-03T16:20:02.153Z'
+        }
+    );
+
+
+    convertCheck( 'should be able to handle arrays',
+        {
+            name : 'fred',
+            city : 'bedrock',
+            friends : ['barney', 'betty']
+        },
+        {
+            name : 'fred',
+            city : 'bedrock',
+            'friends.[0]' : 'barney',
+            'friends.[1]' : 'betty'
+        }
+    );
+
+    convertCheck( 'should be able to handle complex values',
+        {
+            name : 'fred',
+            city : 'bedrock',
+            pets : ['dino'],
+            associates : {
+                friends : [
+                    {
+                        name : 'barney',
+                        family : [
+                            { name : 'betty', male : false, age : 26 },
+                            { name : 'bambam', male : true, age : 3 }
+                        ]
+                    }
+                ],
+                work : [
+                    {
+                        name : 'barney',
+                        family : [
+                            { name : 'betty', age : 26 },
+                            { name : 'bambam', age : 3 }
+                        ]
+                    },
+                    {
+                        name : 'slate',
+                        family : []
+                    }
+                ]
             }
-        );
+        },
+        {
+            name : 'fred',
+            city : 'bedrock',
+            'pets.[0]' : 'dino',
+            'associates.friends.[0].name' : 'barney',
+            'associates.friends.[0].family.[0].name' : 'betty',
+            'associates.friends.[0].family.[0].male' : false,
+            'associates.friends.[0].family.[0].age' : 26,
+            'associates.friends.[0].family.[1].name' : 'bambam',
+            'associates.friends.[0].family.[1].male' : true,
+            'associates.friends.[0].family.[1].age' : 3,
+            'associates.work.[0].name' : 'barney',
+            'associates.work.[0].family.[0].name' : 'betty',
+            'associates.work.[0].family.[0].age' : 26,
+            'associates.work.[0].family.[1].name' : 'bambam',
+            'associates.work.[0].family.[1].age' : 3,
+            'associates.work.[1].name' : 'slate',
+            'associates.work.[1].family.[]' : ''
+        }
+    );
 } );

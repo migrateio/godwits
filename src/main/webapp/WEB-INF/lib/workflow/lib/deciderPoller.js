@@ -24,7 +24,7 @@ var {Decider} = require( './decider' );
  *     3. When the queue is empty, the Poller will send ACK to workflow which will
  *        terminate the Poller.
  */
-function DeciderPoller( taskListName, deciderModuleId, swfClient ) {
+function DeciderPoller( taskListName, swfClient, resolveDecisionModule ) {
 
     /**
      * Indicates whether the poller is trying to shutdown.
@@ -74,36 +74,41 @@ function DeciderPoller( taskListName, deciderModuleId, swfClient ) {
         polling = false;
     }
 
-    function error() {
-        log.error( 'DeciderPoller::poll, ERROR:', e );
-        log.error( 'DeciderPoller::poll, ERROR:', JSON.stringify( arguments ) );
-    }
-
     /**
      * ### _poll_
      *
      */
     var poll = java.lang.Runnable( {
         run : function () {
-            log.debug( 'DeciderPoller::poll, entry' );
             while ( !shuttingDown ) {
                 while ( polling ) {
-                    log.debug( 'DeciderPoller::poll, is polling' );
-                    var task = swfClient
-                        .pollForDecisionTask( { taskListName : taskListName } )
-                        .wait();
+                    var task = null;
+                    try {
+                        log.info( 'DeciderPoller::poll, polling task list [{}]', taskListName );
+                        task = swfClient
+                            .pollForDecisionTask( { taskListName : taskListName } )
+                            .wait();
+                    } catch ( e ) {
+                        log.error( 'DeciderPoller::poll', JSON.stringify( e ), e );
+                        log.error( 'DeciderPoller::poll, task: {}', JSON.stringify( task ) );
+                        throw e;
+                    }
 
-                    log.info( 'DeciderPoller::poll, task: {}', JSON.stringify( task ) );
                     if ( task && task.taskToken ) {
+                        log.debug( 'DeciderPoller::poll, task found {}',
+                            JSON.stringify( task ) );
                         startTask( task );
                     }
+                    else log.debug( 'DeciderPoller::poll, no task found on list [{}]',
+                        taskListName );
 
                     if ( shuttingDown ) {
                         if ( workerCount === 0 )
-                            log.info( 'DeciderPoller [{}] is terminated', taskListName );
+                            log.debug( 'DeciderPoller [{}] is terminated', taskListName );
                         break;
                     }
                 }
+                // todo: comment this out and see if it starves other threads
                 java.lang.Thread.sleep( 1000 );
             }
         }
@@ -118,13 +123,13 @@ function DeciderPoller( taskListName, deciderModuleId, swfClient ) {
                     .pollForDecisionTask( { taskListName : taskListName } )
                     .wait();
 
-                log.info( 'DeciderPoller::poll, task: {}', JSON.stringify( task ) );
+                log.debug( 'DeciderPoller::poll, task: {}', JSON.stringify( task ) );
                 if (task.taskToken) {
                     startTask( task );
                 }
 
                 if (shuttingDown && workerCount === 0 ) {
-                    log.info( 'DeciderPoller [{}] is terminated', taskListName );
+                    log.debug( 'DeciderPoller [{}] is terminated', taskListName );
                 }
 
                 if (!shuttingDown) setTimeout( poll, 0 );
@@ -260,12 +265,12 @@ function DeciderPoller( taskListName, deciderModuleId, swfClient ) {
         workerCount++;
 
         // Create a Decider object which will evaluate the Decider Task
-        var decider = new Decider( deciderModuleId, task.events );
+        var decider = new Decider( task, resolveDecisionModule );
         decider
-            .then( function ( e ) {
+            .then( function ( decisions ) {
                 // When the worker successfully completes, we are passed an array of
                 // decisions.
-                deciderSuccess( task, e.decisions );
+                deciderSuccess( task, decisions );
             }, function () {
                 // In the case of an error,
                 deciderError( task );
@@ -274,9 +279,9 @@ function DeciderPoller( taskListName, deciderModuleId, swfClient ) {
                 workerCount--;
                 if ( shuttingDown ) {
                     if ( workerCount === 0 )
-                        log.info( 'DeciderPoller::terminated' );
+                        log.debug( 'DeciderPoller::terminated' );
                     else
-                        log.info( 'DeciderPoller::finalizing, ' +
+                        log.debug( 'DeciderPoller::finalizing, ' +
                             'waiting on {} workers to finish', workerCount );
                 }
             } );
@@ -289,14 +294,11 @@ function DeciderPoller( taskListName, deciderModuleId, swfClient ) {
      * the polling of SWF for new decision tasks.
      *
      * @param {String} taskListName The name of the task list for the decision tasks
-     * @param {String} deciderModuleId The module name of the decider for this poller.
      * @param {Workflow} swfClient The swfClient object in which this poller resides.
+     * @param {Function} [resolveDecisionModule] A function that will be passed a
+     * DecisionTask and replies with the module path to load the decision logic
      */
-    function init( taskListName, deciderModuleId, swfClient ) {
-        if ( !deciderModuleId ) throw {
-            status : 400,
-            message : 'DeciderPoller requires property [deciderModuleId]'
-        };
+    function init( taskListName, swfClient, resolveDecisionModule ) {
         if ( !swfClient ) throw {
             status : 400,
             message : 'DeciderPoller requires property [swfClient]'
@@ -311,7 +313,7 @@ function DeciderPoller( taskListName, deciderModuleId, swfClient ) {
         new java.lang.Thread( poll, threadName ).start();
     }
 
-    init( taskListName, deciderModuleId, swfClient );
+    init( taskListName, swfClient, resolveDecisionModule );
 
     return {
         start : start,

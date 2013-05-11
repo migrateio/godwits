@@ -43,6 +43,23 @@ with Microsoft Active Directory, LDAP directories, and Lotus Notes.
 
 # Developer Docs
 
+## Documentation
+
+Documentation is generated using [Docker](http://jbt.github.io/docker/README.md.html).
+
+From the command line
+
+    docker -i src/main/webapp/WEB-INF -o html -c manni -s yes -I -u -x node_modules --extras fileSearch
+
+And if you want Docker to sit watching for newly saved files and generating new docs
+use this command. Combining the generation of live docs with LiveReload which will
+auto refresh the Chrome browser is pretty powerful, but I have noticed some issues with
+Docker picking up changed files.
+
+    docker -i src/main/webapp/WEB-INF -o html -c manni -s yes -I -u -x node_modules -w --extras fileSearch
+
+> todo: Add a Maven task to execute Docker during generate-docs phase.
+
 ## Testing
 
 ### Unit Tests

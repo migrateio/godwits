@@ -25,6 +25,7 @@
 	var NEXT_TRANSITION = "transition";
 	var NEXT_HANDLER = "handler";
 	var HANDLING = "handling";
+	var CYCLE_END = "cycleend";
 	var HANDLED = "handled";
 	var NO_HANDLER = "nohandler";
 	var TRANSITION = "transition";
@@ -112,6 +113,7 @@
 	
 	_.extend( Fsm.prototype, {
 		initialize: function() { },
+		steadyState: function() { },
 		emit : function ( eventName ) {
 			var args = arguments;
 			if(this.eventListeners["*"]) {
@@ -205,7 +207,8 @@
 			_.each( toProcess, function ( item ) {
 				this.handle.apply( this, item.args );
 			}, this );
-		},
+            this.steadyState.apply(this);
+        },
 		clearQueue : function ( type, name ) {
 			if(!type) {
 				this.eventQueue = [];

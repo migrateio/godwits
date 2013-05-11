@@ -37,13 +37,14 @@ exports.Workflow = function ( workflowOptions, accessKey, secretKey ) {
     /**
      * ### **registerDecider**
      *
-     * Adds a DeciderPoller (or array of DeciderPollers) to the internal list of
-     * pollers. The lifecycle of these pollers will be tied to the lifecycle of this
-     * Workflow instance.
+     * Adds a DeciderPoller to the internal list of pollers. The lifecycle of these
+     * pollers will be tied to the lifecycle of this Workflow instance.
      *
      * @param {DeciderPoller|Array} deciderPoller
+     * @param {Function} [resolveDecisionModule] A function that will be passed a
+     * DecisionTask and replies with the module path to load the decision logic
      */
-    function registerDecider( taskListName, deciderModuleId ) {
+    function registerDecider( taskListName, resolveDecisionModule ) {
         log.debug( 'Workflow::registerDecider, {}', JSON.stringify( arguments ) );
 
         // Pollers are cached using the task list name as the key.
@@ -52,9 +53,9 @@ exports.Workflow = function ( workflowOptions, accessKey, secretKey ) {
         // This may be the first time the poller is accessed. In that case we will create
         // a new poller and track it in the registry.
         if (!poller) {
-            log.info( 'Registering new DeciderPoller for taskList [{}]', taskListName );
+            log.debug( 'Registering new DeciderPoller for taskList [{}]', taskListName );
             // Instantiate a new worker.
-            poller = new DeciderPoller( taskListName, deciderModuleId, swfClient );
+            poller = new DeciderPoller( taskListName, swfClient, resolveDecisionModule );
 
             // Add the poller to the registry.
             deciderPollers[taskListName] = poller;
@@ -76,12 +77,12 @@ exports.Workflow = function ( workflowOptions, accessKey, secretKey ) {
         log.debug( 'Workflow::registerWorkers, {}', JSON.stringify( arguments ) );
         var poller = workerPollers[taskListName];
         if ( !poller ) {
-            log.info( 'Registering new WorkerPoller for taskList [{}]', taskListName );
+            log.debug( 'Registering new WorkerPoller for taskList [{}]', taskListName );
             poller = new WorkerPoller( taskListName, swfClient );
             workerPollers[taskListName] = poller;
         }
         [].concat( workerModuleIds ).forEach( function ( workerModuleId ) {
-            log.info( 'Registering activity worker [{}]', workerModuleId );
+            log.debug( 'Registering activity worker [{}]', workerModuleId );
             poller.registerWorker( workerModuleId );
         } );
     }
@@ -187,7 +188,7 @@ exports.Workflow = function ( workflowOptions, accessKey, secretKey ) {
      * @return {String} A Run Id that is used to identify this workflow execution
      */
     function startWorkflow( options, input ) {
-        log.debug( 'Workflow::startWorkflow, arg count: {}, {}',
+        log.info( 'Workflow::startWorkflow, arg count: {}, {}',
             arguments.length, JSON.stringify( arguments ) );
         return swfClient.startWorkflow.apply( this, Array.slice( arguments ) );
     }
@@ -284,10 +285,10 @@ exports.Workflow = function ( workflowOptions, accessKey, secretKey ) {
         };
 
         swfClient = new SwfClient( workflowType, accessKey, secretKey );
-        log.info( 'Preparing to register workflowtype: {}', JSON.stringify( workflowType ) );
+        log.debug( 'Preparing to register workflowtype: {}', JSON.stringify( workflowType ) );
 
         var result = swfClient.registerWorkflowType( workflowType ).wait(5000);
-        log.info( 'Completed the registration of workflowtype: {}, result: {}',
+        log.debug( 'Completed the registration of workflowtype: {}, result: {}',
             JSON.stringify( workflowType ), JSON.stringify( result ) );
     }
 
