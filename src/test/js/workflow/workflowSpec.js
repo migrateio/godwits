@@ -97,15 +97,14 @@ describe( 'Workflow', function () {
         workflow = new Workflow( workflowType, accessKey, secretKey );
         expect( workflow ).toBeDefined();
         spyOn( workflow.swfClient, 'registerActivityType' ).andCallThrough();
-        var workers = [
-            activities.loadUser, activities.authPayment,
-            activities.doWork, activities.capturePayment
-        ];
-        workflow.registerWorkers( workerTaskList, workers );
+
+        Object.keys(activities ).forEach(function(key) {
+            workflow.registerWorkers( workerTaskList, activities[key] );
+        });
         workflow.registerDecider( deciderTaskList, function() {
             return deciderModuleId;
         } );
-        expect( workflow.swfClient.registerActivityType.calls.length ).toEqual( 4 );
+        expect( workflow.swfClient.registerActivityType.calls.length ).toEqual( 7 );
         workflow.start();
     } );
 
@@ -144,9 +143,12 @@ var workerTaskList = 'test-tasklist-worker';
 var deciderTaskList = 'test-tasklist-decider';
 var deciderModuleId = 'test/0.0.0/deciders/simple-decider';
 var activities = {
-    loadUser : 'test/0.0.0/workers/load-user',
+    analyzeResults : 'test/0.0.0/workers/analyze-results',
     authPayment : 'test/0.0.0/workers/auth-payment',
-    doWork : 'test/0.0.0/workers/do-work',
+    invoice : 'test/0.0.0/workers/invoice',
+    loadUser : 'test/0.0.0/workers/load-user',
+    migrate : 'test/0.0.0/workers/migrate',
+    report : 'test/0.0.0/workers/report',
     capturePayment : 'test/0.0.0/workers/capture-payment'
 };
 var workflowType = {

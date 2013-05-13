@@ -276,7 +276,7 @@ exports.Decider = function ( task, resolveDecisionModule ) {
                     }
                 } catch ( e ) {
                     var message = e.message || e.toString();
-                    log.error( 'Decider::run', message );
+                    log.error( 'Decider::run', message, e);
                     deferred.resolve( e, true );
                 }
             }

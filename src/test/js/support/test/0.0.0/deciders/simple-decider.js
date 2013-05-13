@@ -5,13 +5,12 @@ var log = require( 'ringo/logging' ).getLogger( module.id );
 exports.logic = function ( actions) {
 
     var workflowId, runId, job, user, errors = [], decisions = [],
-        version = version, successfulMigration = false;
+        version = '0.0.6', successfulMigration = false;
     
 
     return {
         initialState : 'uninitialized',
         steadyState: function() {
-            log.debug( 'achieved steady state: ', JSON.stringify( decisions ) );
             this.emit( 'decision', decisions );
         },
         states : {
@@ -35,6 +34,9 @@ exports.logic = function ( actions) {
                 }
             },
             'initialize': {
+                _onEnter : function () {
+                    log.debug( 'initialize::onEnter' );
+                },
                 next: function() {
                     decisions.push(
                         actions.scheduleActivityTask( 'load-user', version, {
@@ -44,8 +46,6 @@ exports.logic = function ( actions) {
                 },
                 ActivityTaskCompleted: function(event) {
                     var result = event.attrs.result;
-                    log.debug( 'uninitialized::ActivityTaskCompleted: {}',
-                        JSON.stringify( result ));
 
                     switch (result.status) {
                         case 200:
@@ -65,6 +65,9 @@ exports.logic = function ( actions) {
             },
 
             'auth-payment' : {
+                _onEnter : function () {
+                    log.debug( 'auth-payment::onEnter' );
+                },
                 next: function() {
                     decisions.push(
                         actions.scheduleActivityTask( 'auth-payment', version, {
@@ -92,6 +95,9 @@ exports.logic = function ( actions) {
             },
 
             'migrate' : {
+                _onEnter : function () {
+                    log.debug( 'migrate::onEnter' );
+                },
                 next: function() {
                     decisions.push(
                         actions.scheduleActivityTask( 'migrate', version, {
@@ -115,6 +121,9 @@ exports.logic = function ( actions) {
             },
 
             'analyze-results' : {
+                _onEnter : function () {
+                    log.debug( 'analyze-results::onEnter' );
+                },
                 next: function() {
                     decisions.push(
                         actions.scheduleActivityTask( 'analyze-results', version )
@@ -125,7 +134,7 @@ exports.logic = function ( actions) {
 
                     switch (result.status) {
                         case 200:
-                            successfulMigration = result.successRate > 0.95;
+                            successfulMigration = result.data.successRate > 0.95;
                             this.transition( 'report' );
                             break;
                         default:
@@ -137,9 +146,12 @@ exports.logic = function ( actions) {
             },
 
             'report' : {
+                _onEnter : function () {
+                    log.debug( 'report::onEnter' );
+                },
                 next: function() {
                     decisions.push(
-                        actions.scheduleActivityTask( 'report', version, result )
+                        actions.scheduleActivityTask( 'report', version )
                     );
                 },
                 ActivityTaskCompleted: function(event) {
@@ -159,9 +171,12 @@ exports.logic = function ( actions) {
             },
 
             'capture-payment' : {
+                _onEnter : function () {
+                    log.debug( 'capture-payment::onEnter' );
+                },
                 next: function() {
                     decisions.push(
-                        actions.scheduleActivityTask( 'capture-payment', version, result )
+                        actions.scheduleActivityTask( 'capture-payment', version )
                     );
                 },
                 ActivityTaskCompleted: function(event) {
@@ -180,9 +195,12 @@ exports.logic = function ( actions) {
             },
 
             'invoice' : {
+                _onEnter : function () {
+                    log.debug( 'invoice::onEnter' );
+                },
                 next: function() {
                     decisions.push(
-                        actions.scheduleActivityTask( 'invoice', version, result )
+                        actions.scheduleActivityTask( 'invoice', version )
                     );
                 },
                 ActivityTaskCompleted: function(event) {
@@ -201,6 +219,9 @@ exports.logic = function ( actions) {
             },
 
             'finalize' : {
+                _onEnter : function () {
+                    log.debug( 'finalize::onEnter' );
+                },
                 next: function() {
                     if (errors.length > 0) {
                         decisions.push(

@@ -12,19 +12,19 @@ function onmessage( e ) {
                 email : 'fred@bedrock.com'
             },
             module : module.id,
-            success : true
+            status : 200
         };
         log.info( 'load-user::doWork, result: {}', JSON.stringify( result ) );
         e.source.postMessage( result, true );
     }
 
-    setTimeout( doWork, 1000 );
+    setTimeout( doWork, 10 );
 }
 
 
 exports.ActivityType = {
     name : 'load-user',
-    version : '0.0.5',
+    version : '0.0.6',
     defaultTaskHeartbeatTimeout : '15',
     defaultTaskScheduleToCloseTimeout : 'NONE',
     defaultTaskScheduleToStartTimeout : 'NONE',

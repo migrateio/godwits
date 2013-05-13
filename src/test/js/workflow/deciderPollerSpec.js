@@ -8,37 +8,41 @@ describe( 'DeciderPoller', function () {
 
     describe( 'should have proper init values', function () {
 
-        it( 'should not be created without a valid deciderModuleId property', function () {
-            expect(function () {
-                new DeciderPoller( undefined, taskListName, {} );
-            } ).toThrow( 'DeciderPoller requires property [deciderModuleId]' );
-        } );
-
         it( 'should not be created without a taskListName property', function () {
             expect(function () {
-                new DeciderPoller( deciderModuleId, undefined, {} );
+                new DeciderPoller( undefined, {}, deciderModuleId );
             } ).toThrow( 'DeciderPoller requires property [taskListName]' );
         } );
 
-        it( 'should not be created without a workflow property', function () {
+        it( 'should not be created without a swfClient property', function () {
             expect(function () {
-                new DeciderPoller( deciderModuleId, taskListName, undefined );
-            } ).toThrow( 'DeciderPoller requires property [workflow]' );
+                new DeciderPoller( taskListName, undefined, deciderModuleId );
+            } ).toThrow( 'DeciderPoller requires property [swfClient]' );
         } );
 
     } );
 
     describe( 'should be able to control polling behavior', function () {
 
-        var decider, workflow;
+        var decider, swfClient;
 
         var start = function () {
             decider.start();
         };
 
         beforeEach( function () {
-            workflow = jasmine.createSpyObj( 'workflow', ['pollForDecisionTask'] );
-            decider = new DeciderPoller( deciderModuleId, taskListName, workflow );
+            swfClient = {
+                pollForDecisionTask: function() {
+                    // return fake promise
+                    return {
+                        wait: function() {
+                            return null;
+                        }
+                    }
+                }
+            };
+            spyOn(swfClient, 'pollForDecisionTask' ).andCallThrough();
+            decider = new DeciderPoller( taskListName, swfClient, deciderModuleId );
         } );
 
         afterEach( function () {
@@ -48,7 +52,7 @@ describe( 'DeciderPoller', function () {
         it( 'should be able to start polling', function () {
             runs( start );
             waitsFor( function () {
-                return workflow.pollForDecisionTask.wasCalled;
+                return swfClient.pollForDecisionTask.wasCalled;
             }, 'pollForDecisionTask to be called', 1000 );
         } );
 
@@ -56,15 +60,18 @@ describe( 'DeciderPoller', function () {
             // Start it up and make sure it is polling
             runs( start );
             waitsFor( function () {
-                return workflow.pollForDecisionTask.wasCalled;
+                return swfClient.pollForDecisionTask.wasCalled;
             }, 'pollForDecisionTask to be called', 1000 );
             runs( function () {
                 decider.stop();
-                workflow.pollForDecisionTask.reset();
             } );
             waits( 1200 );
             runs( function () {
-                expect( workflow.pollForDecisionTask ).not.toHaveBeenCalled();
+                swfClient.pollForDecisionTask.reset();
+            } );
+            waits( 1200 );
+            runs( function () {
+                expect( swfClient.pollForDecisionTask ).not.toHaveBeenCalled();
             } )
         } );
 
@@ -72,7 +79,7 @@ describe( 'DeciderPoller', function () {
             // Start it up and make sure it is polling
             runs( start );
             waitsFor( function () {
-                return workflow.pollForDecisionTask.wasCalled;
+                return swfClient.pollForDecisionTask.wasCalled;
             }, 'pollForDecisionTask to be called', 1000 );
             runs( function () {
                 decider.stop();
@@ -80,7 +87,7 @@ describe( 'DeciderPoller', function () {
             waits( 1200 );
             runs( start );
             waitsFor( function () {
-                return workflow.pollForDecisionTask.wasCalled;
+                return swfClient.pollForDecisionTask.wasCalled;
             }, 'pollForDecisionTask to be called', 1000 );
         } );
     } );

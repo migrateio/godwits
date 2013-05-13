@@ -8,17 +8,20 @@ function onmessage(e) {
     function doWork() {
         log.info( 'Performed the work in module [{}]', module.id );
         e.source.postMessage( {
+            data : {
+                successRate: 1.00
+            },
             module: module.id,
-            success: true
+            status: 200
         } );
     }
-    setTimeout(doWork, 1000);
+    setTimeout(doWork, 10);
 }
 
 
 exports.ActivityType = {
     name: 'analyze-results',
-    version: '0.0.5',
+    version: '0.0.6',
     defaultTaskHeartbeatTimeout: '15',
     defaultTaskScheduleToCloseTimeout: 'NONE',
     defaultTaskScheduleToStartTimeout: 'NONE',
