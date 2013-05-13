@@ -13,9 +13,9 @@
     <logger name="com.amazonaws.auth" level="WARN"/>
     <logger name="com.amazonaws.request" level="WARN"/>
 
-    <logger name="workflow.lib.swfClient" level="INFO"/>
+    <!--<logger name="workflow.lib.swfClient" level="INFO"/>-->
 
-    <root level="DEBUG">
+    <root level="WARN">
         <appender-ref ref="stdout"/>
     </root>
 </configuration>
