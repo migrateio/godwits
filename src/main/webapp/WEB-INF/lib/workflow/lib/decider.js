@@ -344,14 +344,17 @@ exports.Decider = function ( task, resolveDecisionModule ) {
      * > The DecisionTask containing the execution history events and specific proeprties
      * > which descibe the current workflow and task at hand.
      *
-     * _resolveDecisionModule_  {Function}
+     * _resolveDecisionModule_  {Function|String}
      * > An optional function which will resolve the module id of the decision logic for
      * > this particular workflow task. (see [`getDeciderModule()`](#getdecidermodulepath))
+     * > May also be passed as String value to indicate the resolved module id.
      *
      */
     function init( task, resolveDecisionModule ) {
         // Get the module path
-        var deciderModuleId = getDeciderModulePath( task, resolveDecisionModule );
+        var deciderModuleId = typeof resolveDecisionModule === 'function'
+            ? getDeciderModulePath( task, resolveDecisionModule )
+            : resolveDecisionModule;
         log.debug( 'Decider::init, moduleId: {}', deciderModuleId);
 
         // The Decision class is a Promise, so callers can invoke the then() function to
