@@ -511,7 +511,6 @@ function SwfClient( workflowOptions, accessKey, secretKey ) {
         var task = swfClient.pollForDecisionTask( request );
         if ( !task.taskToken ) return null;
 
-        log.info( 'SwfClient::pollForDecisionTask( {} )', task );
         if ( fullHistory ) completeDeciderHistory( request, task );
 
         return convertDeciderTaskToJson( task );
@@ -1065,7 +1064,6 @@ function SwfClient( workflowOptions, accessKey, secretKey ) {
                         name : value.getName()
                     }
                 } else if ( /input|result|control/.test(key) ) {
-                    log.info( 'Parsing JSON, key: {}, value: {}', key, JSON.stringify( value ) );
                     value = JSON.parse( value );
                 } else if ( key === 'tagList' ) {
                     var a = value.toArray();

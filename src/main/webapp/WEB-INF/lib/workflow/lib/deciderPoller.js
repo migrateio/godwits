@@ -89,14 +89,12 @@ function DeciderPoller( taskListName, swfClient, resolveDecisionModule ) {
                             .pollForDecisionTask( { taskListName : taskListName } )
                             .wait();
                     } catch ( e ) {
-                        log.error( 'DeciderPoller::poll', JSON.stringify( e ), e );
-                        log.error( 'DeciderPoller::poll, task: {}', JSON.stringify( task ) );
+//                        log.error( 'DeciderPoller::poll', JSON.stringify( e ), e );
+//                        log.error( 'DeciderPoller::poll, task: {}', JSON.stringify( task ) );
                         throw e;
                     }
 
                     if ( task && task.taskToken ) {
-                        log.debug( 'DeciderPoller::poll, task found {}',
-                            JSON.stringify( task ) );
                         startTask( task );
                     }
                     else log.debug( 'DeciderPoller::poll, no task found on list [{}]',

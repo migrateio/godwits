@@ -84,7 +84,7 @@ function main( args ) {
 
 //    log.info( 'Arguments: {}', JSON.stringify( args, null, 4 ) );
     var options = parser.parse( args );
-    log.info( 'Options: {}', JSON.stringify( options, null, 4 ) );
+    log.debug( 'Options: {}', JSON.stringify( options, null, 4 ) );
 
     if ( options.help ) {
         print( parser.help() );

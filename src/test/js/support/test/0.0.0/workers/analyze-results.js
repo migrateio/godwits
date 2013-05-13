@@ -8,6 +8,9 @@ function onmessage(e) {
     function doWork() {
         log.info( 'Performed the work in module [{}]', module.id );
         e.source.postMessage( {
+            data : {
+                successRate: 1.00
+            },
             module: module.id,
             status: 200
         } );
@@ -17,7 +20,7 @@ function onmessage(e) {
 
 
 exports.ActivityType = {
-    name: 'capture-payment',
+    name: 'analyze-results',
     version: '0.0.6',
     defaultTaskHeartbeatTimeout: '15',
     defaultTaskScheduleToCloseTimeout: 'NONE',

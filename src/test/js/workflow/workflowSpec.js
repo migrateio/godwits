@@ -97,15 +97,14 @@ describe( 'Workflow', function () {
         workflow = new Workflow( workflowType, accessKey, secretKey );
         expect( workflow ).toBeDefined();
         spyOn( workflow.swfClient, 'registerActivityType' ).andCallThrough();
-        var workers = [
-            activities.loadUser, activities.authPayment,
-            activities.doWork, activities.capturePayment
-        ];
-        workflow.registerWorkers( workerTaskList, workers );
+
+        Object.keys(activities ).forEach(function(key) {
+            workflow.registerWorkers( workerTaskList, activities[key] );
+        });
         workflow.registerDecider( deciderTaskList, function() {
             return deciderModuleId;
         } );
-        expect( workflow.swfClient.registerActivityType.calls.length ).toEqual( 4 );
+        expect( workflow.swfClient.registerActivityType.calls.length ).toEqual( 7 );
         workflow.start();
     } );
 
@@ -121,23 +120,21 @@ describe( 'Workflow', function () {
         expect( result.workflowId ).toEqual( jasmine.any( String ) );
 
         function checkForDone() {
-//            log.info( 'Retrieving executions status' );
             var execution = workflow.swfClient.describeWorkflowExecution( {
                 domain : workflowType.domain,
                 workflowId : result.workflowId,
                 runId : result.runId
             } ).wait( 10000 );
-//            log.info( 'Execution Status: {}', JSON.stringify( execution, null, 4 ) );
             if ( execution && execution.executionInfo.executionStatus === 'CLOSED' ) {
                 done();
             }
-            setTimeout( checkForDone, 10000 );
+            setTimeout( checkForDone, 500 );
         }
 
         log.info( 'Starting to check for done' );
-        setTimeout( checkForDone, 0 );
+        setTimeout( checkForDone, 500 );
 
-    }, 100000 );
+    }, 10000 );
 } );
 
 var accessKey = 'AKIAIIQOWQM6FFLQB2EQ';
@@ -146,20 +143,23 @@ var workerTaskList = 'test-tasklist-worker';
 var deciderTaskList = 'test-tasklist-decider';
 var deciderModuleId = 'test/0.0.0/deciders/simple-decider';
 var activities = {
-    loadUser : 'test/0.0.0/workers/load-user',
+    analyzeResults : 'test/0.0.0/workers/analyze-results',
     authPayment : 'test/0.0.0/workers/auth-payment',
-    doWork : 'test/0.0.0/workers/do-work',
+    invoice : 'test/0.0.0/workers/invoice',
+    loadUser : 'test/0.0.0/workers/load-user',
+    migrate : 'test/0.0.0/workers/migrate',
+    report : 'test/0.0.0/workers/report',
     capturePayment : 'test/0.0.0/workers/capture-payment'
 };
 var workflowType = {
     domain : 'dev-migrate',
     name : 'io.migrate.transfers',
-    version : '0.0.3',
+    version : '0.0.4',
     defaultChildPolicy : 'TERMINATE',
     defaultTaskListName : deciderTaskList,
     description : 'The primary workflow used for a transfer Run.',
     defaultExecutionStartToCloseTimeout : '2592000', // 1 month
-    defaultTaskStartToCloseTimeout : 'NONE'
+    defaultTaskStartToCloseTimeout : '60'   // Decisions should complete within a minute
 };
 
 var job = {

@@ -3,21 +3,13 @@ var {Decider} = require( 'workflow/decider' );
 
 describe( 'Decider', function () {
 
-    it( 'returns a promise', function ( done ) {
-        var decider = new Decider( 'test/0.0.0/deciders/simple-decider', [] );
-        expect( typeof decider.then === 'function' ).toBe( true );
-        decider.then( function () {
-            done();
-        } );
-    }, 2000 );
-
-    it( 'will be in initialized state after starting workflow', function ( done ) {
-        var decider = new Decider( 'test/0.0.0/deciders/simple-decider', [
+    it( 'will be able to take its first baby step', function ( done ) {
+        var decider = new Decider( { events: [
             {
                 "eventId" : 1,
                 "eventTimestamp" : 1326592619.474,
                 "eventType" : "WorkflowExecutionStarted",
-                "workflowExecutionStartedEventAttributes" : {
+                "WorkflowExecutionStartedEventAttributes" : {
                     "input" : job,
                     "parentInitiatedEventId" : 0,
                     "tagList" : ["music purchase", "digital", "ricoh-the-dog"],
@@ -29,21 +21,24 @@ describe( 'Decider', function () {
                         "version" : "1.0"
                     }
                 }
+            }],
+            workflowExecution: {
+                workflowId: '',
+                runId: ''
             }
-        ] );
+        }, 'test/0.0.0/deciders/simple-decider' );
 
-        decider.then( function ( data ) {
+        expect( typeof decider.then === 'function' ).toBe( true );
+        decider.then( function ( decisions ) {
+            expect( decisions ).toBeArray();
+            expect( decisions.length ).toEqual( 1 );
+            expect( decisions[0].type ).toEqual( 'ScheduleActivityTask' );
+            expect( decisions[0].activityId ).toBeDefined();
+            expect( decisions[0].activityType.name ).toEqual( 'load-user' );
+            expect( decisions[0].input ).toEqual( JSON.stringify({ userId : '123abc' }));
             done();
-//            log.info( 'Promise returned: {}', JSON.stringify( data ) );
-            expect( data.fsm.state ).toEqual( 'initialized' );
-            expect( data.decisions ).toBeArray();
-            expect( data.decisions.length ).toEqual( 1 );
-            expect( data.decisions[0].type ).toEqual( 'ScheduleActivityTask' );
-            expect( data.decisions[0].activityId ).toBeDefined();
-            expect( data.decisions[0].activityType.name ).toEqual( 'load-customer' );
-            expect( data.decisions[0].input ).toEqual( { userId : '123abc' } );
         } );
-    }, 1000 );
+    }, 500 );
 
     var job = {
         jobId : '4N9w5',

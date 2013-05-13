@@ -17,7 +17,7 @@ function onmessage(e) {
 
 
 exports.ActivityType = {
-    name: 'capture-payment',
+    name: 'invoice',
     version: '0.0.6',
     defaultTaskHeartbeatTimeout: '15',
     defaultTaskScheduleToCloseTimeout: 'NONE',

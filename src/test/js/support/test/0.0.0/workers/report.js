@@ -9,16 +9,16 @@ function onmessage(e) {
         log.info( 'Performed the work in module [{}]', module.id );
         e.source.postMessage( {
             module: module.id,
-            success: true
+            status: 200
         } );
     }
-    setTimeout(doWork, 10000);
+    setTimeout(doWork, 10);
 }
 
 
 exports.ActivityType = {
-    name: 'do-work',
-    version: '0.0.5',
+    name: 'report',
+    version: '0.0.6',
     defaultTaskHeartbeatTimeout: '15',
     defaultTaskScheduleToCloseTimeout: 'NONE',
     defaultTaskScheduleToStartTimeout: 'NONE',
