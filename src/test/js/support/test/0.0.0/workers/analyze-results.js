@@ -12,12 +12,12 @@ function onmessage(e) {
             success: true
         } );
     }
-    setTimeout(doWork, 10000);
+    setTimeout(doWork, 1000);
 }
 
 
 exports.ActivityType = {
-    name: 'do-work',
+    name: 'analyze-results',
     version: '0.0.5',
     defaultTaskHeartbeatTimeout: '15',
     defaultTaskScheduleToCloseTimeout: 'NONE',

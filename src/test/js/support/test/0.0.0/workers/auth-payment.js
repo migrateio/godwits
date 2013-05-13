@@ -12,7 +12,7 @@ function onmessage(e) {
             success: true
         } );
     }
-    setTimeout(doWork, 10000);
+    setTimeout(doWork, 1000);
 }
 
 

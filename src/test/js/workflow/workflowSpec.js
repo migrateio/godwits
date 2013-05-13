@@ -121,23 +121,21 @@ describe( 'Workflow', function () {
         expect( result.workflowId ).toEqual( jasmine.any( String ) );
 
         function checkForDone() {
-//            log.info( 'Retrieving executions status' );
             var execution = workflow.swfClient.describeWorkflowExecution( {
                 domain : workflowType.domain,
                 workflowId : result.workflowId,
                 runId : result.runId
             } ).wait( 10000 );
-//            log.info( 'Execution Status: {}', JSON.stringify( execution, null, 4 ) );
             if ( execution && execution.executionInfo.executionStatus === 'CLOSED' ) {
                 done();
             }
-            setTimeout( checkForDone, 10000 );
+            setTimeout( checkForDone, 500 );
         }
 
         log.info( 'Starting to check for done' );
-        setTimeout( checkForDone, 0 );
+        setTimeout( checkForDone, 500 );
 
-    }, 100000 );
+    }, 10000 );
 } );
 
 var accessKey = 'AKIAIIQOWQM6FFLQB2EQ';
@@ -154,12 +152,12 @@ var activities = {
 var workflowType = {
     domain : 'dev-migrate',
     name : 'io.migrate.transfers',
-    version : '0.0.3',
+    version : '0.0.4',
     defaultChildPolicy : 'TERMINATE',
     defaultTaskListName : deciderTaskList,
     description : 'The primary workflow used for a transfer Run.',
     defaultExecutionStartToCloseTimeout : '2592000', // 1 month
-    defaultTaskStartToCloseTimeout : 'NONE'
+    defaultTaskStartToCloseTimeout : '60'   // Decisions should complete within a minute
 };
 
 var job = {

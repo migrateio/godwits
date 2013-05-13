@@ -18,7 +18,7 @@ function onmessage( e ) {
         e.source.postMessage( result, true );
     }
 
-    setTimeout( doWork, 5000 );
+    setTimeout( doWork, 1000 );
 }
 
 

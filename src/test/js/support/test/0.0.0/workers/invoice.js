@@ -12,12 +12,12 @@ function onmessage(e) {
             success: true
         } );
     }
-    setTimeout(doWork, 5000);
+    setTimeout(doWork, 1000);
 }
 
 
 exports.ActivityType = {
-    name: 'capture-payment',
+    name: 'invoice',
     version: '0.0.5',
     defaultTaskHeartbeatTimeout: '15',
     defaultTaskScheduleToCloseTimeout: 'NONE',
