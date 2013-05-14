@@ -1,3 +1,4 @@
+//noinspection BadExpressionStatementJS
 'use strict';
 
 var log = require( 'ringo/logging' ).getLogger( module.id );
@@ -80,9 +81,12 @@ exports.Users = BaseDomain.subClass( {
         var {schema} = require( 'domain/schema/users.js' );
         var map = store.getMap( 'dev-users' );
         var pk = function(user) {
-            return user.email.address;
+            return user.id;
         };
-        this._super('Users', map, pk, schema);
+        var query = function(key) {
+            return /^select /ig.test(key);
+        };
+        this._super('Users', map, pk, query, schema);
     }
 } );
 

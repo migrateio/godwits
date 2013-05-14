@@ -317,12 +317,10 @@ exports.Decider = function ( task, resolveDecisionModule ) {
     function getDeciderModulePath( task, resolveDecisionModule ) {
         // The name of the decider module is determined by convention unless overriden
         if ( typeof resolveDecisionModule !== 'function' ) {
-            var path = [];
-            path.push( 'workflow' );
-            path.push( task.workflowType.name );
-            path.push( task.workflowType.version );
-            path.push( 'decider' );
-            return path.join( '/' );
+            return 'workflow/workers'
+                + task.workflowType.name
+                + '-'
+                + task.workflowType.version;
         } else {
             return resolveDecisionModule.call( this, task );
         }

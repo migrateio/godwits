@@ -10,8 +10,8 @@ var {
     } = Packages.com.amazonaws.services.simpledb;
 var {
     DomainMetadataRequest, BatchDeleteAttributesRequest, DeletableItem,
-    DeleteAttributesRequest, BatchPutAttributesRequest, ReplaceableItem,
-    PutAttributesRequest, GetAttributesRequest, ReplaceableAttribute
+    DeleteAttributesRequest, BatchPutAttributesRequest, GetAttributesRequest,
+    PutAttributesRequest, ReplaceableAttribute, ReplaceableItem, SelectRequest
     } = Packages.com.amazonaws.services.simpledb.model;
 
 exports.SimpleDBStore = function ( mapName, options ) {
@@ -29,6 +29,13 @@ exports.SimpleDBStore = function ( mapName, options ) {
      * @return value of the key
      */
     function load( key ) {
+        // If we are dealing with the load of a query, forward that request to the
+        // query function.
+        if (/^__query/ig.test(key)) {
+            var select = key.substring( 8 );
+            return query( select );
+        }
+
         log.debug( 'SimpleDBStore::load, table: {}, key: {}',
             tableName, JSON.stringify( key ) );
 
@@ -46,7 +53,6 @@ exports.SimpleDBStore = function ( mapName, options ) {
             attrs = result.attributes;
             for ( var i = attrs.iterator(); i.hasNext(); ) {
                 var attr = i.next();
-                log.debug( 'SimpleDBStore::load, attrs: ', attr );
                 if ( attr.name === '_value' ) {
                     return attr.value;
                 }
@@ -57,6 +63,54 @@ exports.SimpleDBStore = function ( mapName, options ) {
         }
 
         return null;
+    }
+
+    /**
+     * Queries the server for one or more objects that match the query template.
+     *
+     * Support for the token is going to be a little tricky to make the API slightly
+     * nice. SimpleDB requires the query string on each request, so from the top-level
+     * of the api, we would have to pass in the token _and_ the query. This is where it
+     * will get a bit ugly. As an alternative, we could store the query in Hazelcast
+     * using the token as the key. Then, if a future request for the token comes in, we
+     * would already have the token. There are some problems with that approach, mainly
+     * there was at one time a restriction from using hazelcast while in this MapStore
+     * implementation. Need to check if that restriction is still valid, and if so,
+     * perhaps we can move the storing of the query up one level in the api to the base
+     * class.
+     *
+     * @param select
+     * @return An array of matching objects
+     */
+    function query( select ) {
+        log.debug( 'SimpleDBStore::query, table: {}, key: {}',
+            tableName, JSON.stringify( select ) );
+
+        var response = [];
+
+        var request = new SelectRequest()
+            .withConsistentRead( true )
+            .withSelectExpression( select );
+
+        try {
+            var result = client.select( request );
+
+//            if (result.nextToken) response.next = result.nextToken;
+
+            result.items.toArray().forEach( function ( item ) {
+                for ( var i = item.attributes.iterator(); i.hasNext(); ) {
+                    var attr = i.next();
+                    if ( attr.name === '_value' ) {
+                        response.push(attr.value);
+                    }
+                }
+            });
+        } catch ( e ) {
+            log.error( 'SimpleDBStore::query', e.toString() );
+            throw e;
+        }
+
+        return JSON.stringify( response );
     }
 
     /**
@@ -183,7 +237,7 @@ exports.SimpleDBStore = function ( mapName, options ) {
     function jsonToAttributes(value) {
         var json = typeof value === 'string' ? JSON.parse( value ) : value;
         var props = jsonToProps( json );
-        log.info( 'Making pmvn clean testrops: {}', JSON.stringify( props ) );
+        log.info( 'Making props: {}', JSON.stringify( props ) );
 
         var attrs = new java.util.ArrayList();
         attrs.add( new ReplaceableAttribute( '_value', value, true ) );

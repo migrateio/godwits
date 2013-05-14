@@ -151,9 +151,8 @@ function Map( hazelcast, mapName ) {
      *         {@code null} if this map contains no mapping for the key
      */
     var get = function ( key ) {
-        if ( typeof key === 'object' ) return queryGet( key );
         var value = map.get( key );
-        log.debug( 'Getting from map [{}/{}]: {}', mapName, key, value );
+
         if ( typeof value === 'string' ) {
             return JSON.parse( value );
         } else {

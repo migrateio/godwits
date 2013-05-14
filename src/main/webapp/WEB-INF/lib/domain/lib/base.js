@@ -10,7 +10,7 @@ var {JsonSchema} = require( 'tv4' );
  */
 exports.BaseDomain = Object.subClass( {
 
-    init : function ( name, map, pk, schema ) {
+    init : function ( name, map, pk, query, schema ) {
         if ( typeof name !== 'string' ) throw { status : 400,
             message : 'Domain object requires parameter [name] as a string'
         };
@@ -20,6 +20,9 @@ exports.BaseDomain = Object.subClass( {
         if ( typeof pk !== 'function' ) throw { status : 400,
             message : 'Domain object [' + name + '] requires parameter [pk] as a function'
         };
+        if ( typeof query !== 'function' ) throw { status : 400,
+            message : 'Domain object [' + name + '] requires parameter [query] as a function'
+        };
         if ( typeof schema !== 'object' ) throw { status : 400,
             message : 'Domain object [' + name + '] requires parameter [schema] as a function'
         };
@@ -27,6 +30,7 @@ exports.BaseDomain = Object.subClass( {
         this.name = name;
         this.map = map;
         this.pk = pk;
+        this.query = query;
 
         var js = new JsonSchema();
         this.validateSchema = function ( obj ) {
@@ -107,13 +111,20 @@ exports.BaseDomain = Object.subClass( {
 
         return newObj;
     },
-    read : function ( pkey ) {
 
+    read : function ( pkey ) {
         // Verify that the parameter is correct
         if ( !pkey ) throw {
             status : 400,
             message : this.name + '::read requires a primary key value'
         };
+
+        // If the key is a query (as identified by the subclass), pass it on through to
+        // the map, and on the way back out, evict the query from the map's cache.
+        var isQuery = this.query( pkey );
+        if (isQuery) {
+            pkey = '__query:' + pkey;
+        }
 
         // Get the current object from the map
         var obj = this.map.get( pkey );
@@ -121,6 +132,23 @@ exports.BaseDomain = Object.subClass( {
             status : 404,
             message : this.name + '::read not found [' + pkey + ']'
         };
+
+        if (isQuery) {
+            this.map.evict( pkey );
+
+            // Queries will return arrays of json strings
+            if (Array.isArray(obj)) {
+                var result = obj.map(function(item) {
+                    if ( typeof item === 'string' ) {
+                        return JSON.parse( item );
+                    } else {
+                        return null;
+                    }
+                });
+                log.info( 'Result in Map: {}', JSON.stringify( result, null, 4 ) );
+                return result;
+            }
+        }
 
         return obj;
     },

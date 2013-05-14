@@ -44,7 +44,7 @@
         <aws.access_key>${migrate.aws.access_key}</aws.access_key>
         <aws.secret_key>${migrate.aws.secret_key}</aws.secret_key>
 
-        <tv4-version>1.0.1</tv4-version>
+        <tv4-version>1.0.2</tv4-version>
 
         <watcher></watcher>
         <test.verbosity>4</test.verbosity>

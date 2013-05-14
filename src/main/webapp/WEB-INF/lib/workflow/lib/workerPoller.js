@@ -158,35 +158,6 @@ function WorkerPoller( taskListName, swfClient ) {
             }
         }
     } );
-/*
-    var poll = java.lang.Runnable( {
-        run : function () {
-            while ( !shuttingDown ) {
-                while ( polling ) {
-                    try {
-                        var task = swfClient
-                            .pollForActivityTask( { taskListName : taskListName } )
-                            .wait();
-                    } catch ( e ) {
-                        log.error( 'WorkerPoller::poll', JSON.stringify( e ) );
-                    }
-
-                    if ( task && task.taskToken ) startTask( task );
-                    else log.debug( 'WorkerPoller::poll, no task found on list [{}]',
-                        taskListName );
-
-                    if ( shuttingDown ) {
-                        if ( workerCount === 0 )
-                            log.debug( 'WorkerPoller [{}] is terminated', taskListName );
-                        break;
-                    }
-                }
-                // todo: comment this out and see if it starves other threads
-                java.lang.Thread.sleep( 1000 );
-            }
-        }
-    } );
-*/
 
     /**
      * ### _workerSuccess_
