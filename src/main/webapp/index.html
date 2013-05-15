@@ -1,9 +1,141 @@
 <!DOCTYPE html>
-<html>
+<html lang="en" ng-app="migrate">
 <head>
-    <title></title>
+    <title>Migrate IO | Transfer your email, contacts, calendars, photos and more</title>
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description"
+          content="Safely and quickly transfer all of your emails, calendars, photos and more from one web service to another using the indistry leading cloud migration service.">
+    <meta name="author" content="Migrate IO">
+
+    <link href='http://fonts.googleapis.com/css?family=Allerta|Leckerli+One'
+          rel='stylesheet' type='text/css'>
+    <link href="lib/jquery-ui/css/ui-lightness/jquery-ui-1.10.3.custom.min.css"
+          rel="stylesheet" type="text/css">
+    <link href="lib/bootstrap/css/bootstrap.min.css" rel="stylesheet" type="text/css">
+    <link href="lib/bootstrap/css/bootstrap-responsive.css" rel="stylesheet"
+          type="text/css">
+    <link href="css/migrate-basecamp.css" rel="stylesheet" type="text/css">
+    <link href="css/default.css" rel="stylesheet" type="text/css">
+
+    <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
+    <!--[if lt IE 9]>
+    <script src="lib/html5shiv/js/html5shiv.js"></script>
+    <![endif]-->
+
+    <!-- Fav and touch icons -->
+    <link rel="apple-touch-icon" sizes="144x144"
+          href="img/icons/app-icon-144.png">
+    <link rel="apple-touch-icon" sizes="114x114"
+          href="img/icons/app-icon-114.png">
+    <link rel="apple-touch-icon" sizes="72x72"
+          href="img/icons/app-icon-72.png">
+    <link rel="apple-touch-icon" href="img/icons/app-icon-57.png">
+    <link rel="shortcut icon" href="img/icons/app-icon-32.png">
+    <!--[if IE]>
+    <link rel="shortcut icon" href="img/icons/favicon.ico"><![endif]-->
+    <!-- or, set for IE10 win -->
+    <meta name="msapplication-TileColor" content="#1EB6CE">
+    <meta name="msapplication-TileImage"
+          content="lib/local/img/icons/app-icon-128-a.png">
 </head>
+
 <body>
-    <h1>Success</h1>
+
+<div class="container outer header">
+
+    <div class="container inner">
+        <div class="masthead">
+            <div class="row-fluid">
+                <div class="span2 center">
+                    <a class="btn btn-large btn-header" href="#">Home</a>
+                </div>
+                <div class="span2 center">
+                    <a class="btn btn-large btn-header" href="#">About</a>
+                </div>
+                <div class="span4 center">
+                    <img src="img/header/migrate-io.png" width="240" height="70"
+                         alt="Migrate IO"/>
+                </div>
+                <div class="span2 center">
+                    <a class="btn btn-large btn-header" href="#/signin">Migrations</a>
+                </div>
+                <div class="span2 center">
+                    <a class="btn btn-large btn-header" href="#">Sign Up</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="ng-view"></div>
+
+<div class="container outer footer">
+    <div class="container inner">
+        <div class="row-fluid">
+            <div class="span4 center">
+                <img src="img/header/migrate-io.png" width="180" height="53"
+                     alt="Migrate IO"/>
+
+                <ul class="nav nav-pills nav-stacked">
+                    <li class="active"><a href="#">Home</a></li>
+                    <li class=""><a href="#">About</a></li>
+                    <li class=""><a href="#">Migrations</a></li>
+                    <li class="nav-menu"><a href="#">Sign Up</a></li>
+                </ul>
+            </div>
+            <div class="span4">
+                <form>
+                    <h3>Sign Up & Migrate!</h3>
+
+                    <p>
+                        <input type="text" placeholder="First Name"/>
+                    </p>
+
+                    <p>
+                        <input type="email" placeholder="Email Address"/>
+                    </p>
+
+                    <p style="text-align: right;">
+                        <a href="#" class="btn btn-large btn-success">Sign Up</a>
+                    </p>
+                </form>
+            </div>
+            <div class="span4">
+                <div class="twitter">
+                    <h3>
+                        <img src="img/footer/twitter.png" width="25" height="21"
+                             alt="twitter"
+                             style="margin-right: 20px;"/>
+                        Stay Up-to-Date
+                    </h3>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container outer bottom">
+    <div class="container inner">
+        <div class="row-fluid">
+            <div class="span12">
+                <p>Copyright &copy; 2013, Migrate IO, LLC, All rights reserved.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script src="lib/jquery-ui/js/jquery-1.9.1.js"></script>
+<script src="lib/jquery-ui/js/jquery-ui-1.10.3.custom.min.js"></script>
+<script src="lib/bootstrap/js/bootstrap.min.js"></script>
+<script src="lib/angular/angular.min.js"></script>
+<script src="lib/angular/angular-resource.min.js"></script>
+<script src="lib/angular-ui/ui-utils/angular-ui-utils.min.js"></script>
+<!--[if lte IE 8]>
+<script src="/lib/angular-ui/ui-utils/angular-ui-utils-ieshiv.min.js"></script>
+<![endif]-->
+<script src="js/app.js"></script>
 </body>
 </html>

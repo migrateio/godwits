@@ -1,0 +1,231 @@
+body {
+    padding-bottom: 60px;
+    font-family: Allerta, "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+
+.cursive {
+    font-family: 'Leckerli One', cursive;
+}
+
+.hicolor {
+    color: #fcc769;
+}
+
+.center {
+    text-align: center;
+}
+
+/*
+    There are typically two containers on the website because there are background
+    elements (primarily background colors) which will stretch the width of the page.
+    Inside of these 'outer' containers are nested an 'inner' container with a fixed
+    width of 960 pixels. Most of the content goes inside one of these inner containers.
+*/
+
+.container.outer {
+    margin: 0;
+    width: 100%;
+}
+
+.container.inner {
+    width: 960px;
+}
+
+
+/*
+    Both the masthead and the hero are contained within the header container.
+*/
+
+.container.header {
+    background-color: #21b6ce;
+}
+
+
+/*
+    The masthead is on all of the pages and includes the logo and main menu.
+*/
+
+.masthead {
+    padding: 30px 0 0 0;
+}
+
+.masthead .btn {
+    margin-top: 18px;
+    font-size: 12pt;
+    min-width: 70px;
+}
+
+/*
+    The hero row is on the homepage and is directly below the masthead.
+*/
+
+.hero {
+    margin-top: 20px;
+}
+
+.hero h1 {
+    color: #fdfdfb;
+    letter-spacing: -0.1em;
+}
+
+.hero h2 {
+    font-weight: normal;
+    font-size: 34px;
+}
+
+.hero p {
+    color: #fdfdfb;
+    font-size: 20pt;
+    line-height: 24pt;
+    font-weight: normal;
+    letter-spacing: -0.05em;
+    margin: 5px 0 20px 0;
+}
+
+.hero .btn {
+    font-size: 22px;
+    letter-spacing: -0.05em;
+}
+
+
+/*
+    Section on the homepage directly below the hero page.
+*/
+.marketing {
+    margin: 25px 0 35px 0;
+}
+
+.marketing h4 {
+    color: #65c6d8;
+    font-size: 120%;
+}
+
+.marketing p {
+    color: #909090;
+    font-size: 110%;
+}
+
+
+
+/*
+    Below the marketing row are a series of features.
+*/
+
+.container.features {
+    background: #f0f7f8; /* Old browsers */
+    background: -moz-linear-gradient(top,  #f0f7f8 0%, #eaf4f5 2%, #eaf4f5 90%, #e1edee 100%); /* FF3.6+ */
+    background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#f0f7f8), color-stop(2%,#eaf4f5), color-stop(90%,#eaf4f5), color-stop(100%,#e1edee)); /* Chrome,Safari4+ */
+    background: -webkit-linear-gradient(top,  #f0f7f8 0%,#eaf4f5 2%,#eaf4f5 90%,#e1edee 100%); /* Chrome10+,Safari5.1+ */
+    background: -o-linear-gradient(top,  #f0f7f8 0%,#eaf4f5 2%,#eaf4f5 90%,#e1edee 100%); /* Opera 11.10+ */
+    background: -ms-linear-gradient(top,  #f0f7f8 0%,#eaf4f5 2%,#eaf4f5 90%,#e1edee 100%); /* IE10+ */
+    background: linear-gradient(to bottom,  #f0f7f8 0%,#eaf4f5 2%,#eaf4f5 90%,#e1edee 100%); /* W3C */
+    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#f0f7f8', endColorstr='#e1edee',GradientType=0 ); /* IE6-9 */
+}
+
+.features h4 {
+    font-weight: normal;
+}
+
+.features p {
+    font-size: 110%;
+    color: #8a8d8d;
+}
+
+/*
+    The footer appears at the bottom of every page.
+*/
+
+.container.footer {
+    background-color: #21b6ce;
+}
+
+.container.footer > div {
+    margin-top: 40px;
+}
+
+/*
+    The navigation menu in the footer is a slightly modified bootstrap nav.
+*/
+
+.footer .nav>li>a:hover,
+.footer .nav>li>a:focus,
+.footer .nav-pills>.active>a,
+.footer .nav-pills>.active>a:hover,
+.footer .nav-pills>.active>a:focus {
+    background-color: #1da3b8;
+}
+
+.footer ul.nav {
+    text-align: left;
+}
+
+.footer .nav-pills>li>a {
+    margin: 2px 0;
+    -webkit-border-radius: 3px;
+    -moz-border-radius: 3px;
+    border-radius: 3px;
+}
+
+.footer .nav-pills>li>a {
+    font-size: 16px;
+    line-height: 20px;
+    display: inline-block;
+    color: #fdfdfb;
+    padding: 8px 20px;
+}
+
+/*
+    Form for signing up is in the footer.
+*/
+
+.footer form {
+    background-color: #1da3b8;
+    padding: 10px 30px;
+}
+
+.footer form input {
+    width: 100%;
+    -webkit-box-sizing: border-box; /* Safari/Chrome, other WebKit */
+    -moz-box-sizing: border-box;    /* Firefox, other Gecko */
+    box-sizing: border-box;         /* Opera/IE 8+ */
+    padding: 16px 10px;
+    font-size: 16px;
+    line-height: 20px;
+}
+
+.footer form h3 {
+    color: #fdfdfb;
+    letter-spacing: -0.1em;
+    /*font-size: 12px;*/
+}
+
+/*
+    Twitter feed is also in the footer
+*/
+
+.footer .twitter {
+    padding: 10px 30px;
+}
+
+.footer .twitter h3 {
+    color: #fdfdfb;
+    letter-spacing: -0.1em;
+    /*font-size: 12px;*/
+}
+
+/*
+    And right below the footer is a small row containing copyright.
+*/
+
+.container.bottom {
+    background-color: #1da3b8;
+}
+
+.container.bottom p {
+    color: #fdfdfb;
+    font-size: 12px;
+    line-height: 20px;
+    padding: 0;
+    margin: 8px 0;
+}
+
