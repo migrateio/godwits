@@ -102,7 +102,7 @@
         </init-param>
     </filter>
 
-<!--    <filter-mapping>
+    <filter-mapping>
         <filter-name>hazelcast-filter</filter-name>
         <url-pattern>/*</url-pattern>
         <dispatcher>FORWARD</dispatcher>
@@ -112,7 +112,7 @@
 
     <listener>
         <listener-class>com.hazelcast.web.SessionListener</listener-class>
-    </listener>-->
+    </listener>
 
     <!-- Ringo Servlet for API (Web Services)-->
 
