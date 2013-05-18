@@ -10,7 +10,27 @@ exports.Map = Map;
 // todo: Expose the thread count as a configurable option
 var executor = module.singleton( module.id, function () {
     var MAX_THREADS = 20;
-    return new Packages.com.zocia.platform.AsyncExecutorService( MAX_THREADS );
+    var SECONDS = java.util.concurrent.TimeUnit.SECONDS;
+
+    var pool = new java.util.concurrent.ThreadPoolExecutor(
+        1, MAX_THREADS, 60, SECONDS, new java.util.concurrent.SynchronousQueue()
+    );
+
+    var engine = require("ringo/engine");
+    engine.addShutdownHook(function() {
+        log.info('Shutting down execution pool for hazelcast maps');
+        pool.shutdown();
+        try {
+            if (!pool.awaitTermination(60, SECONDS)) {
+                log.warn( 'Executor did not terminate in the specified time.' );
+                pool.shutdownNow();
+            }
+        } catch (e) {
+            log.error("Execution service was interrupted while attempting graceful shutdown.");
+            pool.shutdownNow();
+            java.lang.Thread.currentThread().interrupt();
+        }
+    });
 } );
 
 function Map( hazelcast, mapName ) {

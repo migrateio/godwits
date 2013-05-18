@@ -72,6 +72,17 @@ exports.init = function () {
     // Iterate over map configs and setup those map stores that need it.
     config.mapConfigs.entrySet().toArray().forEach( initializeMapStores );
 
+    // If there is already an instance of Hazelcast with the same name running we will
+    // use that instance instead of creating a brand new one.
+    var name = config.groupConfig.name;
+    var instance = Hazelcast.getHazelcastInstanceByName(name);
+    if (instance) {
+        log.info( 'init::bazelcast instance is already running' );
+        hazelcast = instance;
+        return;
+    }
+
+
     hazelcast = Hazelcast.newHazelcastInstance( config );
 };
 

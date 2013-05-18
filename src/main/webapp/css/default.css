@@ -3,6 +3,17 @@ body {
     font-family: Allerta, "Helvetica Neue", Helvetica, Arial, sans-serif;
 }
 
+/*
+    Style to be used in conjunction with Angular's ng-cloak directive. It is included
+    in angular.js, but since we load that file at the end of our page there is still a
+    FOUC visible. Putting it here ensures the offending elements are hidden on initial
+    load.
+*/
+[ng\:cloak], [ng-cloak], [data-ng-cloak], [x-ng-cloak], .ng-cloak, .x-ng-cloak {
+    display: none;
+}
+
+
 .cursive {
     font-family: 'Leckerli One', cursive;
 }

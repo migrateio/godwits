@@ -1,15 +1,16 @@
 <!DOCTYPE html>
-<html lang="en" ng-app="migrate">
+<html lang="en" x-ng-app="migrate">
 <head>
     <title>Migrate IO | Transfer your email, contacts, calendars, photos and more</title>
 
     <meta charset="utf-8">
+    <meta name="fragment" content="!"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description"
           content="Safely and quickly transfer all of your emails, calendars, photos and more from one web service to another using the indistry leading cloud migration service.">
     <meta name="author" content="Migrate IO">
 
-    <link href='http://fonts.googleapis.com/css?family=Allerta|Leckerli+One'
+    <link href='//fonts.googleapis.com/css?family=Allerta|Leckerli+One'
           rel='stylesheet' type='text/css'>
     <link href="lib/jquery-ui/css/ui-lightness/jquery-ui-1.10.3.custom.min.css"
           rel="stylesheet" type="text/css">
@@ -49,7 +50,7 @@
         <div class="masthead">
             <div class="row-fluid">
                 <div class="span2 center">
-                    <a class="btn btn-large btn-header" href="#">Home</a>
+                    <a class="btn btn-large btn-header" href="#/">Home</a>
                 </div>
                 <div class="span2 center">
                     <a class="btn btn-large btn-header" href="#">About</a>
@@ -59,10 +60,27 @@
                          alt="Migrate IO"/>
                 </div>
                 <div class="span2 center">
-                    <a class="btn btn-large btn-header" href="#/signin">Migrations</a>
+                    <a class="btn btn-large btn-header" href="#/jobs">Migrations</a>
                 </div>
                 <div class="span2 center">
-                    <a class="btn btn-large btn-header" href="#">Sign Up</a>
+                    <div x-ng-cloak x-ng-controller="auth-me">
+                        <div x-ng-switch on="authenticated">
+                            <div x-ng-switch-when="true">
+                                <div class="btn-group">
+                                    <a class="btn btn-large btn-header dropdown-toggle" data-toggle="dropdown"
+                                       href="#">Profile&nbsp;&nbsp;<span class="caret"></span></a>
+                                    <ul class="dropdown-menu">
+                                        <li><a href="#/profile">My profile</a></li>
+                                        <li><a href="#/jobs">My jobs</a></li>
+                                        <li><a href="" x-ng-click="signout()">Sign out</a></li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <span x-ng-switch-default>
+                                <a class="btn btn-large btn-header" href="#/signin">Sign In</a>
+                            </span>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -79,10 +97,10 @@
                      alt="Migrate IO"/>
 
                 <ul class="nav nav-pills nav-stacked">
-                    <li class="active"><a href="#">Home</a></li>
+                    <li class="active"><a href="#/">Home</a></li>
                     <li class=""><a href="#">About</a></li>
                     <li class=""><a href="#">Migrations</a></li>
-                    <li class="nav-menu"><a href="#">Sign Up</a></li>
+                    <li class="nav-menu"><a href="#/jobs">Sign In</a></li>
                 </ul>
             </div>
             <div class="span4">
@@ -136,6 +154,8 @@
 <!--[if lte IE 8]>
 <script src="/lib/angular-ui/ui-utils/angular-ui-utils-ieshiv.min.js"></script>
 <![endif]-->
+<script src="lib/security/auth.js"></script>
+<script src="lib/security/spring.js"></script>
 <script src="js/app.js"></script>
 </body>
 </html>

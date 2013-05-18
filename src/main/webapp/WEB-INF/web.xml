@@ -5,20 +5,39 @@
 		  http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
          version="2.5">
 
-    <distributable />
+    <distributable/>
 
-    <!-- Spring Bootstrap
+    <!-- Snoop -->
+
+    <filter>
+        <filter-name>snoop</filter-name>
+        <filter-class>io.migrate.servlet.SnoopFilter</filter-class>
+    </filter>
+
+    <filter-mapping>
+        <filter-name>snoop</filter-name>
+        <url-pattern>/*</url-pattern>
+    </filter-mapping>
+
+    <!-- Spring Bootstrap -->
+
+    <listener>
+        <listener-class>ch.qos.logback.ext.spring.web.LogbackConfigListener
+        </listener-class>
+    </listener>
 
     <context-param>
         <param-name>contextConfigLocation</param-name>
         <param-value>
-            classpath:spring-context.xml
+            <!--classpath:spring-context.xml-->
             classpath:spring-security.xml
         </param-value>
     </context-param>
 
     <listener>
-        <listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
+        <listener-class>
+            org.springframework.web.context.ContextLoaderListener
+        </listener-class>
     </listener>
 
     <filter>
@@ -30,7 +49,71 @@
         <filter-name>springSecurityFilterChain</filter-name>
         <url-pattern>/*</url-pattern>
     </filter-mapping>
--->
+
+    <!-- Hazelcast Clustered HttpSession -->
+
+    <filter>
+        <filter-name>hazelcast-filter</filter-name>
+        <filter-class>com.hazelcast.web.WebFilter</filter-class>
+        <init-param>
+            <param-name>config-location</param-name>
+            <param-value>hazelcast-cache.xml</param-value>
+        </init-param>
+        <!--
+            Name of the distributed map storing your web session objects
+        -->
+        <init-param>
+            <param-name>map-name</param-name>
+            <param-value>my-sessions</param-value>
+        </init-param>
+        <!--
+            How is your load-balancer configured? sticky-session means all requests of a
+            session is routed to the node where the session is first created. This is
+            excellent for performance. If sticky-session is set to false, when a session
+            is updated on a node, entry for this session on all other nodes is
+            invalidated. You have to know how your load-balancer is configured before
+            setting this parameter. Default is true.
+        -->
+        <init-param>
+            <param-name>sticky-session</param-name>
+            <param-value>true</param-value>
+        </init-param>
+        <!--
+            Name of session id cookie
+        -->
+        <init-param>
+            <param-name>cookie-name</param-name>
+            <param-value>hazelcast.sessionId</param-value>
+        </init-param>
+        <!--
+            Are you debugging? Default is false.
+        -->
+        <init-param>
+            <param-name>debug</param-name>
+            <param-value>true</param-value>
+        </init-param>
+        <!--
+            Do you want to shutdown HazelcastInstance during web application undeploy
+            process? Default is true.
+        -->
+        <init-param>
+            <param-name>shutdown-on-destroy</param-name>
+            <param-value>true</param-value>
+        </init-param>
+    </filter>
+
+<!--    <filter-mapping>
+        <filter-name>hazelcast-filter</filter-name>
+        <url-pattern>/*</url-pattern>
+        <dispatcher>FORWARD</dispatcher>
+        <dispatcher>INCLUDE</dispatcher>
+        <dispatcher>REQUEST</dispatcher>
+    </filter-mapping>
+
+    <listener>
+        <listener-class>com.hazelcast.web.SessionListener</listener-class>
+    </listener>-->
+
     <!-- Ringo Servlet for API (Web Services)-->
 
     <servlet>
@@ -42,7 +125,7 @@
         </init-param>
         <init-param>
             <param-name>optlevel</param-name>
-            <param-value>0</param-value>
+            <param-value>-1</param-value>
         </init-param>
         <init-param>
             <param-name>production</param-name>
@@ -51,6 +134,10 @@
         <init-param>
             <param-name>debug</param-name>
             <param-value>false</param-value>
+        </init-param>
+        <init-param>
+            <param-name>bootscript</param-name>
+            <param-value>bootscripts/init.js,bootscripts/seed.js</param-value>
         </init-param>
         <init-param>
             <param-name>module-path</param-name>
@@ -66,4 +153,13 @@
         <url-pattern>/api/*</url-pattern>
     </servlet-mapping>
 
+    <security-constraint>
+        <web-resource-collection>
+            <web-resource-name>migrate</web-resource-name>
+            <url-pattern>/*</url-pattern>
+        </web-resource-collection>
+        <user-data-constraint>
+            <transport-guarantee>CONFIDENTIAL</transport-guarantee>
+        </user-data-constraint>
+    </security-constraint>
 </web-app>

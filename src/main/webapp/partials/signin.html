@@ -1,1 +1,40 @@
-<h1>Sign In</h1>
+
+<div x-ng-controller="spring-auth-controller">
+    <form class="form-horizontal" name="login" ng-submit="submit()">
+
+        <div class="alert alert-error alert-block" ng-show="showSignInError">
+            <button type="button" class="close" ui-event="{ closed: 'closeErrorAlert()' }" data-dismiss="alert"></button>
+            <div>
+                <h4>Error while signing in</h4>
+                <span>{{signInErrorMessage}}</span>
+            </div>
+        </div>
+
+        <div class="control-group">
+            <label class="control-label" for="username" >Username</label>
+            <div class="controls">
+                <input id="username" type="text" ng-model="username" required />
+            </div>
+        </div>
+
+        <div class="control-group">
+            <label class="control-label" for="password">Password</label>
+            <div class="controls">
+                <input id="password" type="password" ng-model="password" required/>
+                <a href="#">Forgot Password</a>
+            </div>
+        </div>
+        <div class="control-group">
+            <label class="control-label"></label>
+            <div class="controls">
+                <input class="btn btn-success" type="submit" value="Sign In"/>
+            <span class="help-inline">
+                <input type="checkbox" ng-model="remember">
+                <strong>Remember me <i>for 30 days</i></strong>
+            </span>
+            </div>
+        </div>
+
+    </form>
+</div>
+
