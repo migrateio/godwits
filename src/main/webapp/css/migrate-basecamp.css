@@ -57,6 +57,13 @@ input[type="color"],
     border: 1px solid #ddebec;
 }
 
+.input-append .add-on, .input-prepend .add-on {
+    padding: 6px 6px;
+}
+
+.input-append, .input-prepend {
+}
+
 .well {
     background-color: #f5f5f5;
 }
@@ -84,7 +91,6 @@ input[type="color"],
     outline-offset: 0;
 }
 
-}
 
 .btn.disabled, .btn[disabled] {
     -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=30)";  /* IE 8 */

@@ -14,12 +14,22 @@ body {
 }
 
 
+.icon-envelope, .icon-user, .icon-lock {
+    color: #999999;
+}
+
+
+
 .cursive {
     font-family: 'Leckerli One', cursive;
 }
 
 .hicolor {
     color: #fcc769;
+}
+
+.white {
+    color: #fbfbfb;
 }
 
 .center {
@@ -191,23 +201,20 @@ body {
 
 .footer form {
     background-color: #1da3b8;
-    padding: 10px 30px;
+    padding: 20px 20px;
 }
 
-.footer form input {
-    width: 100%;
-    -webkit-box-sizing: border-box; /* Safari/Chrome, other WebKit */
-    -moz-box-sizing: border-box;    /* Firefox, other Gecko */
-    box-sizing: border-box;         /* Opera/IE 8+ */
-    padding: 16px 10px;
-    font-size: 16px;
-    line-height: 20px;
+input[type="text"], input[type="email"] {
+    width: 226px;
 }
 
-.footer form h3 {
+.footer form .input-prepend input {
+    padding-right: 0;
+}
+
+.footer h3 {
     color: #fdfdfb;
     letter-spacing: -0.1em;
-    /*font-size: 12px;*/
 }
 
 /*
@@ -240,3 +247,122 @@ body {
     margin: 8px 0;
 }
 
+/*
+    Sign up and sign in form styles
+*/
+
+div.sign-in {
+    text-align: center;
+}
+
+div.sign-in .header {
+    position: relative;
+    height: 4em;
+}
+
+div.sign-in h3 {
+    margin: 0;
+    position: absolute;
+    display: inline;
+    left: 0;
+}
+
+div.sign-in h4 {
+    margin: 0;
+    position: absolute;
+    display: inline;
+    text-decoration: underline;
+    font-size: .8em;
+    bottom: 1.2em;
+    right: 0;
+}
+
+div.sign-in form {
+    position: relative;
+    margin: 2em;
+    display: inline-block;
+    border: 1px solid #999999;
+    padding: 20px;
+}
+
+div.sign-in form div.submit {
+    text-align: right;
+}
+
+div.sign-in form div.submit > div {
+    float: left;
+    padding-top: 5px;
+}
+
+div.sign-in form div.submit > div span:last-child {
+    font-size: 0.8em;
+    font-style: italic;
+}
+
+div.sign-in form div.submit input {
+    margin: 0;
+}
+
+
+/*
+    General form styling and validation
+*/
+input.ng-invalid.ng-dirty + div.tooltip {
+    display: block;
+}
+
+input.ng-invalid.ng-dirty + div.tooltip div.tooltip-arrow {
+    border-right-color: #8b0000;
+}
+
+input.ng-invalid.ng-dirty + div.tooltip div.tooltip-inner {
+    background-color: #8b0000;
+}
+
+input + div.tooltip {
+    display: none;
+}
+
+
+
+/*
+    The ng-view component is animated using the following classes
+*/
+/*
+.main-leave-setup, .main-enter-setup {
+    -webkit-transform: translate3d(0, 0, 0);
+    -webkit-transition:all linear 0.25s;
+    -moz-transition:all linear 0.25s;
+    -ms-transition:all linear 0.25s;
+    -o-transition:all linear 0.25s;
+    transition:all linear 0.25s;
+}
+
+.main-viewer {
+    position:relative;
+    height: 200px;
+}
+
+.main-viewer > * {
+    display:block;
+    width:100%;
+    position:absolute;
+    top:0;
+    left:0;
+    right:0;
+    bottom:0;
+    padding:10px;
+}
+
+.main-enter-setup {
+    left:100%;
+}
+.main-enter-setup.main-enter-start {
+    left:0;
+}
+
+.main-leave-setup { }
+.main-leave-setup.main-leave-start {
+    left:-100%;
+}
+*/

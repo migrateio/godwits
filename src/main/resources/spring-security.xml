@@ -14,7 +14,7 @@
     <http pattern="/js/**" security="none"/>
     <http pattern="/css/**" security="none"/>
     <http pattern="/" security="none"/>
-    <http pattern="/partials/home.html" security="none"/>
+    <http pattern="/partials/*.html" security="none"/>
 
 
     <http auto-config='true' use-expressions="true">
