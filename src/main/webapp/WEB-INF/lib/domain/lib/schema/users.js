@@ -4,6 +4,9 @@ exports.schema = {
         id: {
             type: 'string'
         },
+        name: {
+            type: 'string'
+        },
         password: {
             type: 'string'
         },
@@ -36,11 +39,20 @@ exports.schema = {
             'default': {},
             additionalProperties: false
         },
+        roles: {
+            type: 'array',
+            "items": {
+                "type": "string"
+            },
+            "minItems": 1,
+            "uniqueItems": true,
+            'default': ['ROLE_USER']
+        },
         created: {
             type: 'string',
             format: 'date-time'
         }
     },
     additionalProperties: false,
-    required: ['id', 'email']
+    required: ['id', 'email', 'name', 'roles']
 };

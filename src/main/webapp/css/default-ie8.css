@@ -1,0 +1,18 @@
+body {
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+
+
+.icon-envelope, .icon-user, .icon-lock {
+    color: #000000;
+}
+
+div.sign-in form {
+    width: 269px;
+}
+
+
+.cursive {
+    font-family: cursive;
+}
+

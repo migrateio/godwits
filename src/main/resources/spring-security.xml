@@ -1,0 +1,67 @@
+<beans:beans xmlns="http://www.springframework.org/schema/security"
+             xmlns:beans="http://www.springframework.org/schema/beans"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xsi:schemaLocation="http://www.springframework.org/schema/beans
+           http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+           http://www.springframework.org/schema/security
+           http://www.springframework.org/schema/security/spring-security-3.1.xsd">
+
+
+    <!-- No security on any of these urls -->
+
+    <http pattern="/lib/**" security="none" />
+    <http pattern="/img/**" security="none"/>
+    <http pattern="/js/**" security="none"/>
+    <http pattern="/css/**" security="none"/>
+    <http pattern="/" security="none"/>
+    <http pattern="/partials/*.html" security="none"/>
+
+
+    <http auto-config='true' use-expressions="true" entry-point-ref="authenticationEntryPoint">
+        <intercept-url pattern="/partials/jobs.html"
+                       access="hasRole('ROLE_USER')" requires-channel="any"/>
+        <intercept-url pattern="/api/auth/" access="isAuthenticated() or isAnonymous()" requires-channel="https"/>
+        <intercept-url pattern="/api/**" access="isAuthenticated()" requires-channel="https"/>
+        <remember-me key="migrateiscool" use-secure-cookie="false"
+                user-service-ref="userDetailsService" token-validity-seconds="86400"/>
+        <!-- Set to 30 days when we go to production - 2592000 secs -->
+        <http-basic />
+        <form-login
+                authentication-success-handler-ref="ajaxAuthenticationSuccessHandler"
+                authentication-failure-handler-ref="ajaxAuthenticationFailureHandler"/>
+        <logout success-handler-ref="ajaxLogoutSuccessHandler"/>
+    </http>
+
+    <!-- Rewrite these handlers to support AJAX authentication -->
+    <beans:bean id="authenticationEntryPoint"
+                class="io.migrate.spring.security.Http401DeniedEntryPoint"/>
+    <beans:bean id="ajaxAuthenticationSuccessHandler"
+                class="io.migrate.spring.security.AjaxAuthenticationSuccessHandler"/>
+    <beans:bean id="ajaxAuthenticationFailureHandler"
+                class="io.migrate.spring.security.AjaxAuthenticationFailureHandler"/>
+    <beans:bean id="ajaxLogoutSuccessHandler"
+                class="io.migrate.spring.security.AjaxLogoutSuccessHandler"/>
+
+    <authentication-manager>
+        <authentication-provider user-service-ref="userDetailsService">
+            <password-encoder hash="sha-256"/>
+        </authentication-provider>
+
+        <authentication-provider>
+            <user-service>
+                <user name="wilma" password="secret"
+                      authorities="ROLE_USER, ROLE_ADMIN"/>
+            </user-service>
+        </authentication-provider>
+    </authentication-manager>
+
+    <beans:bean id="userDetailsService"
+                class="io.migrate.spring.security.MigrateUserDetailsService">
+        <beans:property name="select"
+                        value="select _value from `${environment}-users` where `email.address` = '{username}'"/>
+        <beans:property name="awsAccess" value="${aws.app.access_key}"/>
+        <beans:property name="awsSecret" value="${aws.app.secret_key}"/>
+    </beans:bean>
+
+</beans:beans>
+

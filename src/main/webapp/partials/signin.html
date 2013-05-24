@@ -1,1 +1,50 @@
-<h1>Sign In</h1>
+<div class="sign-in" x-ng-controller="spring-auth-controller">
+    <form name="signin" novalidate ng-submit="submit()">
+
+        <div class="header clearfix" style="text-align: left;">
+            <h3>Sign In</h3>
+            <span><a href="#">register</a></span>
+        </div>
+
+        <div alert ng-repeat="alert in alerts" type="alert.type" close="closeAlert($index)">
+            <span ng-bind-html-unsafe="alert.msg"></span>
+        </div>
+
+
+        <div class="controls">
+            <div class="input-prepend">
+                <span class="add-on"><i class="icon-envelope gray"></i></span>
+                <input name="username" type="email" x-ng-model="username" placeholder="Email" required>
+            </div>
+            <div x-valid-tooltip input-target="signin.username">
+                <span ng-show="signin.username.$error.required">An email address is required</span>
+                <span ng-show="signin.username.$error.email">This is not a valid email address</span>
+            </div>
+        </div>
+
+        <div class="controls">
+            <div class="input-prepend">
+                <span class="add-on"><span class="icon-lock icon-gray"></span></span>
+                <input x-pass-xray="showPass" type="password" name="password" ng-model="password" placeholder="Password" required>
+            </div>
+            <div x-valid-tooltip input-target="signin.password">
+                <span ng-show="signin.password.$error.required">Password is required</span>
+            </div>
+        </div>
+
+        <div class="controls clearfix">
+            <span class="pull-left"><input type="checkbox" ng-model="showPass" />Show password</span>
+            <span class="pull-right"><a href="#">forgot</a></span>
+        </div>
+
+        <div class="controls submit">
+            <div>
+                <input type="checkbox" ng-model="remember">
+                <span>Remember me</span>
+                <span class="last">(for 30 days)</span>
+            </div>
+            <input ng-disabled="signin.$invalid" class="btn btn-success" type="submit" value="Sign In"/>
+        </div>
+    </form>
+</div>
+

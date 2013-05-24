@@ -3,7 +3,8 @@
 <configuration scan="true" scanPeriod="15 seconds">
     <appender name="stdout" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
-            <pattern>%date{HH:mm:ss:SSS} %5p [%8.8t] %30.30logger{30} %5.5line - %m%n</pattern>
+            <!--<pattern>%date{HH:mm:ss:SSS} %5p [%8.8t] %30.30logger{30} %5.5line - %m%n</pattern>-->
+            <pattern>%6.6relative{6} [%10.10thread] %highlight(%-5level [%30.30logger{30}] %m) %n%n</pattern>
         </encoder>
     </appender>
 
@@ -12,6 +13,7 @@
     <logger name="ssl" level="INFO"/>
     <logger name="org.eclipse.jetty" level="INFO"/>
     <logger name="org.springframework" level="INFO"/>
+    <logger name="org.springframework.security" level="DEBUG"/>
     <logger name="org.ringojs" level="TRACE"/>
 
     <root level="DEBUG">

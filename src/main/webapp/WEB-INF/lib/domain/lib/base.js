@@ -1,6 +1,5 @@
 var log = require( 'ringo/logging' ).getLogger( module.id );
 var {merge} = require( 'ringo/utils/objects' );
-var store = require( 'store-js' );
 var {JsonSchema} = require( 'tv4' );
 
 

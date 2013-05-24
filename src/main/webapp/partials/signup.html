@@ -1,0 +1,42 @@
+<div x-ng-controller="spring-auth-controller">
+    <form name="login" ng-submit="submit()">
+
+        <div x-ng-cloak x-ng-controller="auth-me">
+            <div x-ng-switch on="authenticated">
+                <div x-ng-switch-when="true">
+                    <div class="alert alert-error alert-block" x-ng-show="showSignUpError">
+                        <button type="button" class="close" data-dismiss="alert"></button>
+                        <div>
+                            <h4>You are Signed In</h4>
+                            <p>
+                                To sign up for a new account, sign out using the button
+                                below, or press cancel to return to the home screen.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <div x-ng-switch-default>
+                    <div class="controls">
+                        <div class="input-prepend">
+                            <span class="add-on"><i class="icon-user"></i></span>
+                            <input type="text" ng-model="firstname" placeholder="First Name">
+                        </div>
+                    </div>
+
+                    <div class="controls">
+                        <div class="input-prepend">
+                            <span class="add-on"><i class="icon-envelope"></i></span>
+                            <input type="email" x-ng-model="email" placeholder="Email">
+                        </div>
+                    </div>
+
+                    <div class="controls" style="text-align: right;">
+                        <input class="btn btn-success" type="submit" value="Sign Up"/>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </form>
+</div>
+

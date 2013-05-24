@@ -21,16 +21,16 @@
         <jetty-version>8.1.9.v20130131</jetty-version>
 
         <slf4j-version>1.7.5</slf4j-version>
-        <logback-version>1.0.12</logback-version>
+        <logback-version>1.0.13</logback-version>
 
         <mail-version>1.5.0-b01</mail-version>
 
         <ringo-version>0.9.0.1</ringo-version>
         <stick-version>0.1.0-alpha-7</stick-version>
-        <store-version>1.0.6-SNAPSHOT</store-version>
+        <hazelcast-version>2.3.1</hazelcast-version>
 
-        <spring-version>3.2.1.RELEASE</spring-version>
-        <springsec-version>3.1.3.RELEASE</springsec-version>
+        <spring-version>3.2.2.RELEASE</spring-version>
+        <springsec-version>3.1.4.RELEASE</springsec-version>
         <springext-version>1.0.10</springext-version>
 
         <beanstalk-version>1.0.5</beanstalk-version>
@@ -40,7 +40,7 @@
         </beanstalk.s3.name>
 
         <!-- Amazon deployment credentials -->
-        <aws-version>1.4.2.1</aws-version>
+        <aws-version>1.4.3</aws-version>
         <aws.access_key>${migrate.aws.access_key}</aws.access_key>
         <aws.secret_key>${migrate.aws.secret_key}</aws.secret_key>
 
@@ -71,18 +71,23 @@
             <version>${stick-version}</version>
         </dependency>
 
+<!--
         <dependency>
             <groupId>org.ringojs</groupId>
             <artifactId>httpclient-jetty</artifactId>
             <version>1.0.0-SNAPSHOT</version>
         </dependency>
+-->
 
+<!--
         <dependency>
             <groupId>org.pykl.ringojs</groupId>
             <artifactId>spring-ext</artifactId>
             <version>${springext-version}</version>
         </dependency>
+-->
 
+<!--
         <dependency>
             <groupId>com.zocia.platform</groupId>
             <artifactId>store-js</artifactId>
@@ -92,11 +97,90 @@
                     <groupId>org.slf4j</groupId>
                     <artifactId>slf4j-log4j12</artifactId>
                 </exclusion>
+                <exclusion>
+                    <groupId>log4j</groupId>
+                    <artifactId>log4j</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+-->
+
+        <!-- Hazelcast -->
+
+        <dependency>
+            <groupId>com.hazelcast</groupId>
+            <artifactId>hazelcast</artifactId>
+            <version>${hazelcast-version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.hazelcast</groupId>
+            <artifactId>hazelcast-wm</artifactId>
+            <version>${hazelcast-version}</version>
+        </dependency>
+
+        <!-- Spring / Spring Security -->
+
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-web</artifactId>
+            <version>${spring-version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-expression</artifactId>
+            <version>${spring-version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework</groupId>
+            <artifactId>spring-jdbc</artifactId>
+            <version>${spring-version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-core</artifactId>
+            <version>${springsec-version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-web</artifactId>
+            <version>${springsec-version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.springframework</groupId>
+                    <artifactId>spring-jdbc</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>org.springframework</groupId>
+                    <artifactId>spring-tx</artifactId>
+                </exclusion>
             </exclusions>
         </dependency>
 
+        <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-config</artifactId>
+            <version>${springsec-version}</version>
+        </dependency>
 
-        <!-- Jetty's HTTP Client -->
+
+        <!-- Jetty -->
+
+        <dependency>
+            <groupId>org.eclipse.jetty</groupId>
+            <artifactId>jetty-servlets</artifactId>
+            <version>${jetty-version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.eclipse.jetty</groupId>
+            <artifactId>jetty-http</artifactId>
+            <version>${jetty-version}</version>
+        </dependency>
 
         <!--
                 <dependency>
@@ -139,10 +223,23 @@
         </dependency>
 
         <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>jul-to-slf4j</artifactId>
+            <version>${slf4j-version}</version>
+        </dependency>
+
+        <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
             <version>${logback-version}</version>
         </dependency>
+
+        <dependency>
+            <groupId>org.logback-extensions</groupId>
+            <artifactId>logback-ext-spring</artifactId>
+            <version>0.1.1</version>
+        </dependency>
+
 
         <!-- SIGAR for native OS monitoring -->
 
@@ -222,6 +319,35 @@
             -->
 
             <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>keytool-maven-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <phase>generate-resources</phase>
+                        <id>clean</id>
+                        <goals>
+                            <goal>clean</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <phase>generate-resources</phase>
+                        <id>genkey</id>
+                        <goals>
+                            <goal>genkey</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <keystore>${project.build.directory}/jetty-ssl.keystore</keystore>
+                    <dname>cn=dev.migrate.io</dname><!-- put your CN here-->
+                    <keypass>jetty6</keypass>
+                    <storepass>jetty6</storepass>
+                    <alias>jetty6</alias>
+                    <keyalg>RSA</keyalg>
+                </configuration>
+            </plugin>
+
+            <plugin>
                 <groupId>org.mortbay.jetty</groupId>
                 <artifactId>jetty-maven-plugin</artifactId>
                 <version>${jetty-version}</version>
@@ -234,7 +360,7 @@
                         </systemProperty>
                     </systemProperties>
                     <webAppConfig>
-                        <contextPath>/mio</contextPath>
+                        <!--<contextPath>/mio</contextPath>-->
                         <descriptor>${project.build.directory}/web.xml</descriptor>
                         <resourceBases>
                             <resourceBase>src/main/webapp</resourceBase>
@@ -244,7 +370,15 @@
                         <connector
                                 implementation="org.eclipse.jetty.server.nio.SelectChannelConnector">
                             <port>8080</port>
+                            <confidentialPort>8443</confidentialPort>
                             <maxIdleTime>60000</maxIdleTime>
+                        </connector>
+                        <connector implementation="org.eclipse.jetty.server.ssl.SslSocketConnector">
+                            <port>8443</port>
+                            <maxIdleTime>60000</maxIdleTime>
+                            <keystore>${project.build.directory}/jetty-ssl.keystore</keystore>
+                            <password>jetty6</password>
+                            <keyPassword>jetty6</keyPassword>
                         </connector>
                     </connectors>
                     <stopKey>abcdef</stopKey>
@@ -338,8 +472,7 @@
             <properties>
                 <environment>dev</environment>
 
-                <!-- The URL to access web services from the gc platform. -->
-                <localUrl>http://localhost:8080/migrate</localUrl>
+                <ga.id>UA-41014735-2</ga.id>
 
                 <!-- Hazelcast configuration -->
                 <hz.name>hazelcast-${beanstalk.environment.name}-${user.name}</hz.name>
@@ -356,8 +489,8 @@
             <id>qa</id>
             <properties>
                 <environment>qa</environment>
-                <localUrl>http://${beanstalk.environment.name}.elasticbeanstalk.com/api
-                </localUrl>
+
+                <ga.id>UA-41014735-2</ga.id>
 
                 <!-- Hazelcast configuration -->
                 <hz.name>hazelcast-${beanstalk.environment.name}</hz.name>
@@ -374,8 +507,8 @@
             <id>prod</id>
             <properties>
                 <environment>prod</environment>
-                <localUrl>http://${beanstalk.environment.name}.elasticbeanstalk.com/api
-                </localUrl>
+
+                <ga.id>UA-41014735-1</ga.id>
 
                 <!-- Hazelcast configuration -->
                 <hz.name>hazelcast-${beanstalk.environment.name}</hz.name>
