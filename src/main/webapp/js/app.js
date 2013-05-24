@@ -28,10 +28,10 @@ angular.module( 'migrateApp', [
 
     .config( ['AnalyticsProvider',
     function ( AnalyticsProvider ) {
-        // initial configuration
-        AnalyticsProvider.setAccount( 'UA-41014735-1' );
+        var production = /(www\.)*migrate\.io/i.test(window.location.hostname);
+        var ga = production ? 'UA-41014735-2' : 'UA-41014735-1';
 
-        // track all routes (or not)
+        AnalyticsProvider.setAccount( ga );
         AnalyticsProvider.trackPages( true );
     }]
 );
