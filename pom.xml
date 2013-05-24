@@ -472,8 +472,7 @@
             <properties>
                 <environment>dev</environment>
 
-                <!-- The URL to access web services from the gc platform. -->
-                <localUrl>http://localhost:8080/migrate</localUrl>
+                <ga.id>UA-41014735-2</ga.id>
 
                 <!-- Hazelcast configuration -->
                 <hz.name>hazelcast-${beanstalk.environment.name}-${user.name}</hz.name>
@@ -490,8 +489,8 @@
             <id>qa</id>
             <properties>
                 <environment>qa</environment>
-                <localUrl>http://${beanstalk.environment.name}.elasticbeanstalk.com/api
-                </localUrl>
+
+                <ga.id>UA-41014735-2</ga.id>
 
                 <!-- Hazelcast configuration -->
                 <hz.name>hazelcast-${beanstalk.environment.name}</hz.name>
@@ -508,8 +507,8 @@
             <id>prod</id>
             <properties>
                 <environment>prod</environment>
-                <localUrl>http://${beanstalk.environment.name}.elasticbeanstalk.com/api
-                </localUrl>
+
+                <ga.id>UA-41014735-1</ga.id>
 
                 <!-- Hazelcast configuration -->
                 <hz.name>hazelcast-${beanstalk.environment.name}</hz.name>

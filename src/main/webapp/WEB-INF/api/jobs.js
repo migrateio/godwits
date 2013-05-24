@@ -7,6 +7,7 @@ app.configure('error', 'notfound', 'params', 'route');
 var {json} = require('ringo/jsgi/response');
 
 app.get('/', function (req) {
+    java.lang.Thread.sleep( 5000 );
     return json({
         success: true
     });

@@ -1,24 +1,22 @@
 (function () {
     "use strict";
 
-    var mod = angular.module( 'spring-security', ['angular-auth'] );
+    var mod = angular.module( 'spring-security', ['angular-auth'] )
+        .run( ['$log', '$rootScope', '$location', 'authEvents',
+        function ( $log, $rootScope, $location, authEvents ) {
 
-    mod.factory( 'authListeners',
-        ['$rootScope', '$location', 'authEvents',
-            function ( $rootScope, $location, authEvents ) {
+            var originalPath;
 
-                var originalUrl = $location.url();
+            $rootScope.$on( authEvents.EVENT_LOGIN_REQUIRED, function (e, path) {
+                originalPath = path;
+                $location.path( '/signin' );
+            } );
 
-                $rootScope.on( authEvents.EVENT_LOGIN_REQUIRED, function () {
-                    $location.url( '#/signin.html' );
-                } );
-
-                $rootScope.on( authEvents.EVENT_LOGIN_CONFIRMED, function () {
-                    if (originalUrl) $location.url( originalUrl );
-                    originalUrl = null;
-                } );
-            }
-        ]
+            $rootScope.$on( authEvents.EVENT_LOGIN_CONFIRMED, function () {
+                if ( originalPath ) $location.path( originalPath );
+                originalPath = null;
+            } );
+        } ]
     );
 
     /**
@@ -31,26 +29,26 @@
 
             $scope.authenticated = false;
 
-            $rootScope.$on(authService.events.EVENT_LOGOUT_CONFIRMED, function() {
+            $rootScope.$on( authService.events.EVENT_LOGOUT_CONFIRMED, function () {
                 $scope.authenticated = false;
                 $log.info( 'Setting $scope.authenticated to false' );
-            });
+            } );
 
-            $rootScope.$on(authService.events.EVENT_LOGIN_CONFIRMED, function() {
+            $rootScope.$on( authService.events.EVENT_LOGIN_CONFIRMED, function () {
                 $scope.authenticated = true;
                 $log.info( 'Setting $scope.authenticated to true' );
-            });
+            } );
 
             /**
              * Signs the user out using the spring security conventions, and broadcasts
              * the result to all listeners.
              */
-            $scope.signout = function() {
+            $scope.signout = function () {
                 $log.info( 'Attempting logout of the user' );
-                $http.get( 'j_spring_security_logout' ).then(function() {
+                $http.get( 'j_spring_security_logout' ).then( function () {
                     $log.info( 'Logout succeeds' );
                     authService.logout();
-                });
+                } );
             };
 
             /**
@@ -61,15 +59,15 @@
              */
             function passiveAuth() {
                 $log.info( 'Attempting passive authentication of the user' );
-                $http.get('/api/auth/' ).success(function(data) {
-                    $log.info( 'Result of /api/auth/', JSON.stringify(data) );
+                $http.get( '/api/auth/' ).success( function ( data ) {
+                    $log.info( 'Result of /api/auth/', JSON.stringify( data ) );
                     $scope.authenticated = data.isAuthenticated;
-                });
+                } );
             }
 
             // If the user hasn't explicity authenticated at some point, let's try a
             // passive auth attempt.
-            if (!$scope.authenticated) passiveAuth();
+            if ( !$scope.authenticated ) passiveAuth();
         }
     ] );
 
@@ -77,13 +75,19 @@
         ['$log', '$rootScope', '$scope', '$http', 'authService',
             function ( $log, $rootScope, $scope, $http, authService ) {
 
+//                $scope.username = '';
+//                $scope.password = '';
                 $scope.username = 'admin@migrate.io';
                 $scope.password = 'secret';
                 $scope.remember = false;
-                $scope.showSignInError = false;
+                $scope.alerts = [];
+
+                $scope.closeAlert = function ( index ) {
+                    $scope.alerts.splice( index, 1 );
+                };
 
                 $scope.submit = function () {
-                    $scope.showSignInError = false;
+                    $scope.alerts = [];
 
                     var success = function ( data ) {
                         $log.info( 'Response from auth request:', JSON.stringify( data ) );
@@ -95,12 +99,18 @@
                                 // todo: Handle case where user has not yet verified their email address
                                 break;
                             case 'AUTH_BAD_CREDENTIALS' :
-                                $scope.signInErrorMessage = 'Your email address or password isn\'t correct. Please try again.';
-                                $scope.showSignInError = true;
+                                $scope.alerts.push( {
+                                    type : 'error',
+                                    msg : 'Your email address or password isn\'t correct. \
+                                        Please try again.'
+                                } );
                                 break;
                             default :
-                                $scope.signInErrorMessage = 'Unknown error occurred while signing in. This isn\'t your fault, it is ours. We are on it.';
-                                $scope.showSignInError = true;
+                                $scope.alerts.push( {
+                                    type : 'error',
+                                    msg : 'Unknown error occurred while signing in. \
+                                        This isn\'t your fault, it is ours. We are on it.'
+                                } );
                                 break;
                         }
                     };
@@ -119,12 +129,10 @@
 
                     $log.info( 'Data:', data );
 
-                    $http.post( '/j_spring_security_check', $.param(data), config )
+                    $http.post( '/j_spring_security_check', $.param( data ), config )
                         .success( success )
                         .error( function () {
-                            $scope.signInErrorMessage = 'Unknown error occurred while signing in. This isn\'t your fault, it is ours. We are on it.';
-                            $scope.showSignInError = true;
-                            $log.error( 'Error while authenticating to Spring', arguments );
+                            success( 'AUTH_ERROR' );
                         } );
                 }
 

@@ -46,8 +46,8 @@
         }] );
 
     mod.config( ['$httpProvider', function ( $httpProvider ) {
-        var authInterceptor = ['$rootScope', '$q', 'httpBuffer', 'authEvents',
-            function ( $rootScope, $q, httpBuffer, authEvents ) {
+        var authInterceptor = ['$rootScope', '$q', 'httpBuffer', 'authEvents', '$location',
+            function ( $rootScope, $q, httpBuffer, authEvents, $location ) {
                 var success = function ( response ) {
                     return response;
                 };
@@ -58,7 +58,7 @@
                     if ( response.status === 401 ) {
                         var deferred = $q.defer();
                         httpBuffer.append( response.config, deferred );
-                        $rootScope.$broadcast( authEvents.EVENT_LOGIN_REQUIRED );
+                        $rootScope.$broadcast( authEvents.EVENT_LOGIN_REQUIRED, $location.path() );
                         return deferred.promise;
                     }
                     // No need to replay the requests that result in a 403

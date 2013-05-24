@@ -1,48 +1,48 @@
 <div class="sign-in" x-ng-controller="spring-auth-controller">
     <form name="signin" novalidate ng-submit="submit()">
 
-        <div class="header">
+        <div class="header clearfix" style="text-align: left;">
             <h3>Sign In</h3>
-            <h4><a href="#">register</a></h4>
+            <span><a href="#">register</a></span>
         </div>
 
-        <div class="alert alert-error alert-block" ng-show="showSignInError">
-            <button type="button" class="close" data-dismiss="alert"></button>
-            <div>
-                <h4>Error while signing in</h4>
-                <span>{{signInErrorMessage}}</span>
-            </div>
-        </div>
-
-        <div class="controls">
-            <div class="input-prepend">
-                <span class="add-on"><i class="icon-envelope"></i></span>
-                <input name="email" type="email" x-ng-model="email" placeholder="Email" required>
-            </div>
-            <div x-valid-tooltip input-target="signin.email">
-                <span ng-show="signin.email.$error.required">An email address is required</span>
-                <span ng-show="signin.email.$error.email">This is not a valid email address</span>
-            </div>
+        <div alert ng-repeat="alert in alerts" type="alert.type" close="closeAlert($index)">
+            <span ng-bind-html-unsafe="alert.msg"></span>
         </div>
 
 
         <div class="controls">
             <div class="input-prepend">
-                <span class="add-on"><i class="icon-lock"></i></span>
-                <input type="text" name="password" ng-model="password" placeholder="Password" required>
+                <span class="add-on"><i class="icon-envelope gray"></i></span>
+                <input name="username" type="email" x-ng-model="username" placeholder="Email" required>
+            </div>
+            <div x-valid-tooltip input-target="signin.username">
+                <span ng-show="signin.username.$error.required">An email address is required</span>
+                <span ng-show="signin.username.$error.email">This is not a valid email address</span>
+            </div>
+        </div>
+
+        <div class="controls">
+            <div class="input-prepend">
+                <span class="add-on"><span class="icon-lock icon-gray"></span></span>
+                <input x-pass-xray="showPass" type="password" name="password" ng-model="password" placeholder="Password" required>
             </div>
             <div x-valid-tooltip input-target="signin.password">
                 <span ng-show="signin.password.$error.required">Password is required</span>
             </div>
         </div>
 
+        <div class="controls clearfix">
+            <span class="pull-left"><input type="checkbox" ng-model="showPass" />Show password</span>
+            <span class="pull-right"><a href="#">forgot</a></span>
+        </div>
+
         <div class="controls submit">
             <div>
                 <input type="checkbox" ng-model="remember">
                 <span>Remember me</span>
-                <span>(for 30 days)</span>
+                <span class="last">(for 30 days)</span>
             </div>
-            <!--<input class="btn btn-success" type="submit" value="Sign In"/>-->
             <input ng-disabled="signin.$invalid" class="btn btn-success" type="submit" value="Sign In"/>
         </div>
     </form>
