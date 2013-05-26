@@ -14,7 +14,12 @@
 
             $rootScope.$on( authEvents.EVENT_LOGIN_CONFIRMED, function () {
                 if ( originalPath ) $location.path( originalPath );
+                else $location.path( '/' );
                 originalPath = null;
+            } );
+
+            $rootScope.$on( authEvents.EVENT_LOGOUT_CONFIRMED, function () {
+                $location.path( '/' );
             } );
         } ]
     );
@@ -71,7 +76,7 @@
         }
     ] );
 
-    mod.controller( 'spring-auth-controller',
+    mod.controller( 'signin-controller',
         ['$log', '$rootScope', '$scope', '$http', 'authService',
             function ( $log, $rootScope, $scope, $http, authService ) {
 
@@ -133,6 +138,50 @@
                         .success( success )
                         .error( function () {
                             success( 'AUTH_ERROR' );
+                        } );
+                }
+
+            }
+        ]
+    );
+
+    mod.controller( 'signup-controller',
+        ['$log', '$rootScope', '$scope', '$http', '$location',
+            function ( $log, $rootScope, $scope, $http, $location ) {
+
+                $scope.firstname = '';
+                $scope.email = '';
+                $scope.alerts = [];
+
+                $scope.closeAlert = function ( index ) {
+                    $scope.alerts.splice( index, 1 );
+                };
+
+                $scope.submit = function () {
+                    $scope.alerts = [];
+
+                    var success = function ( data ) {
+                        $log.info( 'Response from create user request:', JSON.stringify( data ) );
+                        $location.path( '/verify/' + data.id + '?signup' );
+                    };
+
+                    var data = {
+                        name: $scope.firstname,
+                        email : {
+                            address : $scope.email
+                        }
+                    };
+
+                    $log.info( 'Data:', data );
+
+                    $http.post( '/api/users/', data )
+                        .success( success )
+                        .error( function () {
+                            $scope.alerts.push( {
+                                type : 'error',
+                                msg : 'We are unable to create your account at this time. \
+                                        This isn\'t your fault, it is ours. We are on it.'
+                            } );
                         } );
                 }
 

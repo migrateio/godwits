@@ -3,7 +3,10 @@ var hazel = require('./hazelcast/hazelcast');
 
 
 exports.init = hazel.init;
-exports.shutdown = hazel.shutdown;
+exports.shutdown = function() {
+    hazel.shutdown();
+    require( './hazelcast/map' ).shutdown();
+};
 
 exports.getMap = hazel.getMap;
 exports.lock = hazel.lock;

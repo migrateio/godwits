@@ -1,9 +1,9 @@
-<div class="sign-in" x-ng-controller="spring-auth-controller">
+<div class="sign-in" x-ng-controller="signin-controller">
     <form name="signin" novalidate ng-submit="submit()">
 
         <div class="header clearfix" style="text-align: left;">
             <h3>Sign In</h3>
-            <span><a href="#">register</a></span>
+            <span><a href="#/signup">sign up</a></span>
         </div>
 
         <div alert ng-repeat="alert in alerts" type="alert.type" close="closeAlert($index)">
@@ -24,7 +24,7 @@
 
         <div class="controls">
             <div class="input-prepend">
-                <span class="add-on"><span class="icon-lock icon-gray"></span></span>
+                <span class="add-on"><span class="icon-lock gray"></span></span>
                 <input x-pass-xray="showPass" type="password" name="password" ng-model="password" placeholder="Password" required>
             </div>
             <div x-valid-tooltip input-target="signin.password">

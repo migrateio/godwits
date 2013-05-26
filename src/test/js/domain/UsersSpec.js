@@ -12,7 +12,7 @@ describe( 'User Domain', function () {
     var users, map;
 
     beforeEach( function () {
-        users = new domain.Users();
+        users = new domain.Users('dev');
         expect( users ).toBeDefined();
 
         map = users.backingMap();

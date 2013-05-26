@@ -1,8 +1,9 @@
 var log = require( 'ringo/logging' ).getLogger( module.id );
+var {props} = require( 'utility' );
 
 var users = module.singleton('users', function() {
     var domain = require( 'domain' );
-    return new domain.Users();
+    return new domain.Users( props['environment'] );
 });
 
 

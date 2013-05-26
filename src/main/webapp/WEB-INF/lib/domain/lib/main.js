@@ -77,9 +77,9 @@ var {BaseDomain} = require('./base');
 
 exports.Users = BaseDomain.subClass( {
 
-    init: function() {
+    init: function(environment) {
         var {schema} = require( 'domain/schema/users.js' );
-        var map = store.getMap( 'dev-users' );
+        var map = store.getMap( environment + '-users' );
         var pk = function(user) {
             return user.id;
         };
@@ -87,6 +87,67 @@ exports.Users = BaseDomain.subClass( {
             return /^select /ig.test(key);
         };
         this._super('Users', map, pk, query, schema);
+    }
+} );
+
+exports.Tokens = BaseDomain.subClass( {
+
+    init: function(environment) {
+        var {schema} = require( 'domain/schema/tokens.js' );
+
+        var map = store.getMap( environment + '-tokens' );
+        this.removeOnEvict( map );
+
+        var pk = function(token) {
+            return token.id;
+        };
+
+        var query = function(key) {
+            return /^select /ig.test(key);
+        };
+
+        this._super('Tokens', map, pk, query, schema);
+    },
+
+    /**
+     * By default, we will create these tokens with a time to live of 3 days
+     */
+    create : function ( json, ttl, timeunit ) {
+        if (isNaN(ttl) ) {
+            ttl = 3;
+            timeunit = 'DAYS'
+        }
+        return this._super( json, ttl, timeunit );
+    },
+
+    /**
+     * By default, we will create these tokens with a time to live of 3 days
+     */
+    update : function ( json, ttl, timeunit ) {
+        if (isNaN(ttl) ) {
+            ttl = 3;
+            timeunit = 'DAYS'
+        }
+        return this._super( json, ttl, timeunit );
+    },
+
+    preValidate: function ( json ) {
+        return json;
+    },
+
+    // When the time-to-live expires on members of this map, we want to remove the
+    // token from the map store. At this point, the map has already evicted the entry.
+    removeOnEvict: function(map) {
+        map.addEntryListener({
+            name: map.name,
+            entryEvicted: function(entry) {
+                log.info( 'Evicted the entry, key: ' + entry.key );
+                map.remove( entry.key );
+            },
+            entryRemoved: function(entry) {
+                log.info( 'Removed the entry, key: ' + entry.key );
+            }
+        });
     }
 } );
 

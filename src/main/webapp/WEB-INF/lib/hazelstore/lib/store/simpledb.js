@@ -11,6 +11,7 @@ var {
 var {
     DomainMetadataRequest, BatchDeleteAttributesRequest, DeletableItem,
     DeleteAttributesRequest, BatchPutAttributesRequest, GetAttributesRequest,
+    NoSuchDomainException,
     PutAttributesRequest, ReplaceableAttribute, ReplaceableItem, SelectRequest
     } = Packages.com.amazonaws.services.simpledb.model;
 
@@ -288,6 +289,7 @@ exports.SimpleDBStore = function ( mapName, options ) {
         log.debug( "SimpleDBStore::init, handle to db client: {}", client );
 
         if ( !tableExists( tableName ) ) {
+            log.error( 'Table does not exist: ', tableName );
             throw {
                 status : 400,
                 message : 'SimpleDBStore was unable to connect to table [' + tableName + ']'

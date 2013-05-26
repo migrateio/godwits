@@ -7,31 +7,51 @@ exports.Map = Map;
 
 // An executor service will be created as a singleton and be available to all maps. This will
 // allow us to manage the thread pool and cap it at a reasonable number of threads.
-// todo: Expose the thread count as a configurable option
 var executor = module.singleton( module.id, function () {
-    var MAX_THREADS = 20;
+    return new ThreadPool( 20, 60, 'SECONDS' );
+} );
+
+function ThreadPool(maxThreads, ttl, timeunit) {
+
+    var pool;
     var SECONDS = java.util.concurrent.TimeUnit.SECONDS;
 
-    var pool = new java.util.concurrent.ThreadPoolExecutor(
-        1, MAX_THREADS, 60, SECONDS, new java.util.concurrent.SynchronousQueue()
+    function shutdown() {
+        if (pool) {
+            log.debug('Shutting down execution pool for hazelcast maps');
+            pool.shutdownNow();
+            try {
+                if (!pool.awaitTermination(60, SECONDS)) {
+                    log.warn( 'Executor did not terminate in the specified time.' );
+                    pool.shutdown();
+                }
+            } catch (e) {
+                log.error("Execution service was interrupted while attempting graceful shutdown.", e);
+                pool.shutdown();
+                java.lang.Thread.currentThread().interrupt();
+            }
+        }
+    }
+
+    var units = java.util.concurrent.TimeUnit.valueOf( timeunit );
+
+    pool = new java.util.concurrent.ThreadPoolExecutor(
+        1, maxThreads, ttl, units, new java.util.concurrent.SynchronousQueue()
     );
 
-    var engine = require("ringo/engine");
-    engine.addShutdownHook(function() {
-        log.info('Shutting down execution pool for hazelcast maps');
-        pool.shutdown();
-        try {
-            if (!pool.awaitTermination(60, SECONDS)) {
-                log.warn( 'Executor did not terminate in the specified time.' );
-                pool.shutdownNow();
-            }
-        } catch (e) {
-            log.error("Execution service was interrupted while attempting graceful shutdown.");
-            pool.shutdownNow();
-            java.lang.Thread.currentThread().interrupt();
+    return {
+        shutdown: shutdown,
+        submit : function(task) {
+            pool.submit(task);
         }
-    });
-} );
+    };
+}
+
+
+var shutdown = exports.shutdown = function() {
+    executor.shutdown()
+    log.debug('Execution pool for hazelcast maps successfully shutdown');
+};
 
 function Map( hazelcast, mapName ) {
 
@@ -90,8 +110,6 @@ function Map( hazelcast, mapName ) {
             // Create the object we will be passing into each of our listeners
             var entry = {
                 key : event.key,
-                index : index,
-                type : type,
                 source : mapName,
                 value : event.value,
                 oldValue : event.oldValue
@@ -153,6 +171,8 @@ function Map( hazelcast, mapName ) {
             ? java.util.concurrent.TimeUnit.valueOf( timeunit ) : null;
 
         var json = JSON.stringify( value );
+//        log.debug( ' Putting into map [{}], key: {}, json: {}, ttl: {}, timeunit: {}',
+//            mapName, key, json, ttl, timeunit );
         return map.put( key, json, ttl, timeunit );
     };
 

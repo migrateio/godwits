@@ -69,10 +69,11 @@ function onmessage( e ) {
     watchInterval = e.data.interval || 2000;
     watchPaths = e.data.watchPaths;
     source = e.source;
-//    log.info( 'Watcher paths: {}',
-//        JSON.stringify( e.data, null, 2 ), watchInterval, watchPaths );
+    log.debug( 'Watcher paths: {}',
+        JSON.stringify( e.data, null, 2 ), watchInterval, watchPaths );
 }
 
+log.debug( 'Starting watcher worker' );
 setTimeout( checkForChanges, 0 );
 
 

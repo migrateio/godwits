@@ -1,0 +1,6 @@
+{
+    "name": "AWS Simple Email Service Implementation",
+    "version": "${project.version}",
+    "description": "",
+    "main": "./lib/main.js"
+}

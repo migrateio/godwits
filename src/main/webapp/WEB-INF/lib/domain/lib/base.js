@@ -1,6 +1,7 @@
 var log = require( 'ringo/logging' ).getLogger( module.id );
 var {merge} = require( 'ringo/utils/objects' );
 var {JsonSchema} = require( 'tv4' );
+var {uuid} = require('utility');
 
 
 /**
@@ -40,7 +41,17 @@ exports.BaseDomain = Object.subClass( {
         };
     },
 
-    create : function ( json ) {
+    preValidate: function ( json ) {
+        // Add a the creation date
+        json.created = new Date().toISOString();
+
+        // add an id if not provided
+        if (!json.id) json.id = uuid();
+
+        return json;
+    },
+
+    create : function ( json, ttl, timeunit ) {
         // Verify that the parameter is correct
         if ( !json ) throw {
             status : 400,
@@ -50,8 +61,7 @@ exports.BaseDomain = Object.subClass( {
         // Clone json object because we don't want to modify its properties
         json = JSON.parse( JSON.stringify( json ) );
 
-        // Add a the creation date
-        json.created = new Date().toISOString();
+        json = this.preValidate( json );
 
         // Flesh out the object with default/required values from the schema
         var newObj = this.generateDefaults( json );
@@ -66,13 +76,12 @@ exports.BaseDomain = Object.subClass( {
         }
 
         // Persist the object if validation succeeds
-        this.map.put( this.pk( newObj ), newObj );
+        this.map.put( this.pk( newObj ), newObj, ttl, timeunit );
 
-        log.info( 'successful validation' );
-        return newObj
+        return newObj;
     },
 
-    update : function ( json ) {
+    update : function ( json, ttl, timeunit ) {
         // Verify that the parameter is correct
         if ( !json ) throw {
             status : 400,
@@ -106,7 +115,7 @@ exports.BaseDomain = Object.subClass( {
         }
 
         // Persist the object if validation succeeds
-        this.map.put( pkey, newObj );
+        this.map.put( pkey, newObj, ttl, timeunit );
 
         return newObj;
     },
