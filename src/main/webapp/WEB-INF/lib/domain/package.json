@@ -1,6 +1,6 @@
 {
-    "name": "Migrate IO domain objects",
-    "version": "${project.version}",
-    "description": "",
-    "main": "./lib/main.js"
+    "name" : "Migrate IO domain objects",
+    "version" : "${project.version}",
+    "description" : "",
+    "main" : "./lib/main.js"
 }
