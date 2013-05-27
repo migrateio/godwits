@@ -10,10 +10,10 @@ var {Config, XmlConfigBuilder} = Packages.com.hazelcast.config;
 var {Hazelcast} = Packages.com.hazelcast.core;
 
 /*
-var maps = module.singleton( "maps", function () {
-    return {}
-} );
-*/
+ var maps = module.singleton( "maps", function () {
+ return {}
+ } );
+ */
 
 var hazelcast;
 var maps = {};
@@ -21,7 +21,7 @@ var sets = {};
 var entryListeners = [];
 
 exports.shutdown = function () {
-    log.debug( 'shutdown::hazelcast instance: {}', hazelcast);
+    log.debug( 'shutdown::hazelcast instance: {}', hazelcast );
     if ( hazelcast )
         hazelcast.lifecycleService.shutdown();
 //    hazelcast.shutdownAll();
@@ -35,7 +35,7 @@ exports.shutdown = function () {
  * @param {Object} options
  */
 exports.init = function () {
-    if (hazelcast) {
+    if ( hazelcast ) {
         log.info( 'init::bazelcast instance is already running' );
         return;
     }
@@ -100,7 +100,7 @@ function initializeMapStores( entry ) {
 
         // If there is a property <storeEngine>, then we take over, otherwise bail
         var props = convertPropsToMap( mapStoreConfig.properties );
-        if (props.storeEngine) {
+        if ( props.storeEngine ) {
             log.info( 'Store engine: ', props.storeEngine );
             var factory = new DelegatingMapStoreFactory();
             mapStoreConfig.setFactoryImplementation( factory );

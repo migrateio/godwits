@@ -73,13 +73,14 @@ var store = require( 'hazelstore' );
 })();
 
 // Order is important. This require statement must appear after the Object.subClass(...)
-var {BaseDomain} = require('./base');
+var {BaseDomain} = require( './base' );
 
 exports.Users = BaseDomain.subClass( {
 
-    init: function() {
+    init : function () {
         var {schema} = require( 'domain/schema/users.js' );
         var map = store.getMap( 'dev-users' );
+<<<<<<< Updated upstream
         var pk = function(user) {
             return user.id;
         };
@@ -87,21 +88,27 @@ exports.Users = BaseDomain.subClass( {
             return /^select /ig.test(key);
         };
         this._super('Users', map, pk, query, schema);
+=======
+        var pk = function ( user ) {
+            return user.email.address;
+        };
+        this._super( 'Users', map, pk, schema );
+>>>>>>> Stashed changes
     }
 } );
 
 /*
-exports.Invoices = BaseDomain.subClass( {
+ exports.Invoices = BaseDomain.subClass( {
 
-    init: function() {
-        var {schema} = require( 'domain/schema/invoices.js' );
-        var map = store.getMap( 'dev-invoices' );
-        var pk = function(invoice) {
-            return invoice.invoiceId;
-        };
-        this._super('Invoices', map, pk, schema);
-    }
-} );
-*/
+ init: function() {
+ var {schema} = require( 'domain/schema/invoices.js' );
+ var map = store.getMap( 'dev-invoices' );
+ var pk = function(invoice) {
+ return invoice.invoiceId;
+ };
+ this._super('Invoices', map, pk, schema);
+ }
+ } );
+ */
 
 

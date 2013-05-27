@@ -1,6 +1,6 @@
 {
-    "name": "AWS Simple Workflow Implementation",
-    "version": "${project.version}",
-    "description": "",
-    "main": "./lib/main.js"
+    "name" : "AWS Simple Workflow Implementation",
+    "version" : "${project.version}",
+    "description" : "",
+    "main" : "./lib/main.js"
 }

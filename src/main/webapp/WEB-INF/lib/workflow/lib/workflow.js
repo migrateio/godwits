@@ -52,7 +52,7 @@ exports.Workflow = function ( workflowOptions, accessKey, secretKey ) {
 
         // This may be the first time the poller is accessed. In that case we will create
         // a new poller and track it in the registry.
-        if (!poller) {
+        if ( !poller ) {
             log.debug( 'Registering new DeciderPoller for taskList [{}]', taskListName );
             // Instantiate a new worker.
             poller = new DeciderPoller( taskListName, swfClient, resolveDecisionModule );
@@ -203,9 +203,9 @@ exports.Workflow = function ( workflowOptions, accessKey, secretKey ) {
         Object.keys( deciderPollers ).forEach( function ( key ) {
             deciderPollers[key].start();
         } );
-        Object.keys(workerPollers ).forEach(function(key) {
+        Object.keys( workerPollers ).forEach( function ( key ) {
             workerPollers[key].start();
-        });
+        } );
     }
 
     /**
@@ -218,9 +218,9 @@ exports.Workflow = function ( workflowOptions, accessKey, secretKey ) {
         Object.keys( deciderPollers ).forEach( function ( key ) {
             deciderPollers[key].stop();
         } );
-        Object.keys(workerPollers ).forEach(function(key) {
+        Object.keys( workerPollers ).forEach( function ( key ) {
             workerPollers[key].stop();
-        });
+        } );
     }
 
     /**
@@ -233,9 +233,9 @@ exports.Workflow = function ( workflowOptions, accessKey, secretKey ) {
         Object.keys( deciderPollers ).forEach( function ( key ) {
             deciderPollers[key].shutdown();
         } );
-        Object.keys(workerPollers ).forEach(function(key) {
+        Object.keys( workerPollers ).forEach( function ( key ) {
             workerPollers[key].shutdown();
-        });
+        } );
     }
 
     function toJSON() {
@@ -263,31 +263,31 @@ exports.Workflow = function ( workflowOptions, accessKey, secretKey ) {
     function init( workflowType, accessKey, secretKey ) {
         log.debug( 'Workflow:init{}', JSON.stringify( arguments ) );
 
-        if (typeof workflowType !== 'object') throw {
-            status: 400,
-            message: 'Workflow instance requires a [workflowType] parameter as an object.'
+        if ( typeof workflowType !== 'object' ) throw {
+            status : 400,
+            message : 'Workflow instance requires a [workflowType] parameter as an object.'
         };
-        if (typeof workflowType.name !== 'string') throw {
-            status: 400,
-            message: 'WorkflowType parameter requires a [name] parameter as a string.'
+        if ( typeof workflowType.name !== 'string' ) throw {
+            status : 400,
+            message : 'WorkflowType parameter requires a [name] parameter as a string.'
         };
-        if (typeof workflowType.version !== 'string') throw {
-            status: 400,
-            message: 'WorkflowType parameter requires a [version] parameter as a string.'
+        if ( typeof workflowType.version !== 'string' ) throw {
+            status : 400,
+            message : 'WorkflowType parameter requires a [version] parameter as a string.'
         };
-        if (typeof accessKey !== 'string') throw {
-            status: 400,
-            message: 'Workflow instance requires an [accessKey] parameter as a string.'
+        if ( typeof accessKey !== 'string' ) throw {
+            status : 400,
+            message : 'Workflow instance requires an [accessKey] parameter as a string.'
         };
-        if (typeof secretKey !== 'string') throw {
-            status: 400,
-            message: 'Workflow instance requires an [secretKey] parameter as a string.'
+        if ( typeof secretKey !== 'string' ) throw {
+            status : 400,
+            message : 'Workflow instance requires an [secretKey] parameter as a string.'
         };
 
         swfClient = new SwfClient( workflowType, accessKey, secretKey );
         log.debug( 'Preparing to register workflowtype: {}', JSON.stringify( workflowType ) );
 
-        var result = swfClient.registerWorkflowType( workflowType ).wait(5000);
+        var result = swfClient.registerWorkflowType( workflowType ).wait( 5000 );
         log.debug( 'Completed the registration of workflowtype: {}, result: {}',
             JSON.stringify( workflowType ), JSON.stringify( result ) );
     }
@@ -315,7 +315,7 @@ exports.Workflow = function ( workflowOptions, accessKey, secretKey ) {
         startWorkflow : startWorkflow,
 
         // Gotta be a better way than exposing this for testing purposes only (spies)
-        swfClient: swfClient,
+        swfClient : swfClient,
 
         start : start,
         stop : stop,

@@ -91,7 +91,7 @@ exports.propsToJson = function ( props, delim ) {
         isArray = regex.exec( key );
         if ( isArray ) {
             // Handle empty array syntax
-            if (key.length === 2) {
+            if ( key.length === 2 ) {
                 return start;
             }
             key = parseInt( isArray[1] );
@@ -100,8 +100,8 @@ exports.propsToJson = function ( props, delim ) {
         // If this key is the last in the chain, we have to set the value
         if ( keys.length === 0 ) {
             // Value may be a date
-            if (iso8601.test(value)) {
-                value = new Date(Date.parse( value ) );
+            if ( iso8601.test( value ) ) {
+                value = new Date( Date.parse( value ) );
             }
             node[key] = value;
             return start;

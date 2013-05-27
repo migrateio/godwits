@@ -7,7 +7,7 @@ var {Deferred} = require( 'ringo/promise' );
 var {AmazonSimpleWorkflowClient} = Packages.com.amazonaws.services.simpleworkflow;
 var {BasicAWSCredentials} = Packages.com.amazonaws.auth;
 
-var ISO_FORMAT = new java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+var ISO_FORMAT = new java.text.SimpleDateFormat( "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'" );
 
 var {
     ActivityType, Decision,
@@ -130,7 +130,11 @@ function SwfClient( workflowOptions, accessKey, secretKey ) {
             log.debug( 'swfClient.registerWorkflowType( {} )', request );
             swfClient.registerWorkflowType( request );
 //            } catch ( e if e.javaException instanceof TypeAlreadyExistsException ) {
-            } catch ( e if e.javaException instanceof TypeAlreadyExistsException ) {
+        } catch ( e if e
+    .
+        javaException instanceof TypeAlreadyExistsException
+    )
+        {
         }
     }
 
@@ -274,8 +278,8 @@ function SwfClient( workflowOptions, accessKey, secretKey ) {
         log.debug( 'swfClient.startWorkflowExecution( {} )', request );
         var run = swfClient.startWorkflowExecution( request );
         return {
-            runId: run.runId,
-            workflowId: workflowId
+            runId : run.runId,
+            workflowId : workflowId
         }
     }
 
@@ -384,7 +388,11 @@ function SwfClient( workflowOptions, accessKey, secretKey ) {
             log.debug( 'swfClient.registerActivityType( {} )', request );
             swfClient.registerActivityType( request );
 //            } catch ( e if e.javaException instanceof TypeAlreadyExistsException ) {
-        } catch ( e if e.javaException instanceof TypeAlreadyExistsException ) {
+        } catch ( e if e
+    .
+        javaException instanceof TypeAlreadyExistsException
+    )
+        {
         }
     }
 
@@ -631,7 +639,11 @@ function SwfClient( workflowOptions, accessKey, secretKey ) {
         try {
             log.debug( 'swfClient.respondActivityTaskFailed( {} )', request );
             swfClient.respondActivityTaskFailed( request );
-        } catch ( e if e.javaException instanceof UnknownResourceException ) {
+        } catch ( e if e
+    .
+        javaException instanceof UnknownResourceException
+    )
+        {
             log.debug( 'Perhaps the resource has already failed because of timeout.' );
         }
     }
@@ -887,42 +899,42 @@ function SwfClient( workflowOptions, accessKey, secretKey ) {
         // WorkflowExecutionDetail::WorkflowExecutionInfo
         var info = detail.executionInfo;
         result.executionInfo = {
-            execution: {
-                runId: (info.execution && info.execution.runId) || null,
-                workflowId: (info.execution && info.execution.workflowId) || null
+            execution : {
+                runId : (info.execution && info.execution.runId) || null,
+                workflowId : (info.execution && info.execution.workflowId) || null
             },
-            workflowType: {
-                name: info.workflowType.name,
-                version: info.workflowType.version
+            workflowType : {
+                name : info.workflowType.name,
+                version : info.workflowType.version
             },
-            startTimestamp: info.startTimestamp
-                ? new Date(info.startTimestamp).toISOString() : null,
-            closeTimestamp: info.closeTimestamp
-                ? new Date(info.closeTimestamp).toISOString() : null,
-            executionStatus: info.executionStatus,
-            closeStatus: info.closeStatus,
-            parent: info.parent ? {
-                runId: info.parent.runId,
-                workflowId: info.parent.workflowId
+            startTimestamp : info.startTimestamp
+                ? new Date( info.startTimestamp ).toISOString() : null,
+            closeTimestamp : info.closeTimestamp
+                ? new Date( info.closeTimestamp ).toISOString() : null,
+            executionStatus : info.executionStatus,
+            closeStatus : info.closeStatus,
+            parent : info.parent ? {
+                runId : info.parent.runId,
+                workflowId : info.parent.workflowId
             } : null,
-            tagList: [],
-            cancelRequested: info.isCancelRequested()
+            tagList : [],
+            cancelRequested : info.isCancelRequested()
         };
-        for (var i = info.tagList.iterator(); i.hasNext();) {
+        for ( var i = info.tagList.iterator(); i.hasNext(); ) {
             result.executionInfo.tagList.push( i.next() );
         }
 
         // WorkflowExecutionDetail::WorkflowExecutionOpenCounts
         var open = detail.openCounts;
         result.open = {
-            openActivityTasks: open.openActivityTasks,
-            openDecisionTasks: open.openDecisionTasks,
-            openTimers: open.openTimers,
-            openChildWorkflowExecutions: open.openChildWorkflowExecutions
+            openActivityTasks : open.openActivityTasks,
+            openDecisionTasks : open.openDecisionTasks,
+            openTimers : open.openTimers,
+            openChildWorkflowExecutions : open.openChildWorkflowExecutions
         };
 
         result.latestActivityTaskTimestamp = detail.latestActivityTaskTimestamp
-            ? new Date(detail.latestActivityTaskTimestamp).toISOString() : null;
+            ? new Date( detail.latestActivityTaskTimestamp ).toISOString() : null;
         result.latestExecutionContext = detail.latestExecutionContext;
 
         return result;
@@ -1049,7 +1061,7 @@ function SwfClient( workflowOptions, accessKey, secretKey ) {
 //                log.info( 'SwfClient::processEvents, eventType: {}, key: {}', e.eventType, key );
                 var value = attrs[key];
                 // If value is null, bail now
-                if ( value == null || value === 'undefined') {
+                if ( value == null || value === 'undefined' ) {
 //                    log.debug( 'SwfClient::processEvents, eventType: {}, key: {}, value: null',
 //                        e.eventType, key );
                     return;
@@ -1108,18 +1120,18 @@ function SwfClient( workflowOptions, accessKey, secretKey ) {
         };
     }
 
-    swfClient = module.singleton('swfClient', function() {
+    swfClient = module.singleton( 'swfClient', function () {
         log.debug( "SwfClient::init, establishing AWS SWF Client using " +
             "access key: {}, secret key: {}", accessKey, secretKey );
         var credentials = new BasicAWSCredentials( accessKey, secretKey );
         return new AmazonSimpleWorkflowClient( credentials );
-    });
+    } );
 
     function threadIt( f, args ) {
         var deferred = new Deferred();
 
-        new java.lang.Thread( new java.lang.Runnable({
-            run: function() {
+        new java.lang.Thread( new java.lang.Runnable( {
+            run : function () {
                 try {
                     log.debug( 'SwfClient::{}', f.name, JSON.stringify( args ) );
                     var result = f.apply( this, args );
@@ -1130,7 +1142,7 @@ function SwfClient( workflowOptions, accessKey, secretKey ) {
                     deferred.resolve( {message : e.message || e.toString() }, true );
                 }
             }
-        }) ).start();
+        } ) ).start();
 
         return deferred.promise;
     }

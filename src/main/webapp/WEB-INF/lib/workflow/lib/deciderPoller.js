@@ -113,27 +113,27 @@ function DeciderPoller( taskListName, swfClient, resolveDecisionModule ) {
     } );
 
     /*
-        function poll() {
-            log.debug( 'DeciderPoller::poll, entry' );
-            if ( polling ) {
-                log.debug( 'DeciderPoller::poll, is polling' );
-                var task = swfClient
-                    .pollForDecisionTask( { taskListName : taskListName } )
-                    .wait();
+     function poll() {
+     log.debug( 'DeciderPoller::poll, entry' );
+     if ( polling ) {
+     log.debug( 'DeciderPoller::poll, is polling' );
+     var task = swfClient
+     .pollForDecisionTask( { taskListName : taskListName } )
+     .wait();
 
-                log.debug( 'DeciderPoller::poll, task: {}', JSON.stringify( task ) );
-                if (task.taskToken) {
-                    startTask( task );
-                }
+     log.debug( 'DeciderPoller::poll, task: {}', JSON.stringify( task ) );
+     if (task.taskToken) {
+     startTask( task );
+     }
 
-                if (shuttingDown && workerCount === 0 ) {
-                    log.debug( 'DeciderPoller [{}] is terminated', taskListName );
-                }
+     if (shuttingDown && workerCount === 0 ) {
+     log.debug( 'DeciderPoller [{}] is terminated', taskListName );
+     }
 
-                if (!shuttingDown) setTimeout( poll, 0 );
-            }
-        }
-    */
+     if (!shuttingDown) setTimeout( poll, 0 );
+     }
+     }
+     */
 
     /**
      * ### _deciderSuccess_

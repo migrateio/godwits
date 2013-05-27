@@ -86,22 +86,22 @@
         -->
         <eviction-percentage>50</eviction-percentage>
 
-<!--
-        <map-store enabled="false">
-            &lt;!&ndash;
-               Number of seconds to delay to call the MapStore.store(key, value).
-               If the value is zero then it is write-through so MapStore.store(key, value)
-               will be called as soon as the entry is updated.
-               Otherwise it is write-behind so updates will be stored after write-delay-seconds
-               value by calling Hazelcast.storeAll(map). Default value is 0.
-            &ndash;&gt;
-            <write-delay-seconds>0</write-delay-seconds>
+        <!--
+                <map-store enabled="false">
+                    &lt;!&ndash;
+                       Number of seconds to delay to call the MapStore.store(key, value).
+                       If the value is zero then it is write-through so MapStore.store(key, value)
+                       will be called as soon as the entry is updated.
+                       Otherwise it is write-behind so updates will be stored after write-delay-seconds
+                       value by calling Hazelcast.storeAll(map). Default value is 0.
+                    &ndash;&gt;
+                    <write-delay-seconds>0</write-delay-seconds>
 
-            <class-name>com.zocia.platform.hazelcast.persistence.amazon.DynamoMapPersistence</class-name>
-            <properties>
-                <property name="access">rw</property>
-            </properties>
-        </map-store>
--->
+                    <class-name>com.zocia.platform.hazelcast.persistence.amazon.DynamoMapPersistence</class-name>
+                    <properties>
+                        <property name="access">rw</property>
+                    </properties>
+                </map-store>
+        -->
     </map>
 </hazelcast>
