@@ -22,9 +22,7 @@ var entryListeners = [];
 
 exports.shutdown = function () {
     log.debug( 'shutdown::hazelcast instance: {}', hazelcast);
-    if ( hazelcast )
-        hazelcast.lifecycleService.shutdown();
-//    hazelcast.shutdownAll();
+    if ( hazelcast ) hazelcast.lifecycleService.shutdown();
     hazelcast = null;
 };
 
@@ -36,7 +34,7 @@ exports.shutdown = function () {
  */
 exports.init = function () {
     if (hazelcast) {
-        log.info( 'init::bazelcast instance is already running' );
+//        log.debug( 'init::bazelcast instance is already running' );
         return;
     }
 
@@ -82,8 +80,19 @@ exports.init = function () {
         return;
     }
 
-
+    // If we get here, we are creating the first instance of Hazelcast with this JVM
     hazelcast = Hazelcast.newHazelcastInstance( config );
+
+    /*
+     log.warn( 'Adding hazelcast shutdown hook' );
+    var engine = require( 'ringo/engine' );
+    engine.addShutdownHook(function() {
+        log.error( 'Executing hazelcast shutdown hook' );
+        if (hazelcast) {
+            hazelcast.lifecycleService.shutdown();
+        }
+    });
+*/
 };
 
 /**

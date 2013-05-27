@@ -259,33 +259,33 @@ input[type="text"], input[type="email"], input[type="password"] {
     Sign up and sign in form styles
 */
 
-div.sign-in {
+div.sign-in, div.sign-up {
     text-align: center;
 }
 
-div.sign-in .alert {
+div.sign-in .alert, div.sign-up .alert {
     width: 219px;
 }
 
-div.sign-in .header {
+div.sign-in .header, div.sign-up .header {
     position: relative;
     height: 50px;
 }
 
-div.sign-in .header h3 {
+div.sign-in .header h3, div.sign-up .header h3 {
     position: absolute;
     left: 0;
     bottom: 0;
     margin: 10px;
 }
 
-div.sign-in .header span {
+div.sign-in .header span, div.sign-up .header span {
     position: absolute;
     right: 0;
     bottom: 14px;
 }
 
-div.sign-in form {
+div.sign-in form, div.sign-up form {
     position: relative;
     margin: 2em;
     display: inline-block;
@@ -293,7 +293,7 @@ div.sign-in form {
     padding: 20px;
 }
 
-div.sign-in form div.submit {
+div.sign-in form div.submit, div.sign-up form div.submit {
     text-align: right;
 }
 

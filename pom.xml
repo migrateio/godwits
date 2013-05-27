@@ -27,6 +27,7 @@
 
         <ringo-version>0.9.0.1</ringo-version>
         <stick-version>0.1.0-alpha-7</stick-version>
+        <trimpath-version>1.0.7</trimpath-version>
         <hazelcast-version>2.3.1</hazelcast-version>
 
         <spring-version>3.2.2.RELEASE</spring-version>
@@ -71,13 +72,19 @@
             <version>${stick-version}</version>
         </dependency>
 
-<!--
         <dependency>
-            <groupId>org.ringojs</groupId>
-            <artifactId>httpclient-jetty</artifactId>
-            <version>1.0.0-SNAPSHOT</version>
+            <groupId>org.pykl.ringojs</groupId>
+            <artifactId>trimpath</artifactId>
+            <version>${trimpath-version}</version>
         </dependency>
--->
+
+        <!--
+                <dependency>
+                    <groupId>org.ringojs</groupId>
+                    <artifactId>httpclient-jetty</artifactId>
+                    <version>1.0.0-SNAPSHOT</version>
+                </dependency>
+        -->
 
 <!--
         <dependency>
@@ -467,11 +474,14 @@
         <profile>
             <id>dev</id>
             <activation>
-                <activeByDefault>true</activeByDefault>
+                <property>
+                    <name>!env</name>
+                </property>
             </activation>
             <properties>
                 <environment>dev</environment>
 
+                <server.web.url>https://localhost:8443/</server.web.url>
                 <ga.id>UA-41014735-2</ga.id>
 
                 <!-- Hazelcast configuration -->
@@ -483,13 +493,24 @@
                 <!-- AWS App Access -->
                 <aws.app.access_key>AKIAIIQOWQM6FFLQB2EQ</aws.app.access_key>
                 <aws.app.secret_key>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</aws.app.secret_key>
+
+                <!-- AWS Email Access -->
+                <aws.email.access_key>AKIAIHRK73TADPMVP2KA</aws.email.access_key>
+                <aws.email.secret_key>AqHImRRpYfzX53F+azTiwVR/NVoC1szfYC4A+VHLCOyV</aws.email.secret_key>
             </properties>
         </profile>
         <profile>
             <id>qa</id>
+            <activation>
+                <property>
+                    <name>env</name>
+                    <value>qa</value>
+                </property>
+            </activation>
             <properties>
                 <environment>qa</environment>
 
+                <server.web.url>https://qa.migrate.io/</server.web.url>
                 <ga.id>UA-41014735-2</ga.id>
 
                 <!-- Hazelcast configuration -->
@@ -501,13 +522,24 @@
                 <!-- AWS App Access -->
                 <aws.app.access_key>AKIAJUK7QWOGW5XMHLXQ</aws.app.access_key>
                 <aws.app.secret_key>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</aws.app.secret_key>
+
+                <!-- AWS Email Access -->
+                <aws.email.access_key>AKIAIHRK73TADPMVP2KA</aws.email.access_key>
+                <aws.email.secret_key>AqHImRRpYfzX53F+azTiwVR/NVoC1szfYC4A+VHLCOyV</aws.email.secret_key>
             </properties>
         </profile>
         <profile>
             <id>prod</id>
+            <activation>
+                <property>
+                    <name>env</name>
+                    <value>prod</value>
+                </property>
+            </activation>
             <properties>
                 <environment>prod</environment>
 
+                <server.web.url>https://migrate.io/</server.web.url>
                 <ga.id>UA-41014735-1</ga.id>
 
                 <!-- Hazelcast configuration -->
@@ -519,10 +551,19 @@
                 <!-- AWS App Access -->
                 <aws.app.access_key>${migrate.aws.app.access_key}</aws.app.access_key>
                 <aws.app.secret_key>${migrate.aws.app.secret_key}</aws.app.secret_key>
+
+                <!-- AWS Email Access -->
+                <aws.email.access_key>AKIAIHRK73TADPMVP2KA</aws.email.access_key>
+                <aws.email.secret_key>AqHImRRpYfzX53F+azTiwVR/NVoC1szfYC4A+VHLCOyV</aws.email.secret_key>
             </properties>
         </profile>
         <profile>
             <id>watch</id>
+            <activation>
+                <property>
+                    <name>watch</name>
+                </property>
+            </activation>
             <properties>
                 <watcher>-w</watcher>
             </properties>

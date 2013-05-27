@@ -8,6 +8,8 @@
                 ">
     <properties>
         <property name="hazelcast.logging.type">slf4j</property>
+        <property name="hazelcast.map.cleanup.delay.seconds">1</property>
+        <property name="hazelcast.shutdownhook.enabled">false</property>
     </properties>
     <group>
         <name>name-${hz.name}</name>
@@ -50,6 +52,12 @@
             fail-safety. Valid numbers are 0 (no backup), 1, 2, 3.
         -->
         <backup-count>1</backup-count>
+
+        <!-- Entities in the cache will live for a period of two minutes. After that time, they
+             will be fetched from the persistence tier.
+        -->
+        <time-to-live-seconds>120</time-to-live-seconds>
+
         <!--
 
             Valid values are:
@@ -59,11 +67,6 @@
             NONE is the default.
         -->
         <eviction-policy>LFU</eviction-policy>
-
-        <!-- Entities in the cache will live for a period of two minutes. After that time, they
-             will be fetched from the persistence tier.
-        -->
-        <time-to-live-seconds>120</time-to-live-seconds>
 
         <!--
             Maximum size of the map. When max size is reached,
@@ -100,4 +103,5 @@
             </properties>
         </map-store>
     </map>
+
 </hazelcast>

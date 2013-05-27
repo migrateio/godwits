@@ -40,7 +40,11 @@ exports.BaseDomain = Object.subClass( {
         };
     },
 
-    create : function ( json ) {
+    preCreate: function ( json ) {
+        return json;
+    },
+
+    create : function ( json, ttl, timeunit ) {
         // Verify that the parameter is correct
         if ( !json ) throw {
             status : 400,
@@ -50,14 +54,15 @@ exports.BaseDomain = Object.subClass( {
         // Clone json object because we don't want to modify its properties
         json = JSON.parse( JSON.stringify( json ) );
 
-        // Add a the creation date
-        json.created = new Date().toISOString();
+        this.preCreate( json );
 
         // Flesh out the object with default/required values from the schema
         var newObj = this.generateDefaults( json );
 
         // Validate the new object
+        log.debug( 'Domain object right before validation: ', JSON.stringify( newObj ) );
         var schema = this.validateSchema( newObj );
+        log.debug( 'Schema results: ', JSON.stringify( schema ) );
 
         // If there are validation errors, we throw an exception with the errors
         if ( !schema.valid ) {
@@ -66,13 +71,12 @@ exports.BaseDomain = Object.subClass( {
         }
 
         // Persist the object if validation succeeds
-        this.map.put( this.pk( newObj ), newObj );
+        this.map.put( this.pk( newObj ), newObj, ttl, timeunit );
 
-        log.info( 'successful validation' );
-        return newObj
+        return newObj;
     },
 
-    update : function ( json ) {
+    update : function ( json, ttl, timeunit ) {
         // Verify that the parameter is correct
         if ( !json ) throw {
             status : 400,
@@ -106,7 +110,7 @@ exports.BaseDomain = Object.subClass( {
         }
 
         // Persist the object if validation succeeds
-        this.map.put( pkey, newObj );
+        this.map.put( pkey, newObj, ttl, timeunit );
 
         return newObj;
     },

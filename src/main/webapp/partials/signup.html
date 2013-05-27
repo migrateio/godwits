@@ -1,42 +1,39 @@
-<div x-ng-controller="spring-auth-controller">
-    <form name="login" ng-submit="submit()">
+<div class="sign-up" x-ng-controller="signup-controller">
+    <form name="signup" novalidate ng-submit="submit()">
 
-        <div x-ng-cloak x-ng-controller="auth-me">
-            <div x-ng-switch on="authenticated">
-                <div x-ng-switch-when="true">
-                    <div class="alert alert-error alert-block" x-ng-show="showSignUpError">
-                        <button type="button" class="close" data-dismiss="alert"></button>
-                        <div>
-                            <h4>You are Signed In</h4>
-                            <p>
-                                To sign up for a new account, sign out using the button
-                                below, or press cancel to return to the home screen.
-                            </p>
-                        </div>
-                    </div>
-                </div>
-                <div x-ng-switch-default>
-                    <div class="controls">
-                        <div class="input-prepend">
-                            <span class="add-on"><i class="icon-user"></i></span>
-                            <input type="text" ng-model="firstname" placeholder="First Name">
-                        </div>
-                    </div>
+        <div class="header clearfix" style="text-align: left;">
+            <h3>Sign Up</h3>
+            <span><a href="#/signin">sign in</a></span>
+        </div>
 
-                    <div class="controls">
-                        <div class="input-prepend">
-                            <span class="add-on"><i class="icon-envelope"></i></span>
-                            <input type="email" x-ng-model="email" placeholder="Email">
-                        </div>
-                    </div>
+        <div alert ng-repeat="alert in alerts" type="alert.type" close="closeAlert($index)">
+            <span ng-bind-html-unsafe="alert.msg"></span>
+        </div>
 
-                    <div class="controls" style="text-align: right;">
-                        <input class="btn btn-success" type="submit" value="Sign Up"/>
-                    </div>
-                </div>
+        <div class="controls">
+            <div class="input-prepend">
+                <span class="add-on"><span class="icon-user gray"></span></span>
+                <input type="text" name="firstname" ng-model="firstname" placeholder="First Name" required>
+            </div>
+            <div x-valid-tooltip input-target="signup.firstname">
+                <span ng-show="signup.firstname.$error.required">Please provide your first name</span>
             </div>
         </div>
 
+        <div class="controls">
+            <div class="input-prepend">
+                <span class="add-on"><i class="icon-envelope gray"></i></span>
+                <input name="username" type="email" x-ng-model="username" placeholder="Email" required>
+            </div>
+            <div x-valid-tooltip input-target="signup.username">
+                <span ng-show="signup.username.$error.required">An email address is required</span>
+                <span ng-show="signup.username.$error.email">This is not a valid email address</span>
+            </div>
+        </div>
+
+        <div class="controls submit">
+            <input ng-disabled="signup.$invalid" class="btn btn-success" type="submit" value="Sign Up"/>
+        </div>
     </form>
 </div>
 

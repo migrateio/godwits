@@ -13,8 +13,9 @@ angular.module( "template/valid/tooltip.html", [] ).run(
 );
 
 
-angular.module( 'migrate.directives', [ 'template/valid/tooltip.html' ] )
-    .directive( 'validTooltip', [ '$log', '$timeout', '$position',
+var mod = angular.module( 'migrate.directives', [ 'template/valid/tooltip.html' ] );
+
+mod.directive( 'validTooltip', [ '$log', '$timeout', '$position',
     function ( $log, $timeout, $position ) {
 
         function getEleByName( names, ele ) {
@@ -94,14 +95,15 @@ angular.module( 'migrate.directives', [ 'template/valid/tooltip.html' ] )
                  */
             }
         }
-    } ] )
+    }
+] );
 
     // The following functionality is a custom-based poly-fill placeholder for AngularJS
     // @example  <input id="weight" name="weight" type="number" default-text="lbs" min="50" max="500" required />
     // For browsers lower than IE 10 the in-built placeholder functionality is used, otherwise
     // the poly-fill is used.
     // https://github.com/ferronrsmith/angularjs-placeholder
-    .directive( 'placeholder',
+mod.directive( 'placeholder',
     ['$log', '$timeout',
     function ( $log, $timeout ) {
         $log.info( 'Support for placeholder? ', Modernizr.input.placeholder );
@@ -124,12 +126,14 @@ angular.module( 'migrate.directives', [ 'template/valid/tooltip.html' ] )
                 } );
             }
         };
-    } ] )
+    }
+    ] );
+
     // This directive is applied to a password input field. We will create a clone of the
     // input field and toggle between the original and the copy when the bound expression
     // tells us to. The only difference between the two input fields is that the original
     // is a password field, and the other is a text field.
-    .directive( 'passXray',
+mod.directive( 'passXray',
     [ '$compile', '$timeout', '$parse', '$position', '$log',
     function ( $compile, $timeout, $parse, $position, $log ) {
 
@@ -196,10 +200,16 @@ angular.module( 'migrate.directives', [ 'template/valid/tooltip.html' ] )
             }
         }
     }
-] )
+] );
 
-;
 
+mod.directive('eatClick', function() {
+    return function(scope, element, attrs) {
+        $(element).click(function(event) {
+            event.preventDefault();
+        });
+    }
+});
 
 // Released under MIT license: http://www.opensource.org/licenses/mit-license.php
 var placeholderSupport = ("placeholder" in document.createElement( "input" ));

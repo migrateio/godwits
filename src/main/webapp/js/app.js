@@ -1,7 +1,8 @@
-angular.module( 'migrateApp', [
+var app = angular.module( 'migrateApp', [
     'ui.bootstrap', 'spring-security', 'migrate.directives', 'migrate.jobs',
-    'angular-google-analytics'] )
-    .config( ['$routeProvider',
+    'angular-google-analytics', 'devbar'] );
+
+app.config( ['$routeProvider',
     function ( $routeProvider ) {
 
         $routeProvider.when( '/', {
@@ -13,55 +14,36 @@ angular.module( 'migrateApp', [
         $routeProvider.when( '/signin', {
             templateUrl : 'partials/signin.html'
         } );
+        $routeProvider.when( '/signup', {
+            templateUrl : 'partials/signup.html'
+        } );
+        $routeProvider.when( '/verify/:id', {
+            templateUrl : 'partials/verify.html'
+        } );
         $routeProvider.when( '/jobs', {
             templateUrl : 'partials/jobs.html'
+        } );
+        $routeProvider.when( '/profile', {
+            templateUrl : 'partials/profile.html'
         } );
         $routeProvider.otherwise( {
             redirectTo : '/'
         } );
-    }] )
+    }
+] );
 
-    .config( ['$locationProvider',
+app.config( ['$locationProvider',
     function ( $locationProvider ) {
         $locationProvider.html5Mode( false );
-    } ] )
+    }
+] );
 
-    .config( ['AnalyticsProvider',
+app.config( ['AnalyticsProvider',
     function ( AnalyticsProvider ) {
-        // initial configuration
-        AnalyticsProvider.setAccount( 'UA-41014735-1' );
+        var production = /(www\.)*migrate\.io/i.test( window.location.hostname );
+        var ga = production ? 'UA-41014735-2' : 'UA-41014735-1';
 
-        // track all routes (or not)
+        AnalyticsProvider.setAccount( ga );
         AnalyticsProvider.trackPages( true );
-    }]
-);
-
-// Released under MIT license: http://www.opensource.org/licenses/mit-license.php
-var placeholderSupport = ("placeholder" in document.createElement( "input" ));
-function applyPlaceholders( ele ) {
-    if ( placeholderSupport ) return;
-    if ( !ele ) ele = $( 'body' );
-    $( '[placeholder]', ele ).focus(function () {
-        var input = $( this );
-        if ( input.val() == input.attr( 'placeholder' ) ) {
-            input.val( '' );
-            input.removeClass( 'placeholder' );
-        }
-    } ).blur(function () {
-            var input = $( this );
-            if ( input.val() == '' || input.val() == input.attr( 'placeholder' ) ) {
-                input.addClass( 'placeholder' );
-                input.val( input.attr( 'placeholder' ) );
-            }
-        } ).blur().parents( 'form' ).submit( function () {
-            $( this ).find( '[placeholder]' ).each( function () {
-                var input = $( this );
-                if ( input.val() == input.attr( 'placeholder' ) ) {
-                    input.val( '' );
-                }
-            } )
-        } );
-}
-
-
-
+    }
+] );

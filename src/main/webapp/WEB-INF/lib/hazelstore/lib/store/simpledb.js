@@ -11,6 +11,7 @@ var {
 var {
     DomainMetadataRequest, BatchDeleteAttributesRequest, DeletableItem,
     DeleteAttributesRequest, BatchPutAttributesRequest, GetAttributesRequest,
+    NoSuchDomainException,
     PutAttributesRequest, ReplaceableAttribute, ReplaceableItem, SelectRequest
     } = Packages.com.amazonaws.services.simpledb.model;
 
@@ -85,6 +86,9 @@ exports.SimpleDBStore = function ( mapName, options ) {
     function query( select ) {
         log.debug( 'SimpleDBStore::query, table: {}, key: {}',
             tableName, JSON.stringify( select ) );
+
+        // Replace substituable variables, if any
+        select = select.replace( '[mapname]', tableName );
 
         var response = [];
 
@@ -237,13 +241,13 @@ exports.SimpleDBStore = function ( mapName, options ) {
     function jsonToAttributes(value) {
         var json = typeof value === 'string' ? JSON.parse( value ) : value;
         var props = jsonToProps( json );
-        log.info( 'Making props: {}', JSON.stringify( props ) );
+//        log.info( 'Making props: {}', JSON.stringify( props ) );
 
         var attrs = new java.util.ArrayList();
         attrs.add( new ReplaceableAttribute( '_value', value, true ) );
         Object.keys( props ).forEach( function ( key ) {
-            log.info( 'Entry key: {}, value: {}',
-                JSON.stringify( key ), JSON.stringify( props[key] ) );
+//            log.info( 'Entry key: {}, value: {}',
+//                JSON.stringify( key ), JSON.stringify( props[key] ) );
             attrs.add(
                 new ReplaceableAttribute()
                     .withReplace( true )
@@ -288,6 +292,7 @@ exports.SimpleDBStore = function ( mapName, options ) {
         log.debug( "SimpleDBStore::init, handle to db client: {}", client );
 
         if ( !tableExists( tableName ) ) {
+            log.error( 'Table does not exist: ', tableName );
             throw {
                 status : 400,
                 message : 'SimpleDBStore was unable to connect to table [' + tableName + ']'

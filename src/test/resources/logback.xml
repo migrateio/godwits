@@ -9,13 +9,13 @@
 
     <logger name="org.apache.http" level="WARN"/>
     <logger name="ch.qos.logback" level="WARN"/>
-    <logger name="com.hazelcast" level="WARN"/>
+    <logger name="com.hazelcast" level="INFO"/>
     <logger name="com.amazonaws.auth" level="WARN"/>
     <logger name="com.amazonaws.request" level="WARN"/>
 
     <!--<logger name="workflow.lib.swfClient" level="INFO"/>-->
 
-    <root level="WARN">
+    <root level="DEBUG">
         <appender-ref ref="stdout"/>
     </root>
 </configuration>

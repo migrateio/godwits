@@ -45,7 +45,14 @@ function initializeJasmine( watcher, verbosity, junitDir ) {
         log.info( 'Finished' );
         oldCallback.apply( this, arguments );
         if ( !watcher ) {
+            // System won't shutdown cleanly with hazelcast running its threads
+            require('hazelstore' ).shutdown();
+
             var result = reporter.hasErrors() ? -1 : 0;
+            // system.exit so maven can detect runtime success/fail
+            log.info( 'Exiting with result', result );
+            // This borks the exit and keeps the java process running in the background
+            // because of the use of engine.addShutdownHooks().
             require( 'system' ).exit( result );
         }
     };
@@ -108,22 +115,18 @@ function main( args ) {
         watcher.postMessage( { watchPaths : watchPaths, interval : options.interval } );
     }
 
+/*
+    var engine = require("ringo/engine");
+    engine.addShutdownHook(function() {
+        log.error( 'SHUTTING DOWN' );
+    });
+*/
+
+
     executeTests( testDirs );
 }
 
 if ( require.main === module ) {
-/*
-    var {Workflow} = require( 'workflow/workflow' );
-    var workflow = new Workflow( {
-        domain : 'dev-migrate',
-        name : 'io.migrate.transfers',
-        version : '0.0.0',
-        defaultChildPolicy : 'TERMINATE',
-        defaultTaskListName : 'transfer-decisions',
-        description : 'The primary workflow used for a transfer Run.',
-        defaultExecutionStartToCloseTimeout : '2592000', // 1 month
-        defaultTaskStartToCloseTimeout : 'NONE'
-    }, 'AKIAIIQOWQM6FFLQB2EQ', 'ItTa0xaI9sey2SEGGEN8yVcA5slN95+qmNrf1TMd' );
-*/
     main( system.args );
+    log.info( 'Exiting clean' );
 }
