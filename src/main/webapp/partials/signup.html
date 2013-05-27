@@ -23,11 +23,11 @@
         <div class="controls">
             <div class="input-prepend">
                 <span class="add-on"><i class="icon-envelope gray"></i></span>
-                <input name="username" type="email" x-ng-model="username" placeholder="Email" required>
+                <input name="email" type="email" x-ng-model="email" placeholder="Email" required>
             </div>
-            <div x-valid-tooltip input-target="signup.username">
-                <span ng-show="signup.username.$error.required">An email address is required</span>
-                <span ng-show="signup.username.$error.email">This is not a valid email address</span>
+            <div x-valid-tooltip input-target="signup.email">
+                <span ng-show="signup.email.$error.required">An email address is required</span>
+                <span ng-show="signup.email.$error.email">This is not a valid email address</span>
             </div>
         </div>
 
