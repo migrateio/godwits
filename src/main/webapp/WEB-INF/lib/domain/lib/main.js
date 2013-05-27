@@ -3,6 +3,7 @@
 
 var log = require( 'ringo/logging' ).getLogger( module.id );
 var store = require( 'hazelstore' );
+var {uuid} = require('utility');
 
 
 /**
@@ -87,8 +88,31 @@ exports.Users = BaseDomain.subClass( {
             return /^select /ig.test(key);
         };
         this._super('Users', map, pk, query, schema);
+    },
+
+    preCreate: function(json) {
+        // Add a the creation date
+        json.created = new Date().toISOString();
+
+        // add an id if not provided
+        if (!json.id) json.id = uuid();
     }
 } );
+
+/**
+ * Returns a random character from the list of tokenChars. Little funky as it overwrites
+ * itself in order to keep things from polluting the parent namespace, but this is what
+ * I like about JavaScript.
+ * 6 character permutation will represent 48^6 permutations = 12,230,590,464
+ */
+var randomChar = (function () {
+    var tokenChars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjklmnpqrstuvwxyz';
+    var tokenLen = tokenChars.length;
+    var random = new java.security.SecureRandom();
+    return function () {
+        return tokenChars.charAt( Math.floor( random.nextDouble() * tokenLen ) );
+    }
+})();
 
 exports.Tokens = BaseDomain.subClass( {
 
@@ -107,6 +131,27 @@ exports.Tokens = BaseDomain.subClass( {
         };
 
         this._super('Tokens', map, pk, query, schema);
+    },
+
+    /**
+     * Creates a new token that is guaranteed to be unique.
+     */
+    generate: function(length) {
+        var result = '';
+        while (!result) {
+            // Create a new token with the desired length
+            for (var i = 0; i < length; i++) result += randomChar();
+
+            // Check to see if this token exists already
+            var hits = this.read(
+                "select * from `[mapname]` where `id` = '" + result + "'"
+            );
+
+            // If there is a match (highly unlikely depending on the length), we will
+            // try again
+            if (hits.length > 0) result = '';
+        }
+        return result;
     },
 
     /**
@@ -131,8 +176,15 @@ exports.Tokens = BaseDomain.subClass( {
         return this._super( json, ttl, timeunit );
     },
 
-    preValidate: function ( json ) {
-        return json;
+    /**
+     * If the user has not yet generated a token and attached it, we will create a new
+     * token on the fly.
+     *
+     * @param json
+     */
+    preCreate: function ( json ) {
+        json.created = new Date().toISOString();
+        if (!json.id) json.id = this.generate(6);
     },
 
     // When the time-to-live expires on members of this map, we want to remove the

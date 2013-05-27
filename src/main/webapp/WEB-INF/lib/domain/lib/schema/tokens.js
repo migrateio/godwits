@@ -6,6 +6,10 @@ exports.schema = {
         },
         userId: {
             type: 'string'
+        },
+        created: {
+            type: 'string',
+            format: 'date-time'
         }
     },
     additionalProperties: false,

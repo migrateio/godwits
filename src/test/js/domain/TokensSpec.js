@@ -14,7 +14,6 @@ describe( 'Token Domain', function () {
     beforeEach( function () {
         tokens = new domain.Tokens( 'dev' );
         expect( tokens ).toBeDefined();
-
         map = tokens.backingMap();
     } );
 
@@ -53,8 +52,8 @@ describe( 'Token Domain', function () {
             expect( result ).toBeDefined();
         } );
 
-        // Should be evicted and removed in 10 seconds
-        waits( 10000 );
+        // Should be evicted and removed in 6 seconds
+        waits( 6000 );
 
         runs(function() {
             expect(function () {

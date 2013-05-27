@@ -49,6 +49,8 @@
 
 <body>
 
+<div ng-controller="devbar-controller" dev-bar></div>
+
 <div class="container outer header">
 
     <div class="container inner">
@@ -165,6 +167,7 @@
                 '/lib/analytics/angular-google-analytics.js'
             ], function () {
                 $script( [
+                    '/lib/devbar/devbar.js',
                     '/lib/security/auth.js',
                     '/lib/security/spring.js',
                     '/js/jobs.js',

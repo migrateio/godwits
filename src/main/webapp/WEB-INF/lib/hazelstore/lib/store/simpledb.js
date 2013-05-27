@@ -87,6 +87,9 @@ exports.SimpleDBStore = function ( mapName, options ) {
         log.debug( 'SimpleDBStore::query, table: {}, key: {}',
             tableName, JSON.stringify( select ) );
 
+        // Replace substituable variables, if any
+        select = select.replace( '[mapname]', tableName );
+
         var response = [];
 
         var request = new SelectRequest()
@@ -238,13 +241,13 @@ exports.SimpleDBStore = function ( mapName, options ) {
     function jsonToAttributes(value) {
         var json = typeof value === 'string' ? JSON.parse( value ) : value;
         var props = jsonToProps( json );
-        log.info( 'Making props: {}', JSON.stringify( props ) );
+//        log.info( 'Making props: {}', JSON.stringify( props ) );
 
         var attrs = new java.util.ArrayList();
         attrs.add( new ReplaceableAttribute( '_value', value, true ) );
         Object.keys( props ).forEach( function ( key ) {
-            log.info( 'Entry key: {}, value: {}',
-                JSON.stringify( key ), JSON.stringify( props[key] ) );
+//            log.info( 'Entry key: {}, value: {}',
+//                JSON.stringify( key ), JSON.stringify( props[key] ) );
             attrs.add(
                 new ReplaceableAttribute()
                     .withReplace( true )

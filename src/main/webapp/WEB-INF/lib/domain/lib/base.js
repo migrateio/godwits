@@ -1,7 +1,6 @@
 var log = require( 'ringo/logging' ).getLogger( module.id );
 var {merge} = require( 'ringo/utils/objects' );
 var {JsonSchema} = require( 'tv4' );
-var {uuid} = require('utility');
 
 
 /**
@@ -41,13 +40,7 @@ exports.BaseDomain = Object.subClass( {
         };
     },
 
-    preValidate: function ( json ) {
-        // Add a the creation date
-        json.created = new Date().toISOString();
-
-        // add an id if not provided
-        if (!json.id) json.id = uuid();
-
+    preCreate: function ( json ) {
         return json;
     },
 
@@ -61,13 +54,15 @@ exports.BaseDomain = Object.subClass( {
         // Clone json object because we don't want to modify its properties
         json = JSON.parse( JSON.stringify( json ) );
 
-        json = this.preValidate( json );
+        this.preCreate( json );
 
         // Flesh out the object with default/required values from the schema
         var newObj = this.generateDefaults( json );
 
         // Validate the new object
+        log.debug( 'Domain object right before validation: ', JSON.stringify( newObj ) );
         var schema = this.validateSchema( newObj );
+        log.debug( 'Schema results: ', JSON.stringify( schema ) );
 
         // If there are validation errors, we throw an exception with the errors
         if ( !schema.valid ) {

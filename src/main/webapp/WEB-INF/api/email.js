@@ -53,6 +53,7 @@ function sendEmail( template, obj ) {
  * @param obj
  */
 exports.sendWelcomeEmail = function ( token, user ) {
+    log.info( 'Sending welcome to ', JSON.stringify( user ) );
     var confirm = props['server.web.url'] + 'verify/' + user.id + '?token=' + token;
     var opts = {
         to : user.email.address,

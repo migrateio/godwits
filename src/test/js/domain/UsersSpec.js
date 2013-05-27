@@ -79,7 +79,7 @@ describe( 'User Domain', function () {
         users.create( betty );
 
         var results = users.read(
-            "select * from `dev-users` where `email.address` like 'b%'"
+            "select * from `[mapname]` where `email.address` like 'b%'"
         );
 
         expect( results ).toBeArray();
@@ -98,7 +98,7 @@ describe( 'User Domain', function () {
         expect( expected ).toEqual( actual );
 
         results = users.read(
-            'select * from `dev-users` where `email.address` = "fred@bedrock.com"'
+            'select * from `[mapname]` where `email.address` = "fred@bedrock.com"'
         );
 
         expect( results ).toBeArray();

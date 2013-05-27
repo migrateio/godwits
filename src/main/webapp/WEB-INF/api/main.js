@@ -10,7 +10,10 @@ require( 'hazelstore' ).init();
 
 var {Application} = require('stick');
 var app = exports.app = Application();
-app.configure('profiler', 'middleware/nocache', 'error', 'notfound', 'params', 'mount', 'route');
+app.configure(
+    'profiler', 'middleware/nocache', 'middleware/ajaxerror', 'notfound', 'params',
+    'middleware/auth', 'mount', 'route'
+);
 
 var {json} = require('ringo/jsgi/response');
 
