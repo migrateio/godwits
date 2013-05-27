@@ -97,20 +97,11 @@ describe( 'Workflow', function () {
         workflow = new Workflow( workflowType, accessKey, secretKey );
         expect( workflow ).toBeDefined();
         spyOn( workflow.swfClient, 'registerActivityType' ).andCallThrough();
-<<<<<<< Updated upstream
 
         Object.keys(activities ).forEach(function(key) {
             workflow.registerWorkers( workerTaskList, activities[key] );
         });
         workflow.registerDecider( deciderTaskList, function() {
-=======
-        var workers = [
-            activities.loadUser, activities.authPayment,
-            activities.doWork, activities.capturePayment
-        ];
-        workflow.registerWorkers( workerTaskList, workers );
-        workflow.registerDecider( deciderTaskList, function () {
->>>>>>> Stashed changes
             return deciderModuleId;
         } );
         expect( workflow.swfClient.registerActivityType.calls.length ).toEqual( 7 );

@@ -1,4 +1,5 @@
-var hazel = require( './hazelcast/hazelcast' );
+var hazel = require('./hazelcast/hazelcast');
+
 
 
 exports.init = hazel.init;
@@ -10,4 +11,4 @@ exports.inTransaction = hazel.inTransaction;
 exports.registerListener = hazel.registerListener;
 exports.clearListeners = hazel.clearListeners;
 
-exports.generateId = require( './utils' ).generateId;
+exports.generateId = require('./utils').generateId;

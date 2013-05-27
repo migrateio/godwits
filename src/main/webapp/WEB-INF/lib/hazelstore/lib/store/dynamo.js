@@ -36,14 +36,10 @@ exports.DynamoDBStore = function ( mapName, options ) {
                 .withKey( map );
             var result = dynamoDB.getItem( request );
             var attrVals = result.getItem();
-            if ( !attrVals ) return null;
+            if (!attrVals) return null;
             var value = attrVals.get( 'value' );
             return value ? value.getS() : null;
-        } catch ( e if e
-    .
-        javaException instanceof ResourceNotFoundException
-    )
-        {
+        } catch ( e if e.javaException instanceof ResourceNotFoundException ) {
         }
 
         return null;
@@ -80,14 +76,14 @@ exports.DynamoDBStore = function ( mapName, options ) {
      * @param key   key of the entry to store
      * @param value value of the entry to store
      */
-    function store( key, value ) {
+    function store(key, value) {
         log.debug( 'DynamoDBStore::store', JSON.stringify( arguments ) );
 
         var item = new java.util.HashMap();
-        item.put( "key", new AttributeValue( key.toString() ) );
-        item.put( "value", new AttributeValue( new java.lang.String( value ) ) );
-        var request = new PutItemRequest( tableName, item );
-        dynamoDB.putItem( request );
+        item.put("key", new AttributeValue(key.toString()));
+        item.put("value", new AttributeValue(new java.lang.String(value)));
+        var request = new PutItemRequest(tableName, item);
+        dynamoDB.putItem(request);
     }
 
     /**
@@ -96,10 +92,10 @@ exports.DynamoDBStore = function ( mapName, options ) {
      *
      * @param map map of entries to store
      */
-    function storeAll( map ) {
-        map.entrySet().toArray().forEach( function ( entry ) {
+    function storeAll(map) {
+        map.entrySet().toArray().forEach(function(entry){
             store( entry.key, entry.value );
-        } );
+        });
     }
 
     /**
@@ -107,22 +103,18 @@ exports.DynamoDBStore = function ( mapName, options ) {
      *
      * @param key key to delete from the store.
      */
-    function del( key ) {
+    function del(key) {
         log.debug( 'DynamoDBStore::delete', JSON.stringify( arguments ) );
         var map = new java.util.HashMap();
-        map.put( "key", new AttributeValue().withS( key.toString() ) );
+        map.put("key", new AttributeValue().withS(key.toString()));
 
         var request = new DeleteItemRequest()
-            .withTableName( tableName )
-            .withKey( map );
+            .withTableName(tableName)
+            .withKey(map);
 
         try {
-            dynamoDB.deleteItem( request );
-        } catch ( e if e
-    .
-        javaException instanceof ResourceNotFoundException
-    )
-        {
+            dynamoDB.deleteItem(request);
+        } catch ( e if e.javaException instanceof ResourceNotFoundException ) {
             // Not really a problem
         }
     }
@@ -132,7 +124,7 @@ exports.DynamoDBStore = function ( mapName, options ) {
      *
      * @param keys keys of the entries to delete.
      */
-    function deleteAll( keys ) {
+    function deleteAll(keys) {
         log.debug( 'DynamoDBStore::deleteAll' );
         keys.toArray().forEach( del );
     }
@@ -141,11 +133,7 @@ exports.DynamoDBStore = function ( mapName, options ) {
         var request = new DescribeTableRequest().withTableName( tableName );
         try {
             dynamoDB.describeTable( request );
-        } catch ( e if e
-    .
-        javaException instanceof ResourceNotFoundException
-    )
-        {
+        } catch ( e if e.javaException instanceof ResourceNotFoundException ) {
             return false;
         }
         return true;

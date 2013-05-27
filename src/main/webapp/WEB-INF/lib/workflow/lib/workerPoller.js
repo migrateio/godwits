@@ -100,7 +100,7 @@ function WorkerPoller( taskListName, swfClient ) {
             };
 
         // Register the ActivityType with Amazon SWF
-        swfClient.registerActivityType( type ).wait( 5000 );
+        swfClient.registerActivityType( type ).wait(5000);
 
         // Store the moduleId so we can instantiate this module as a Worker later
         var key = type.name + '/' + type.version;
@@ -141,7 +141,7 @@ function WorkerPoller( taskListName, swfClient ) {
 
                     log.debug( 'WorkerPoller::poll, task: {}', JSON.stringify( task ) );
                     if ( task && task.taskToken ) {
-                        (function () {
+                        (function() {
                             const thisTask = task;
                             setTimeout( function () {
                                 startTask( thisTask );
@@ -173,8 +173,8 @@ function WorkerPoller( taskListName, swfClient ) {
         log.debug( 'WorkerPoller::workerSuccess {}', JSON.stringify( arguments ) );
         swfClient.respondActivityTaskCompleted( {
             result : {
-                status : 200,
-                data : data
+                status: 200,
+                data: data
             },
             taskToken : task.taskToken
         } );
@@ -248,14 +248,14 @@ function WorkerPoller( taskListName, swfClient ) {
             workerCount++;
             log.info( 'WorkerPoller::startTask, {}', JSON.stringify( task, null, 4 ) );
             var worker = new WorkerPromise( workerModule, task );
-            /*
-             var heartbeat = new Worker( 'workflow/heartbeat' );
-             heartbeat.postMessage( {
-             swfClient: swfClient,
-             interval: '5',
-             taskToken : task.taskToken
-             } );
-             */
+/*
+            var heartbeat = new Worker( 'workflow/heartbeat' );
+            heartbeat.postMessage( {
+                swfClient: swfClient,
+                interval: '5',
+                taskToken : task.taskToken
+            } );
+*/
             worker
                 .then( function ( e ) {
                     workerSuccess( task, e.data );
@@ -289,14 +289,13 @@ function WorkerPoller( taskListName, swfClient ) {
         log.debug( 'WorkerPoller::init, starting worker poller thread: {}', threadName );
         new java.lang.Thread( poll, threadName ).start();
     }
-
-    init( taskListName, swfClient );
+    init( taskListName, swfClient);
 
     return {
-        registerWorker : registerWorker,
-        start : start,
-        stop : stop,
-        shutdown : shutdown
+        registerWorker: registerWorker,
+        start: start,
+        stop: stop,
+        shutdown: shutdown
     }
 }
 exports.WorkerPoller = WorkerPoller;

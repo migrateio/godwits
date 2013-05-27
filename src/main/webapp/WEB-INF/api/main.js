@@ -1,10 +1,10 @@
-var log = require( 'ringo/logging' ).getLogger( module.id );
+var log = require('ringo/logging').getLogger(module.id);
 
-var {Application} = require( 'stick' );
+var {Application} = require('stick');
 var app = exports.app = Application();
 app.configure('profiler', 'middleware/nocache', 'error', 'notfound', 'params', 'mount', 'route');
 
-var {json} = require( 'ringo/jsgi/response' );
+var {json} = require('ringo/jsgi/response');
 
 app.mount( '/jobs', require( 'jobs' ) );
 app.mount( '/users', require( 'users' ) );
@@ -15,6 +15,3 @@ app.get('/', function (req) {
         success: true
     });
 });
-
-app.mount( '/oauth', require( 'oauth/oauth_client' ) );
-

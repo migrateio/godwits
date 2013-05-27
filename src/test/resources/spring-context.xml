@@ -8,8 +8,7 @@
                             http://www.springframework.org/schema/util/spring-util-2.0.xsd">
 
 
-    <util:map id="configParams" key-type="java.lang.String"
-              value-type="java.lang.String">
+    <util:map id="configParams" key-type="java.lang.String" value-type="java.lang.String">
         <entry key="env" value="${environment}"/>
         <entry key="aws.app.access_key" value="${aws.app.access_key}"/>
         <entry key="aws.app.secret_key" value="${aws.app.secret_key}"/>

@@ -29,11 +29,11 @@
  */
 
 
-var {Workflow} = require( './workflow' );
-var {Decider} = require( './decider' );
-var {DeciderPoller} = require( './deciderPoller' );
-var {Worker} = require( './worker' );
-var {WorkerPoller} = require( './workerPoller' );
+var {Workflow} = require('./workflow');
+var {Decider} = require('./decider');
+var {DeciderPoller} = require('./deciderPoller');
+var {Worker} = require('./worker');
+var {WorkerPoller} = require('./workerPoller');
 
 
 exports.Workflow = Workflow;

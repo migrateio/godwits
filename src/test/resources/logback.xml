@@ -3,9 +3,7 @@
 <configuration debug="false" scan="true" scanPeriod="5 seconds">
     <appender name="stdout" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
-            <pattern>%6.6relative{6} [%10.10thread] %highlight(%-5level
-                [%30.30logger{30}] %m) %n%n
-            </pattern>
+            <pattern>%6.6relative{6} [%10.10thread] %highlight(%-5level [%30.30logger{30}] %m) %n%n</pattern>
         </encoder>
     </appender>
 

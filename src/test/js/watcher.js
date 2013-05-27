@@ -14,7 +14,7 @@ function changesDetected( folders ) {
     var jsFiles = [].concat( folders )
         // Replace each folder with an array of all file names
         .map( function ( folder ) {
-            if ( fs.isFile( folder ) ) return [folder];
+            if (fs.isFile(folder)) return [folder];
             return fs.listTree( folder )
                 // Make sure the file names are fully qualified
                 .map( function ( file ) {

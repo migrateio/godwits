@@ -2,7 +2,7 @@
 
 var log = require( 'ringo/logging' ).getLogger( module.id );
 
-exports.logic = function ( actions ) {
+exports.logic = function ( actions) {
 
     var workflowId, runId, job, user, errors = [], decisions = [],
         version = '0.0.6', successfulMigration = false;
@@ -10,12 +10,7 @@ exports.logic = function ( actions ) {
 
     return {
         initialState : 'uninitialized',
-<<<<<<< Updated upstream
         steadyState: function() {
-=======
-        steadyState : function () {
-            log.debug( 'achieved steady state: ', JSON.stringify( decisions ) );
->>>>>>> Stashed changes
             this.emit( 'decision', decisions );
         },
         states : {
@@ -30,7 +25,6 @@ exports.logic = function ( actions ) {
                     runId = event.json.workflowExecution.runId;
 
                     job = event.input;
-<<<<<<< Updated upstream
 
                     if (!job) {
                         errors.push( 'No job was included in workflow task' );
@@ -44,30 +38,16 @@ exports.logic = function ( actions ) {
                     log.debug( 'initialize::onEnter' );
                 },
                 next: function() {
-=======
-                    if ( !job ) throw {
-                        status : 400,
-                        message : 'No job was included in workflow task'
-                    };
-                },
-                next : function () {
-                    log.debug( 'uninitialized::next' );
->>>>>>> Stashed changes
                     decisions.push(
                         actions.scheduleActivityTask( 'load-user', version, {
                             userId : job.userId
                         } )
                     );
                 },
-                ActivityTaskCompleted : function ( event ) {
+                ActivityTaskCompleted: function(event) {
                     var result = event.attrs.result;
-<<<<<<< Updated upstream
-=======
-                    log.debug( 'uninitialized::ActivityTaskCompleted: {}',
-                        JSON.stringify( result ) );
->>>>>>> Stashed changes
 
-                    switch ( result.status ) {
+                    switch (result.status) {
                         case 200:
                             user = result.data;
                             this.transition( 'auth-payment' );
@@ -107,7 +87,6 @@ exports.logic = function ( actions ) {
                             this.transition( 'finalize' );
                             break;
                         default:
-<<<<<<< Updated upstream
                             errors.push( 'Unexpected status [' + result.status + '] ' +
                                 'from workflow state initialized::ActivityTaskCompleted' );
                             this.transition( 'finalize' );
@@ -211,13 +190,6 @@ exports.logic = function ( actions ) {
                             errors.push( 'Unexpected status [' + result.status + '] ' +
                                 'from workflow state migrated::ActivityTaskCompleted' );
                             this.transition( 'finalize' );
-=======
-                            throw {
-                                status : 400,
-                                message : 'Unexpected status [' + result.status + '] ' +
-                                    'from workflow state uninitialized::ActivityTaskCompleted'
-                            }
->>>>>>> Stashed changes
                     }
                 }
             },
@@ -246,16 +218,12 @@ exports.logic = function ( actions ) {
                 }
             },
 
-<<<<<<< Updated upstream
             'finalize' : {
-=======
-            finalize : {
->>>>>>> Stashed changes
                 _onEnter : function () {
                     log.debug( 'finalize::onEnter' );
                 },
-                next : function () {
-                    if ( errors.length > 0 ) {
+                next: function() {
+                    if (errors.length > 0) {
                         decisions.push(
                             actions.failWorkflowExecution( errors )
                         );

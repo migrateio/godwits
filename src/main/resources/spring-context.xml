@@ -23,17 +23,16 @@
     <!--
     <bean id="hzServer" class="com.zocia.platform.hazelcast.HazelcastBootstrap"
           init-method="init" destroy-method="destroy">
-        <property name="mapStoreFactory" ref="mapStoreFactory"/>
+        <property name="mapStoreFactory" ref="mapStoreFactory" />
     </bean>
 
-    <bean id="mapStoreFactory"
-          class="com.zocia.platform.hazelcast.persistence.DelegatingMapStoreFactory"/>
+    <bean id="mapStoreFactory" class="com.zocia.platform.hazelcast.persistence.DelegatingMapStoreFactory" />
 
     <bean id="dynamoMapStore" scope="prototype"
           class="com.zocia.platform.hazelcast.persistence.amazon.DynamoMapPersistence">
-        <property name="access" value="rw"/>
-        <property name="awsAccessKey" value="${aws.app.access_key}"/>
-        <property name="awsSecretKey" value="${aws.app.secret_key}"/>
+        <property name="access" value="rw" />
+        <property name="awsAccessKey" value="${aws.app.access_key}" />
+        <property name="awsSecretKey" value="${aws.app.secret_key}" />
     </bean>
     -->
 

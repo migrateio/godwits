@@ -1,6 +1,6 @@
 {
-    "name" : "Hazelcast wrapper with backing store option",
-    "version" : "${project.version}",
-    "description" : "",
-    "main" : "./lib/main.js"
+    "name": "Hazelcast wrapper with backing store option",
+    "version": "${project.version}",
+    "description": "",
+    "main": "./lib/main.js"
 }

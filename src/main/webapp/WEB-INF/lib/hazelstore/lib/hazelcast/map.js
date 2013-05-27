@@ -62,7 +62,8 @@ function Map( hazelcast, mapName ) {
      * @param listener
      */
     var addEntryListener = function ( listener ) {
-        if ( !listener.entryAdded && !listener.entryRemoved && !listener.entryUpdated && !listener.entryEvicted ) {
+        if ( !listener.entryAdded && !listener.entryRemoved &&
+            !listener.entryUpdated && !listener.entryEvicted ) {
             throw 'EntryListener must implement a valid callback function.';
         }
 
@@ -143,8 +144,8 @@ function Map( hazelcast, mapName ) {
      */
     var put = function ( key, value, ttl, timeunit ) {
         log.debug( 'Putting into map [{}]: {}', mapName, key );
-        if ( typeof key !== 'string' ) throw { status : 400,
-            message : 'map.put requires a parameter [key] of type string'
+        if (typeof key !== 'string') throw { status: 400,
+            message: 'map.put requires a parameter [key] of type string'
         };
 
         if ( isNaN( ttl ) ) ttl = 0;

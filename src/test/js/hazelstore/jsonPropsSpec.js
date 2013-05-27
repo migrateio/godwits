@@ -3,14 +3,14 @@
 var log = require( 'ringo/logging' ).getLogger( module.id );
 var {jsonToProps, propsToJson} = require( 'hazelstore/utils' );
 
-function convertCheck( msg, actual, expected ) {
+function convertCheck(msg, actual, expected) {
 
-    it( msg, function () {
+    it(msg, function() {
         var result = jsonToProps( actual );
         expect( result ).toEqual( expected );
         result = propsToJson( result );
         expect( result ).toEqual( actual );
-    } );
+    });
 }
 
 describe( 'Json to Props Conversion', function () {

@@ -45,7 +45,7 @@ exports.SimpleDBStore = function ( mapName, options ) {
         var request = new GetAttributesRequest()
             .withDomainName( tableName )
             .withItemName( key )
-            .withConsistentRead( true )
+            .withConsistentRead(true)
             .withAttributeNames( attrs );
 
         try {
@@ -144,7 +144,7 @@ exports.SimpleDBStore = function ( mapName, options ) {
      * @param key   key of the entry to store
      * @param value value of the entry to store
      */
-    function store( key, value ) {
+    function store(key, value) {
         log.debug( 'SimpleDBStore::store', JSON.stringify( arguments ) );
 
         // The json object to be stored will be flattened into an attribute list
@@ -168,13 +168,13 @@ exports.SimpleDBStore = function ( mapName, options ) {
      *
      * @param map map of entries to store
      */
-    function storeAll( map ) {
+    function storeAll(map) {
         var items = new java.util.ArrayList();
-        map.entrySet().toArray().forEach( function ( entry ) {
+        map.entrySet().toArray().forEach(function(entry){
             items.add(
                 new ReplaceableItem( entry.key, jsonToAttributes( entry.value ) )
             );
-        } );
+        });
 
         var request = BatchPutAttributesRequest()
             .withDomainName( tableName )
@@ -183,7 +183,7 @@ exports.SimpleDBStore = function ( mapName, options ) {
         try {
             client.batchPutAttributes( request );
         } catch ( e ) {
-            log.error( 'SimpleDBStore::storeAll', e );
+            log.error( 'SimpleDBStore::storeAll', e);
             throw e;
         }
     }
@@ -193,7 +193,7 @@ exports.SimpleDBStore = function ( mapName, options ) {
      *
      * @param key key to delete from the store.
      */
-    function del( key ) {
+    function del(key) {
         log.debug( 'SimpleDBStore::delete', JSON.stringify( arguments ) );
 
         // The json object to be stored will be flattened into an attribute list
@@ -214,13 +214,13 @@ exports.SimpleDBStore = function ( mapName, options ) {
      *
      * @param keys keys of the entries to delete.
      */
-    function deleteAll( keys ) {
+    function deleteAll(keys) {
         var items = new java.util.ArrayList();
-        map.entrySet().toArray().forEach( function ( entry ) {
+        map.entrySet().toArray().forEach(function(entry){
             items.add(
                 new DeletableItem( entry.key )
             );
-        } );
+        });
 
         var request = BatchDeleteAttributesRequest()
             .withDomainName( tableName )
@@ -234,7 +234,7 @@ exports.SimpleDBStore = function ( mapName, options ) {
         }
     }
 
-    function jsonToAttributes( value ) {
+    function jsonToAttributes(value) {
         var json = typeof value === 'string' ? JSON.parse( value ) : value;
         var props = jsonToProps( json );
         log.info( 'Making props: {}', JSON.stringify( props ) );
@@ -260,11 +260,7 @@ exports.SimpleDBStore = function ( mapName, options ) {
         var request = new DomainMetadataRequest().withDomainName( tableName );
         try {
             client.domainMetadata( request );
-        } catch ( e if e
-    .
-        javaException instanceof NoSuchDomainException
-    )
-        {
+        } catch ( e if e.javaException instanceof NoSuchDomainException ) {
             return false;
         }
         return true;
