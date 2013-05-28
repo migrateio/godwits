@@ -74,13 +74,14 @@ var {uuid} = require('utility');
 })();
 
 // Order is important. This require statement must appear after the Object.subClass(...)
-var {BaseDomain} = require('./base');
+var {BaseDomain} = require( './base' );
 
 exports.Users = BaseDomain.subClass( {
 
     init: function(environment) {
         var {schema} = require( 'domain/schema/users.js' );
         var map = store.getMap( environment + '-users' );
+
         var pk = function(user) {
             return user.id;
         };
@@ -204,17 +205,17 @@ exports.Tokens = BaseDomain.subClass( {
 } );
 
 /*
-exports.Invoices = BaseDomain.subClass( {
+ exports.Invoices = BaseDomain.subClass( {
 
-    init: function() {
-        var {schema} = require( 'domain/schema/invoices.js' );
-        var map = store.getMap( 'dev-invoices' );
-        var pk = function(invoice) {
-            return invoice.invoiceId;
-        };
-        this._super('Invoices', map, pk, schema);
-    }
-} );
-*/
+ init: function() {
+ var {schema} = require( 'domain/schema/invoices.js' );
+ var map = store.getMap( 'dev-invoices' );
+ var pk = function(invoice) {
+ return invoice.invoiceId;
+ };
+ this._super('Invoices', map, pk, schema);
+ }
+ } );
+ */
 
 

@@ -167,7 +167,7 @@ exports.BaseDomain = Object.subClass( {
         return this.map.remove( pkey );
     },
 
-    backingMap: function() {
+    backingMap : function () {
         return this.map;
     }
 } );

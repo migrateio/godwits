@@ -1,4 +1,4 @@
-if (typeof Object.extend !== 'function') {
+if ( typeof Object.extend !== 'function' ) {
     Object.extend = function extend( orig ) {
         var args = Array.prototype.slice.call( arguments, 0 );
         var result = args.shift();
@@ -19,7 +19,7 @@ if (typeof Object.extend !== 'function') {
  * Extends the Object class with John Resig's class inheritance recipe.
  */
 (function () {
-    if (typeof Object.subClass === 'function') return;
+    if ( typeof Object.subClass === 'function' ) return;
 
     var initializing = false,
         superPattern = // Determine if functions can be serialized
@@ -83,9 +83,9 @@ if (typeof Object.extend !== 'function') {
 })();
 
 exports.Google = {
-    Mail: require( './google/mail/google-mail' ).Service
+    Mail : require( './google/mail/google-mail' ).Service
 };
 
 exports.Yahoo = {
-    Mail: require( './yahoo/mail/yahoo-mail' ).Service
+    Mail : require( './yahoo/mail/yahoo-mail' ).Service
 };

@@ -10,10 +10,10 @@ var {Config, XmlConfigBuilder} = Packages.com.hazelcast.config;
 var {Hazelcast} = Packages.com.hazelcast.core;
 
 /*
-var maps = module.singleton( "maps", function () {
-    return {}
-} );
-*/
+ var maps = module.singleton( "maps", function () {
+ return {}
+ } );
+ */
 
 var hazelcast;
 var maps = {};
@@ -109,7 +109,7 @@ function initializeMapStores( entry ) {
 
         // If there is a property <storeEngine>, then we take over, otherwise bail
         var props = convertPropsToMap( mapStoreConfig.properties );
-        if (props.storeEngine) {
+        if ( props.storeEngine ) {
             log.info( 'Store engine: ', props.storeEngine );
             var factory = new DelegatingMapStoreFactory();
             mapStoreConfig.setFactoryImplementation( factory );

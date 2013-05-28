@@ -7,8 +7,8 @@
         "type" : "git",
         "url" : "git://github.com/ifandelse/machina.js.git"
     },
-	"author" : "Jim Cowart (http://freshbrewedcode.com/jimcowart)",
-    "contributors": [
+    "author" : "Jim Cowart (http://freshbrewedcode.com/jimcowart)",
+    "contributors" : [
         {
             "name" : "Jim Cowart",
             "email" : "jim@ifandelse.com",
@@ -20,46 +20,48 @@
             "url" : "http://code.dougneiner.com"
         },
         {
-	        "name" : "Friedemann Altrock",
-	        "email" : "frodenius@gmail.com",
-	        "url" : "https://github.com/fwg"
+            "name" : "Friedemann Altrock",
+            "email" : "frodenius@gmail.com",
+            "url" : "https://github.com/fwg"
         },
         {
-	        "name" : "Michiel Trimpe",
-	        "email" : "michiel@trimpe.nl",
-	        "url" : "https://github.com/mtrimpe"
+            "name" : "Michiel Trimpe",
+            "email" : "michiel@trimpe.nl",
+            "url" : "https://github.com/mtrimpe"
         },
         {
-	        "name" : "Brian Mavity",
-	        "url" : "https://github.com/bmavity"
+            "name" : "Brian Mavity",
+            "url" : "https://github.com/bmavity"
         }
     ],
-	"keywords" : [
-		"state machine",
-		"finite state machine",
-		"fsm",
-		"async",
-		"workflow",
-		"state",
-		"machina",
-		"machina-js",
-		"machina.js",
-		"machinajs"
-	],
+    "keywords" : [
+        "state machine",
+        "finite state machine",
+        "fsm",
+        "async",
+        "workflow",
+        "state",
+        "machina",
+        "machina-js",
+        "machina.js",
+        "machinajs"
+    ],
     "bugs" : {
         "email" : "jim@ifandelse.com",
         "url" : "http://github.com/ifandelse/machina.js/issues"
-   },
-	"directories" : { "lib" : "lib" },
+    },
+    "directories" : {
+        "lib" : "lib"
+    },
     "main" : "lib/machina.js",
-	"engines" : {
-		"node" : ">=0.4.0"
-	},
-	"dependencies" : {
-		"underscore" : ">=1.1.7"
-	},
-	"bundleDependencies" : [ "underscore" ],
-	"devDependencies" : {},
+    "engines" : {
+        "node" : ">=0.4.0"
+    },
+    "dependencies" : {
+        "underscore" : ">=1.1.7"
+    },
+    "bundleDependencies" : [ "underscore" ],
+    "devDependencies" : {},
     "licenses" : [
         {
             "type" : "MIT",

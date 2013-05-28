@@ -1,6 +1,6 @@
 {
-    "name": "Migration libraries for various cloud providers",
-    "version": "${project.version}",
-    "description": "",
-    "main": "./lib/main.js"
+    "name" : "Migration libraries for various cloud providers",
+    "version" : "${project.version}",
+    "description" : "",
+    "main" : "./lib/main.js"
 }

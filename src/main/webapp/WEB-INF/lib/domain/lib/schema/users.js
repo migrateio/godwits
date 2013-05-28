@@ -1,4 +1,5 @@
 exports.schema = {
+<<<<<<< Updated upstream
     type: 'object',
     properties: {
         id: {
@@ -29,12 +30,24 @@ exports.schema = {
                     type: 'string',
                     'enum': ['candidate','verified'],
                     'default': 'candidate'
+=======
+    type : 'object',
+    properties : {
+        email : {
+            type : 'object',
+            properties : {
+                status : {
+                    type : 'string',
+                    enum : ['candidate', 'verified'],
+                    default : 'candidate'
+>>>>>>> Stashed changes
                 },
-                address: {
-                    type: 'string',
-                    format: 'email'
+                address : {
+                    type : 'string',
+                    format : 'email'
                 }
             },
+<<<<<<< Updated upstream
             required: ['status', 'address'],
             'default': {},
             additionalProperties: false
@@ -55,4 +68,17 @@ exports.schema = {
     },
     additionalProperties: false,
     required: ['id', 'email', 'name', 'roles']
+=======
+            required : ['status', 'address'],
+            default : {},
+            additionalProperties : false
+        },
+        created : {
+            type : 'string',
+            format : 'date-time'
+        }
+    },
+    additionalProperties : false,
+    required : ['email']
+>>>>>>> Stashed changes
 };

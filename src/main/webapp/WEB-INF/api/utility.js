@@ -3,7 +3,7 @@
 
 
 var config = exports.config = {
-    version: '0.1.0'
+    version : '0.1.0'
 };
 
 exports.uuid = function () {

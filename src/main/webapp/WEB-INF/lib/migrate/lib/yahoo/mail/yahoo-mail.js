@@ -1,15 +1,17 @@
-var log = require('ringo/logging').getLogger(module.id);
+var log = require( 'ringo/logging' ).getLogger( module.id );
 
-var ImapService = require('../../imap/mail/imap').ImapService;
+var ImapService = require( '../../imap/mail/imap' ).ImapService;
 
-exports.Service = ImapService.subClass({
-    connect: function() {
-        Object.extend(this.opts, {
-            hostname: 'imap.mail.yahoo.com',
-            props: {
-                'mail.imap.yahoo.guid': '1'
+var {merge} = require( 'ringo/utils/objects' );
+
+exports.Service = ImapService.subClass( {
+    init : function ( opts ) {
+        this.opts = merge( opts, {
+            hostname : 'imap.mail.yahoo.com',
+            props : {
+                'mail.imap.yahoo.guid' : '1'
             }
-        });
-        this._super(this.opts);
+        } );
+        this._super( this.opts );
     }
-});
+} );
