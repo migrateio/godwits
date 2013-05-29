@@ -7,8 +7,8 @@ exports.middleware = function error(next, app) {
         try {
             return next(request);
         } catch (error if error.status && error.message) {
-            log.error( error );
-            return response.error().json( error );
+            log.error( JSON.stringify( error ) );
+            return response.setStatus(error.status).json( error );
         } catch (e) {
             log.error( e );
             return response.error().json({

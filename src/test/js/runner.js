@@ -15,7 +15,6 @@ var baseDir = fs.directory( module.path );
 load( baseDir + '/jasmine/jasmine-1.3.1.js' );
 load( baseDir + '/jasmine/async-callback.js' );
 load( baseDir + '/jasmine/jasmine.term_reporter.js' );
-load( baseDir + '/jasmine/async-callback.js' );
 load( baseDir + '/jasmine/jasmine.junit_reporter.js' );
 
 // Load helpers
@@ -127,6 +126,20 @@ function main( args ) {
 }
 
 if ( require.main === module ) {
+
+    /*
+     var {Workflow} = require( 'workflow/workflow' );
+     var workflow = new Workflow( {
+     domain : 'dev-migrate',
+     name : 'io.migrate.transfers',
+     version : '0.0.0',
+     defaultChildPolicy : 'TERMINATE',
+     defaultTaskListName : 'transfer-decisions',
+     description : 'The primary workflow used for a transfer Run.',
+     defaultExecutionStartToCloseTimeout : '2592000', // 1 month
+     defaultTaskStartToCloseTimeout : 'NONE'
+     }, 'AKIAIIQOWQM6FFLQB2EQ', 'ItTa0xaI9sey2SEGGEN8yVcA5slN95+qmNrf1TMd' );
+     */
     main( system.args );
     log.info( 'Exiting clean' );
 }

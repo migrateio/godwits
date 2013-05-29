@@ -76,6 +76,7 @@
         }
     ] );
 
+/*
     mod.controller( 'signin-controller',
         ['$log', '$rootScope', '$scope', '$http', 'authService',
             function ( $log, $rootScope, $scope, $http, authService ) {
@@ -144,6 +145,7 @@
             }
         ]
     );
+*/
 
     mod.controller( 'signup-controller',
         ['$log', '$rootScope', '$scope', '$http', '$location',

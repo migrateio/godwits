@@ -5,14 +5,15 @@ var {trimpathString} = require( 'trimpath' );
 var {merge} = require( 'ringo/utils/objects' );
 
 
-var service = module.singleton( 'emailService', function () {
+//var service = module.singleton( 'emailService', function () {
     var {props} = require( 'utility' );
-    var accessKey = props['aws.email.access_key'];
-    var secretKey = props['aws.email.secret_key'];
-    return new EmailService( {
-        from : '"Migrate IO" <no-reply@migrate.io>'
+    var accessKey = props['aws.app.access_key'];
+    var secretKey = props['aws.app.secret_key'];
+    var service = new EmailService( {
+        from : 'no-reply@migrate.io'
+//        from : '"Migrate IO" <no-reply@migrate.io>'
     }, accessKey, secretKey );
-} );
+//} );
 
 
 function sendEmail( template, obj ) {
@@ -36,7 +37,7 @@ function sendEmail( template, obj ) {
         from : from
     } );
 
-    service.send( opts );
+    return service.send( opts );
 }
 
 /**
@@ -53,16 +54,21 @@ function sendEmail( template, obj ) {
  * @param obj
  */
 exports.sendWelcomeEmail = function ( token, user ) {
-    log.info( 'Sending welcome to ', JSON.stringify( user ) );
     var confirm = props['server.web.url'] + 'verify/' + user.id + '?token=' + token;
     var opts = {
-        to : user.email.address,
+        to : 'success@simulator.amazonses.com',
+//        to : 'suppressionlist@simulator.amazonses.com',
+//        to : 'complaint@simulator.amazonses.com',
+//        to : 'ooto@simulator.amazonses.com',
+//        to : 'bounce@simulator.amazonses.com',
+//        to : user.email.address,
         token : token,
         link : {
             support : props['support.web.url'],
             confirm : confirm
         }
     };
-    sendEmail( 'email.welcome', opts );
+    log.info( 'Sending welcome email:', JSON.stringify( opts, null, 4 ) );
+    return sendEmail( 'email.welcome', opts );
 };
 

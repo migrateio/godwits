@@ -38,10 +38,23 @@ exports.BaseDomain = Object.subClass( {
         this.generateDefaults = function ( obj ) {
             return js.generate( obj, schema );
         };
+        this.strip = function ( obj, keys ) {
+            return js.strip( obj, schema, keys );
+        };
     },
 
     preCreate: function ( json ) {
         return json;
+    },
+
+    validate: function( json ) {
+        log.debug( 'Domain object right before validation: ', JSON.stringify( json ) );
+        var schema = this.validateSchema( json );
+        log.debug( 'Schema results: ', JSON.stringify( schema ) );
+        if ( !schema.valid ) {
+            throw { status : 400, errors : schema.errors,
+                message : this.name + '::validation errors: ' + JSON.stringify( schema.errors )};
+        }
     },
 
     create : function ( json, ttl, timeunit ) {
@@ -60,15 +73,7 @@ exports.BaseDomain = Object.subClass( {
         var newObj = this.generateDefaults( json );
 
         // Validate the new object
-        log.debug( 'Domain object right before validation: ', JSON.stringify( newObj ) );
-        var schema = this.validateSchema( newObj );
-        log.debug( 'Schema results: ', JSON.stringify( schema ) );
-
-        // If there are validation errors, we throw an exception with the errors
-        if ( !schema.valid ) {
-            throw { status : 400, errors : schema.errors,
-                message : this.name + '::validation errors: ' + JSON.stringify( schema.errors )};
-        }
+        this.validate( newObj );
 
         // Persist the object if validation succeeds
         this.map.put( this.pk( newObj ), newObj, ttl, timeunit );
@@ -167,7 +172,7 @@ exports.BaseDomain = Object.subClass( {
         return this.map.remove( pkey );
     },
 
-    backingMap: function() {
+    backingMap : function () {
         return this.map;
     }
 } );

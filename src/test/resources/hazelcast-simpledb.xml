@@ -30,7 +30,7 @@
         </interfaces>
     </network>
 
-    <management-center enabled="false" />
+    <management-center enabled="false"/>
 
     <executor-service>
         <core-pool-size>16</core-pool-size>
@@ -99,7 +99,8 @@
             <properties>
                 <property name="storeEngine">simpledb</property>
                 <property name="accessKey">AKIAIIQOWQM6FFLQB2EQ</property>
-                <property name="secretKey">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</property>
+                <property name="secretKey">ItTa0xaI9sey2SEGGEN8yVcA5slN95+qmNrf1TMd
+                </property>
             </properties>
         </map-store>
     </map>

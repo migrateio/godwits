@@ -45,8 +45,14 @@ mod.directive( 'validTooltip', [ '$log', '$timeout', '$position',
                     found.';
 
                 var placement = function () {
-                    // Get the position of the input field.
-                    var position = $position.position( inputField );
+                    // Get the position of the input field. Note: $position will throw an
+                    // exception if DOM is not ready.
+                    try {
+                        var position = $position.position( inputField );
+                    } catch ( e ) {
+                        $timeout( placement, 100 );
+                        return;
+                    }
 
                     // Get the height and width of the tooltip so we can center it.
                     var ttWidth = $element.width();

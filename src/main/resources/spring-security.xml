@@ -47,9 +47,8 @@
 
     <authentication-manager>
         <authentication-provider user-service-ref="userDetailsService">
-            <password-encoder hash="sha-256"/>
+            <password-encoder ref="bcrypt" />
         </authentication-provider>
-
         <authentication-provider>
             <user-service>
                 <user name="wilma" password="secret"
@@ -57,6 +56,8 @@
             </user-service>
         </authentication-provider>
     </authentication-manager>
+
+    <beans:bean id="bcrypt" class="org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder" />
 
     <beans:bean id="userDetailsService"
                 class="io.migrate.spring.security.MigrateUserDetailsService">

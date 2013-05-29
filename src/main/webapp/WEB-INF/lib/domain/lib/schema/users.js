@@ -5,13 +5,17 @@ exports.schema = {
             type: 'string'
         },
         name: {
-            type: 'string'
+            type: 'string',
+            minLength : 1
         },
         password: {
-            type: 'string'
+            type: 'string',
+            strip: 'ROLE_USER',
+            minLength : 1
         },
         services: {
             type: 'object',
+            strip: 'ROLE_USER',
             properties: {
                 stripe: {
                     type: 'string'
@@ -32,7 +36,8 @@ exports.schema = {
                 },
                 address: {
                     type: 'string',
-                    format: 'email'
+                    format: 'email',
+                    minLength : 1
                 }
             },
             required: ['status', 'address'],
@@ -40,6 +45,7 @@ exports.schema = {
             additionalProperties: false
         },
         roles: {
+            strip: 'ROLE_USER',
             type: 'array',
             "items": {
                 "type": "string"

@@ -1,4 +1,4 @@
-function writeTests(service) {
+function writeTests( service ) {
     describe( 'The write function', function () {
 
         beforeEach( function () {
@@ -182,7 +182,7 @@ function writeTests(service) {
     } );
 }
 
-function getFoldersTests(service) {
+function getFoldersTests( service ) {
     describe( 'The getFolders function', function () {
 
         beforeEach( function () {
@@ -215,7 +215,7 @@ function getFoldersTests(service) {
     } );
 }
 
-function readTests(service) {
+function readTests( service ) {
     describe( 'The read function', function () {
 
         beforeEach( function () {
@@ -238,7 +238,7 @@ function readTests(service) {
     } );
 }
 
-function writeFoldersTests(service) {
+function writeFoldersTests( service ) {
     describe( 'The writeFolders function', function () {
 
         beforeEach( function () {
@@ -272,3 +272,4 @@ function writeFoldersTests(service) {
         } );
     } );
 }
+

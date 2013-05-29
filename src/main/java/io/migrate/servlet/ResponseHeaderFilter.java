@@ -65,7 +65,10 @@ public class ResponseHeaderFilter implements Filter {
         long now = System.currentTimeMillis();
         response.setHeader("Cache-Control", "public");
 //        response.setHeader("Cache-Control", _cacheControl);
-        response.setDateHeader("Expires", now + _timeout * 1000);
+        if (_timeout > 0)
+            response.setDateHeader("Expires", now + _timeout * 1000);
+        else
+            response.setIntHeader("Expires", -1);
 
         chain.doFilter(request, response);
     }

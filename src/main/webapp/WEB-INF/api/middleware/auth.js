@@ -1,3 +1,5 @@
+var log = require( 'ringo/logging' ).getLogger( module.id );
+
 exports.middleware = function ( next, app ) {
 
     var response = require( 'ringo/jsgi/response' );
@@ -6,13 +8,31 @@ exports.middleware = function ( next, app ) {
 
         var servletRequest = req.env.servletRequest;
 
-        var isUserInRole = req.isUserInRole = function ( role ) {
-            return [].concat( role ).some( function ( role ) {
+        var hasRole = req.hasRole = function ( roles ) {
+            return [].concat( roles ).some( function ( role ) {
                 return servletRequest.isUserInRole( role );
             } );
         };
 
-        req.getUsername = function () {
+        req.hasAllRoles = function ( roles ) {
+            return [].concat( roles ).every( function ( role ) {
+                return servletRequest.isUserInRole( role );
+            } );
+        };
+
+        req.isNotAdmin = function () {
+            return !hasRole( 'ROLE_ADMIN' );
+        };
+
+        req.isAdmin = function () {
+            return hasRole( 'ROLE_ADMIN' );
+        };
+
+        req.isUser = function (id) {
+            return getUsername() === id;
+        };
+
+        var getUsername = req.getUsername = function () {
             var principal = servletRequest.getUserPrincipal();
             return principal ? principal.name : null;
         };
@@ -20,6 +40,12 @@ exports.middleware = function ( next, app ) {
         req.isAuthenticated = function () {
             return !!servletRequest.getUserPrincipal();
         };
+
+
+        function checkCondition() {
+            return true;
+        }
+
 
         /**
          * Returns a 403 error if the current request does not satisfy the authorization
@@ -29,17 +55,11 @@ exports.middleware = function ( next, app ) {
          * @param {Boolean} [condition]
          * @return {*}
          */
-        req.allow = function (roles, condition) {
-            var args = Array.prototype.slice.call( arguments, 0 );
-            roles = /string|object/.test( typeof args[0] ) ? args.shift() : null;
-            condition = /boolean/.test( typeof args[0] ) ? args.shift() : true;
-
-            var allow = true;
-
-            if ( allow && roles && !isUserInRole( roles ) ) allow = false;
-            if ( allow && !condition ) allow = false;
-
-            if (!allow)  return response.forbidden();
+        req.allow = function ( condition ) {
+            if ( !condition )  throw {
+                status : 403,
+                message : 'Access is forbidden'
+            }
         };
 
         return next( req );

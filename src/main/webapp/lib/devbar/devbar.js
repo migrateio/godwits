@@ -10,7 +10,7 @@
 
     angular.module( 'template/devbar.html', [] ).run(
         ['$templateCache', '$log',
-            function ( $templateCache ) {
+            function ( $templateCache, $log ) {
                 $templateCache.put( 'template/devbar.html', ' \
                     <div class="devbar"> \
                         <p>\
