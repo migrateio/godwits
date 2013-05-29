@@ -119,6 +119,7 @@
     <filter-mapping>
         <filter-name>default-cache-control</filter-name>
         <url-pattern>/*</url-pattern>
+        <url-pattern>/api/*</url-pattern>
     </filter-mapping>
 
     <filter>

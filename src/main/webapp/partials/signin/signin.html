@@ -1,0 +1,18 @@
+<div class="btn-group">
+    <button type="button" class="btn btn-primary" ng-model="phase" btn-radio="'email'">email</button>
+    <button type="button" class="btn btn-primary" ng-model="phase" btn-radio="'signup'">signup</button>
+    <button type="button" class="btn btn-primary" ng-model="phase" btn-radio="'verify'">verify</button>
+    <button type="button" class="btn btn-primary" ng-model="phase" btn-radio="'secure'">secure</button>
+    <button type="button" class="btn btn-primary" ng-model="phase" btn-radio="'expire'">expire</button>
+    <button type="button" class="btn btn-primary" ng-model="phase" btn-radio="'password'">password</button>
+    <button type="button" class="btn btn-primary" ng-model="phase" btn-radio="'welcome'">welcome</button>
+</div>
+<div class="signin">
+    <div ng-include ng-show="phase=='email'" ng-animate="'phase'" src="'partials/signin/email.html'" />
+    <div ng-include ng-show="phase=='signup'" ng-animate="'phase'" src="'partials/signin/signup.html'" />
+    <div ng-include ng-show="phase=='verify'" ng-animate="'phase'" src="'partials/signin/verify.html'" />
+    <div ng-include ng-show="phase=='secure'" ng-animate="'phase'" src="'partials/signin/secure.html'" />
+    <div ng-include ng-show="phase=='expire'" ng-animate="'phase'" src="'partials/signin/expire.html'" />
+    <div ng-include ng-show="phase=='password'" ng-animate="'phase'" src="'partials/signin/password.html'" />
+    <div ng-include ng-show="phase=='welcome'" ng-animate="'phase'" src="'partials/signin/welcome.html'" />
+</div>

@@ -259,6 +259,70 @@ input[type="text"], input[type="email"], input[type="password"] {
     Sign up and sign in form styles
 */
 
+div.signin {
+    height: 200px;
+    overflow: hidden;
+    position: relative;
+}
+
+div.signin > div {
+    height: 200px;
+    position: absolute;
+    -webkit-transform: translate3d(0, 0, 0);
+}
+
+div.signin .phase-show, div.signin .phase-hide {
+    top: 200px;
+    opacity: 0;
+}
+
+div.signin .phase-show {
+}
+
+/* http://matthewlein.com/ceaser/ */
+div.signin .phase-hide {
+    -webkit-transition: all 400ms cubic-bezier(0.205, 0, 0.920, 0); /* older webkit */
+    -webkit-transition: all 400ms cubic-bezier(0.205, -0.180, 0.920, -0.155);
+    -moz-transition: all 400ms cubic-bezier(0.205, -0.180, 0.920, -0.155);
+    -ms-transition: all 400ms cubic-bezier(0.205, -0.180, 0.920, -0.155);
+    -o-transition: all 400ms cubic-bezier(0.205, -0.180, 0.920, -0.155);
+    transition: all 400ms cubic-bezier(0.205, -0.180, 0.920, -0.155); /* custom */
+
+    -webkit-transition-timing-function: cubic-bezier(0.205, 0, 0.920, 0); /* older webkit */
+    -webkit-transition-timing-function: cubic-bezier(0.205, -0.180, 0.920, -0.155);
+    -moz-transition-timing-function: cubic-bezier(0.205, -0.180, 0.920, -0.155);
+    -ms-transition-timing-function: cubic-bezier(0.205, -0.180, 0.920, -0.155);
+    -o-transition-timing-function: cubic-bezier(0.205, -0.180, 0.920, -0.155);
+    transition-timing-function: cubic-bezier(0.205, -0.180, 0.920, -0.155); /* custom */
+    opacity: 0;
+    top: -200px;
+}
+div.signin .phase-show.phase-show-active {
+
+    -webkit-transition: all 400ms cubic-bezier(0.000, 1, 0.495, 1); /* older webkit */
+    -webkit-transition: all 400ms cubic-bezier(0.000, 1.225, 0.495, 1.145);
+    -moz-transition: all 400ms cubic-bezier(0.000, 1.225, 0.495, 1.145);
+    -ms-transition: all 400ms cubic-bezier(0.000, 1.225, 0.495, 1.145);
+    -o-transition: all 400ms cubic-bezier(0.000, 1.225, 0.495, 1.145);
+    transition: all 400ms cubic-bezier(0.000, 1.225, 0.495, 1.145); /* custom */
+
+    -webkit-transition-timing-function: cubic-bezier(0.000, 1, 0.495, 1); /* older webkit */
+    -webkit-transition-timing-function: cubic-bezier(0.000, 1.225, 0.495, 1.145);
+    -moz-transition-timing-function: cubic-bezier(0.000, 1.225, 0.495, 1.145);
+    -ms-transition-timing-function: cubic-bezier(0.000, 1.225, 0.495, 1.145);
+    -o-transition-timing-function: cubic-bezier(0.000, 1.225, 0.495, 1.145);
+    transition-timing-function: cubic-bezier(0.000, 1.225, 0.495, 1.145); /* custom */
+
+    transition-delay: 0.400s;
+    -webkit-transition-delay: 0.400s;
+
+    top: 0;
+    opacity: 1;
+}
+
+
+
+
 div.sign-in, div.sign-up {
     text-align: center;
 }

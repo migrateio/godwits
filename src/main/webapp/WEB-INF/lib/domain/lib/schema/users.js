@@ -1,18 +1,21 @@
 exports.schema = {
-<<<<<<< Updated upstream
     type: 'object',
     properties: {
         id: {
             type: 'string'
         },
         name: {
-            type: 'string'
+            type: 'string',
+            minLength : 1
         },
         password: {
-            type: 'string'
+            type: 'string',
+            strip: 'ROLE_USER',
+            minLength : 1
         },
         services: {
             type: 'object',
+            strip: 'ROLE_USER',
             properties: {
                 stripe: {
                     type: 'string'
@@ -30,29 +33,19 @@ exports.schema = {
                     type: 'string',
                     'enum': ['candidate','verified'],
                     'default': 'candidate'
-=======
-    type : 'object',
-    properties : {
-        email : {
-            type : 'object',
-            properties : {
-                status : {
-                    type : 'string',
-                    enum : ['candidate', 'verified'],
-                    default : 'candidate'
->>>>>>> Stashed changes
                 },
-                address : {
-                    type : 'string',
-                    format : 'email'
+                address: {
+                    type: 'string',
+                    format: 'email',
+                    minLength : 1
                 }
             },
-<<<<<<< Updated upstream
             required: ['status', 'address'],
             'default': {},
             additionalProperties: false
         },
         roles: {
+            strip: 'ROLE_USER',
             type: 'array',
             "items": {
                 "type": "string"
@@ -68,17 +61,4 @@ exports.schema = {
     },
     additionalProperties: false,
     required: ['id', 'email', 'name', 'roles']
-=======
-            required : ['status', 'address'],
-            default : {},
-            additionalProperties : false
-        },
-        created : {
-            type : 'string',
-            format : 'date-time'
-        }
-    },
-    additionalProperties : false,
-    required : ['email']
->>>>>>> Stashed changes
 };

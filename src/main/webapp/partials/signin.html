@@ -1,4 +1,8 @@
-<div class="sign-in" x-ng-controller="signin-controller">
+<div x-ng-controller="signin-controller">
+    <h3>SignIn Templates</h3>
+    <div x-ng-include src="'partials/signin/signin.html'" />
+</div>
+<!--<div class="sign-in" x-ng-controller="signin-controller">
     <form name="signin" novalidate ng-submit="submit()">
 
         <div class="header clearfix" style="text-align: left;">
@@ -46,5 +50,5 @@
             <input ng-disabled="signin.$invalid" class="btn btn-success" type="submit" value="Sign In"/>
         </div>
     </form>
-</div>
+</div>-->
 

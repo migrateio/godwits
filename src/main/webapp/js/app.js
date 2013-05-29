@@ -1,6 +1,7 @@
 var app = angular.module( 'migrateApp', [
-    'ui.bootstrap', 'spring-security', 'migrate.directives', 'migrate.jobs',
-    'angular-google-analytics', 'devbar'] );
+    'ui.bootstrap', 'spring-security', 'devbar',
+    'migrate.directives', 'migrate.jobs', 'migrate-signin',
+    'angular-google-analytics'] );
 
 app.config( ['$routeProvider',
     function ( $routeProvider ) {

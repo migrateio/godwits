@@ -21,6 +21,7 @@ public class MigrateUser implements UserDetails {
 	private String id;
 	private String password;
 	private Collection<GrantedAuthority> authorities;
+	private String username = "";
 	private String name = "";
 	private String email;
     private String status;
@@ -31,7 +32,7 @@ public class MigrateUser implements UserDetails {
         this.user = user;
 		this.id = (String) user.get("id");
 		this.name = (String) user.get("name");
-		this.password = ((String) user.get("password")).toLowerCase();
+		this.password = ((String) user.get("password"));
 
 		if (user.get("email") != null) {
 			this.email = (String) ((Map) user.get("email")).get("address");
@@ -106,7 +107,7 @@ public class MigrateUser implements UserDetails {
 
     @Override
     public String getUsername() {
-        return email;
+        return id;
     }
 
     public Map<String, Object> getMap() {

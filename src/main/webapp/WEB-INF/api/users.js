@@ -1,6 +1,6 @@
 var log = require( 'ringo/logging' ).getLogger( module.id );
 
-var {props} = require( 'utility' );
+var {props, makeToken} = require( 'utility' );
 var domain = require( 'domain' );
 var email = require( 'email' );
 
@@ -10,78 +10,71 @@ var tokens = new domain.Tokens( props['environment'] );
 var {Application} = require( 'stick' );
 var app = exports.app = Application();
 app.configure( 'route' );
-//app.configure( 'error', 'notfound', 'params', 'middleware/auth', 'route' );
 
 var response = require( "ringo/jsgi/response" );
 
-app.get( '/me', function ( req ) {
-    return json( {
-        success : true
-    } );
-} );
-
-/**
- * Create an entry in the tokens table associating a newly created token with this user
- * id.
- *
- * @param userId
- */
-function addToken( userId ) {
-    var token = tokens.generate(6);
-    tokens.create( {token : token, userId : userId} );
-    return token;
+function stripByRole( req, user ) {
+    if ( req.hasRole( 'ROLE_ADMIN' ) ) return user;
+    if ( req.hasRole( 'ROLE_USER' ) ) {
+        return users.strip( user, 'ROLE_USER' );
+    }
+    // Why are we here?
+    return null;
 }
 
-app.post( '/', function ( req ) {
-    // Perform our permissions check
-    req.allow( 'ROLE_ADMIN' );
+app.get( '/me', function ( req ) {
+    req.allow( req.isAuthenticated() );
 
+    var user = users.read( req.getUsername() );
+
+    user = users.strip( user, req.isUserInRole );
+
+    user = stripByRole( req, user );
+
+    return response.json( user )
+} );
+
+app.get( '/:id', function ( req, id ) {
+    req.allow(
+        req.hasRole( 'ROLE_ADMIN' ) || req.hasRole( 'ROLE_USER' ) && req.isUser( id )
+    );
+
+    var user = users.read( id );
+    user = stripByRole( req, user );
+
+    return response.json( user )
+} );
+
+app.post( '/', function ( req ) {
     // Pull the new user out of the request parameter and create the record
-    log.info( 'User object to store: ', JSON.stringify( req.params ) );
     var user = users.create( req.params );
 
     // Add a token to associate with the user account
     var token = tokens.create( {userId : user.id} ).id;
 
-    email.sendWelcomeEmail( token, user );
+    var result = email.sendWelcomeEmail( token, user );
 
     return response.created().json( user )
         .addHeaders( { 'Location' : buildPost( req, user.id ) } );
 } );
 
 app.put( '/:id', function ( req, id ) {
-    try {
-        var user = users.update( req.params );
-        var result = {
-            status : 204,
-            header : {
-                'Location' : buildPut( req, user.id )
-            },
-            body : [JSON.stringify( user )]
-        };
-        log.info( 'Returning result:', JSON.stringify( result ) );
-        return result;
-    } catch ( e ) {
-        return {
-            status : e.status,
-            body : [ e.message ]
-        }
-    }
+    req.allow(
+        req.hasRole( 'ROLE_ADMIN' ) || req.hasRole( 'ROLE_USER' ) && isUser( id )
+    );
+
+    var user = users.update( req.params );
+
+    return response.json( user )
+        .addHeaders( { 'Location' : buildPut( req, user.id ) } );
 } );
 
-app.get( '/:id', function ( req, id ) {
-    try {
-        var user = users.read( id );
-        return {
-            status : 200,
-            body : [JSON.stringify( user )]
-        };
-    } catch ( e ) {
-        return {
-            status : e.status,
-            body : [ e.message ]
-        }
-    }
+app.del( '/:id', function ( req, id ) {
+    req.allow( req.hasRole( 'ROLE_ADMIN' ) );
+
+    var user = users.del( id );
+
+    return response.json( user )
 } );
 
 

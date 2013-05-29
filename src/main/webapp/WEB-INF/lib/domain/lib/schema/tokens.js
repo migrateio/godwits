@@ -4,8 +4,8 @@ exports.schema = {
         id: {
             type: 'string'
         },
-        userId: {
-            type: 'string'
+        user: {
+            type: 'object'
         },
         created: {
             type: 'string',

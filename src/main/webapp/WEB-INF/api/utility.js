@@ -1,10 +1,10 @@
 'use strict';
 
 
-
 var config = exports.config = {
     version : '0.1.0'
 };
+
 
 exports.uuid = function () {
     var uuid = java.util.UUID.randomUUID();

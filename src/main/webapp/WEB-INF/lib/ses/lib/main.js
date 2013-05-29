@@ -3,7 +3,7 @@ var {merge} = require( 'ringo/utils/objects' );
 
 var {Body, Content, Destination, Message, SendEmailRequest} = Packages.com.amazonaws.services.simpleemail.model;
 var {BasicAWSCredentials} = Packages.com.amazonaws.auth;
-var {AmazonSimpleEmailServiceClient} = Packages.com.amazonaws.services.simpleemail;
+var {AmazonSimpleEmailServiceAsyncClient} = Packages.com.amazonaws.services.simpleemail;
 
 const CHARSET = 'UTF-8';    // // Not sure I should assume this. Email is 7-bit ASCII.
 
@@ -23,23 +23,26 @@ exports.EmailService = function ( emailOptions, accessKey, secretKey ) {
 
 
     function createMessage( options ) {
-        var subject = new Content( options.subject || '' ).withCharSet(CHARSET);
+        var subject = new Content( options.subject || '' ).withCharset( CHARSET );
 
         var body = new Body();
-        if (options.textBody) body.setText( options.textBody ).setCharSet( CHARSET );
-        if (options.textHtml) body.setHtml( options.textHtml ).setCharSet( CHARSET );
+        if ( options.textBody )
+            body.setText( new Content( options.textBody ).withCharset( CHARSET ) );
+
+        if ( options.htmlBody )
+            body.setHtml( new Content( options.htmlBody ).withCharset( CHARSET ) );
 
         return new Message()
-            .withSubject(subject)
-            .withBody(body);
+            .withSubject( subject )
+            .withBody( body );
     }
 
-    function createDestination( options ) {
+    function createDestination( opts ) {
         var destination = new Destination();
 
-        if (opts.bcc) destination.setBccAddresses.call( this, opts.bcc );
-        if (opts.cc) destination.setCcAddresses.call( this, opts.cc );
-        if (opts.to) destination.setToAddresses.call( this, opts.to );
+        if ( opts.bcc ) destination.setBccAddresses.call( destination, [].concat( opts.bcc ) );
+        if ( opts.cc ) destination.setCcAddresses.call( destination, [].concat( opts.cc ) );
+        if ( opts.to ) destination.setToAddresses.call( destination, [].concat( opts.to ) );
 
         return destination;
     }
@@ -87,10 +90,11 @@ exports.EmailService = function ( emailOptions, accessKey, secretKey ) {
             .withReturnPath( opts.replyTo || opts.from )
             .withSource( opts.from );
 
-        if (opts.replyTo) request.setReplyToAddresses.call( this, opts.replyTo );
+        if ( opts.replyTo )
+            request.setReplyToAddresses.call( request, [].concat( opts.replyTo ) );
 
-        var result = client.sendEmail( request );
-        return result.messageId;
+        var result = client.sendEmailAsync( request );
+        return result;
     }
 
 
@@ -98,7 +102,7 @@ exports.EmailService = function ( emailOptions, accessKey, secretKey ) {
         log.debug( "EmailService::init, establishing AWS SES Client using " +
             "access key: {}, secret key: {}", accessKey, secretKey );
         var credentials = new BasicAWSCredentials( accessKey, secretKey );
-        return new AmazonSimpleEmailServiceClient( credentials );
+        return new AmazonSimpleEmailServiceAsyncClient( credentials );
     }
 
     var client = init( accessKey, secretKey );

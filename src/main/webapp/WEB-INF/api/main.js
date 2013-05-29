@@ -12,7 +12,7 @@ var {Application} = require('stick');
 
 var app = exports.app = Application();
 app.configure(
-    'profiler', 'middleware/nocache', 'middleware/ajaxerror', 'notfound', 'params',
+    'profiler', 'middleware/ajaxerror', 'notfound', 'params',
     'middleware/auth', 'mount', 'route'
 );
 
