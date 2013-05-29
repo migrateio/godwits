@@ -7,12 +7,28 @@
     <button type="button" class="btn btn-primary" ng-model="phase" btn-radio="'password'">password</button>
     <button type="button" class="btn btn-primary" ng-model="phase" btn-radio="'welcome'">welcome</button>
 </div>
-<div class="signin">
-    <div ng-include ng-show="phase=='email'" ng-animate="'phase'" src="'partials/signin/email.html'" />
-    <div ng-include ng-show="phase=='signup'" ng-animate="'phase'" src="'partials/signin/signup.html'" />
-    <div ng-include ng-show="phase=='verify'" ng-animate="'phase'" src="'partials/signin/verify.html'" />
-    <div ng-include ng-show="phase=='secure'" ng-animate="'phase'" src="'partials/signin/secure.html'" />
-    <div ng-include ng-show="phase=='expire'" ng-animate="'phase'" src="'partials/signin/expire.html'" />
-    <div ng-include ng-show="phase=='password'" ng-animate="'phase'" src="'partials/signin/password.html'" />
-    <div ng-include ng-show="phase=='welcome'" ng-animate="'phase'" src="'partials/signin/welcome.html'" />
+<div class="signin" data-ng-switch="phase" data-ng-animate="'slideup'">
+    <div class="steps">
+        <div data-ng-switch-when="email">
+            <div class="step" data-ng-include src="'partials/signin/email.html'" ></div>
+        </div>
+        <div data-ng-switch-when="signup">
+            <div class="step" data-ng-include src="'partials/signin/signup.html'" ></div>
+        </div>
+        <div data-ng-switch-when="verify">
+            <div class="step" data-ng-include src="'partials/signin/verify.html'" ></div>
+        </div>
+        <div data-ng-switch-when="secure">
+            <div class="step" data-ng-include src="'partials/signin/secure.html'" ></div>
+        </div>
+        <div data-ng-switch-when="expire">
+            <div class="step" data-ng-include src="'partials/signin/expire.html'" ></div>
+        </div>
+        <div data-ng-switch-when="password">
+            <div class="step" data-ng-include src="'partials/signin/password.html'" ></div>
+        </div>
+        <div data-ng-switch-when="welcome">
+            <div class="step" data-ng-include src="'partials/signin/welcome.html'" ></div>
+        </div>
+    </div>
 </div>
