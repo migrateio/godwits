@@ -43,6 +43,26 @@ input[type="radio"], input[type="checkbox"] {
     margin: 0 6px 0 0;
 }
 
+input.ng-invalid.ng-dirty, select.ng-invalid.ng-dirty, textarea.ng-invalid.ng-dirty {
+    color: #b94a48;
+    border-color: #e9322d;
+    -webkit-box-shadow: 0 0 6px #f8b9b7;
+    -moz-box-shadow: 0 0 6px #f8b9b7;
+    box-shadow: 0 0 6px #f8b9b7;
+}
+
+div.tooltip.validation div.tooltip-arrow {
+    border-right-color: #8b0000;
+}
+
+div.tooltip.validation div.tooltip-inner {
+    background-color: #8b0000;
+}
+
+div.tooltip.validation div.tooltip-inner span {
+    /*white-space: pre;*/
+}
+
 
 /*
     There are typically two containers on the website because there are background
@@ -262,7 +282,7 @@ input[type="text"], input[type="email"], input[type="password"] {
 div.signin {
     width: 400px;
     background-color: #f5f5f5;
-    padding: 0 20px;
+    padding: 10px 20px 10px 20px;
     border: 1px solid #e3e3e3;
 
     -webkit-border-radius: 4px;
@@ -281,7 +301,9 @@ div.signin div.steps {
 }
 
 div.signin div.step {
-    height: 200px;
+    height: 198px;
+    width: 390px;
+    padding: 5px;
 }
 
 .slideup-leave, .slideup-enter {
@@ -290,7 +312,7 @@ div.signin div.step {
 
 .slideup-enter {
     position: absolute;
-    top: 110%;
+    top: 200px;
     opacity: 0;
 }
 
@@ -337,81 +359,22 @@ div.signin div.step {
     -o-transition-timing-function: cubic-bezier(0.205, -0.180, 0.920, -0.155);
     transition-timing-function: cubic-bezier(0.205, -0.180, 0.920, -0.155);
 
-    top: -110%;
+    top: -200px;
     opacity: 0;
 }
 
 
-
-
-div.sign-in, div.sign-up {
-    text-align: center;
-}
-
-div.sign-in .alert, div.sign-up .alert {
-    width: 219px;
-}
-
-div.sign-in .header, div.sign-up .header {
-    position: relative;
-    height: 50px;
-}
-
-div.sign-in .header h3, div.sign-up .header h3 {
-    position: absolute;
-    left: 0;
-    bottom: 0;
-    margin: 10px;
-}
-
-div.sign-in .header span, div.sign-up .header span {
-    position: absolute;
-    right: 0;
-    bottom: 14px;
-}
-
-div.sign-in form, div.sign-up form {
-    position: relative;
-    margin: 2em;
-    display: inline-block;
-    border: 1px solid #999999;
-    padding: 20px;
-}
-
-div.sign-in form div.submit, div.sign-up form div.submit {
-    text-align: right;
-}
-
-div.sign-in form div.submit > div {
+form p.callout {
+    font-size: 12px;
+    line-height: 14px;
+    color: #999999;
     float: left;
-    padding-top: 5px;
-}
-
-div.sign-in form div.submit > div span.last {
-    font-size: 0.8em;
-    font-style: italic;
-}
-
-div.sign-in form div.submit input {
-    margin: 0;
+    width: 180px;
+    margin-right: 20px;
 }
 
 
-/*
-    General form styling and validation
-*/
-input.ng-invalid.ng-dirty ~ div.tooltip {
-    display: block;
-}
 
-input.ng-invalid.ng-dirty ~ div.tooltip div.tooltip-arrow {
-    border-right-color: #8b0000;
-}
 
-input.ng-invalid.ng-dirty ~ div.tooltip div.tooltip-inner {
-    background-color: #8b0000;
-}
 
-input + div.tooltip {
-    display: none;
-}
+

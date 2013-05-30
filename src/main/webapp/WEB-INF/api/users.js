@@ -1,6 +1,6 @@
 var log = require( 'ringo/logging' ).getLogger( module.id );
 
-var {props, makeToken} = require( 'utility' );
+var {format} = java.lang.String;
 var domain = require( 'domain' );
 var email = require( 'email' );
 
@@ -13,6 +13,13 @@ app.configure( 'route' );
 
 var response = require( "ringo/jsgi/response" );
 
+/**
+ * Removes properties from the user object based on the user's role.
+ *
+ * @param req
+ * @param user
+ * @return {User} Stripped down user object according to role
+ */
 function stripByRole( req, user ) {
     if ( req.hasRole( 'ROLE_ADMIN' ) ) return user;
     if ( req.hasRole( 'ROLE_USER' ) ) {
@@ -75,6 +82,30 @@ app.del( '/:id', function ( req, id ) {
     var user = users.del( id );
 
     return response.json( user )
+} );
+
+app.get( '/signin/:email', function( req, email ) {
+    var query = format( 'select * from `[mapname]` where `email.address` = "%s"', email );
+    var hits = users.read( query );
+
+    if (hits.length === 0) return response.notFound();
+
+    if (hits.length > 1) {
+        log.error('There is more than one record with an email address of '
+            + email, JSON.stringify( hits ) );
+    }
+
+    var user = hits[0];
+
+    // If there is a user object, we won't be passing it back. Instead we will create the
+    // most minimal object for the signin process to use.
+    var result = {
+        id: user.id,
+        verified: user.email.status === 'verified',
+        complete: user.password && user.password.length > 0
+    };
+
+    return response.json( result );
 } );
 
 

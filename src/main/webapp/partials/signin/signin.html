@@ -1,13 +1,14 @@
 <div class="btn-group">
-    <button type="button" class="btn btn-primary" ng-model="phase" btn-radio="'email'">email</button>
-    <button type="button" class="btn btn-primary" ng-model="phase" btn-radio="'signup'">signup</button>
-    <button type="button" class="btn btn-primary" ng-model="phase" btn-radio="'verify'">verify</button>
-    <button type="button" class="btn btn-primary" ng-model="phase" btn-radio="'secure'">secure</button>
-    <button type="button" class="btn btn-primary" ng-model="phase" btn-radio="'expire'">expire</button>
-    <button type="button" class="btn btn-primary" ng-model="phase" btn-radio="'password'">password</button>
-    <button type="button" class="btn btn-primary" ng-model="phase" btn-radio="'welcome'">welcome</button>
+    <button type="button" class="btn btn-primary" ng-model="state.phase" btn-radio="'email'">email</button>
+    <button type="button" class="btn btn-primary" ng-model="state.phase" btn-radio="'signup'">signup</button>
+    <button type="button" class="btn btn-primary" ng-model="state.phase" btn-radio="'verify'">verify</button>
+    <button type="button" class="btn btn-primary" ng-model="state.phase" btn-radio="'secure'">secure</button>
+    <button type="button" class="btn btn-primary" ng-model="state.phase" btn-radio="'expire'">expire</button>
+    <button type="button" class="btn btn-primary" ng-model="state.phase" btn-radio="'password'">password</button>
+    <button type="button" class="btn btn-primary" ng-model="state.phase" btn-radio="'welcome'">welcome</button>
+    <button type="button" class="btn btn-primary" ng-model="state.phase" btn-radio="'error'">error</button>
 </div>
-<div class="signin" data-ng-switch="phase" data-ng-animate="'slideup'">
+<div class="signin" data-ng-switch="state.phase" data-ng-animate="'slideup'">
     <div class="steps">
         <div data-ng-switch-when="email">
             <div class="step" data-ng-include src="'partials/signin/email.html'" ></div>
@@ -29,6 +30,9 @@
         </div>
         <div data-ng-switch-when="welcome">
             <div class="step" data-ng-include src="'partials/signin/welcome.html'" ></div>
+        </div>
+        <div data-ng-switch-when="error">
+            <div class="step" data-ng-include src="'partials/signin/error.html'" ></div>
         </div>
     </div>
 </div>
