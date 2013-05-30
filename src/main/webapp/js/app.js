@@ -1,6 +1,6 @@
 var app = angular.module( 'migrateApp', [
     'ui.bootstrap', 'spring-security', 'devbar',
-    'migrate.directives', 'migrate.jobs', 'migrate-signin',
+    'migrate.directives', 'migrate.jobs', 'migrate-signin', 'migrate-users',
     'angular-google-analytics'] );
 
 app.config( ['$routeProvider',
@@ -48,3 +48,43 @@ app.config( ['AnalyticsProvider',
         AnalyticsProvider.trackPages( true );
     }
 ] );
+
+function whichTransitionEvent() {
+    var t;
+    var el = document.createElement( 'fakeelement' );
+    var transitions = {
+        'transition' : 'transitionend',
+        'OTransition' : 'oTransitionEnd',
+        'MozTransition' : 'transitionend',
+        'WebkitTransition' : 'webkitTransitionEnd'
+    };
+
+    for ( t in transitions ) {
+        if ( el.style[t] !== undefined ) {
+            return transitions[t];
+        }
+    }
+}
+
+// http://stackoverflow.com/questions/14859266/input-autofocus-attribute/14859639#14859639
+angular.module( 'ng' ).directive( 'ngFocus', function ( $timeout ) {
+    return {
+        link : function ( scope, element, attrs ) {
+            scope.$watch( attrs.ngFocus, function ( val ) {
+                if ( angular.isDefined( val ) && val ) {
+                    $timeout( function () {
+                        element[0].select();
+                        element[0].focus();
+                    } );
+                }
+            }, true );
+
+            element.bind( 'blur', function () {
+                if ( angular.isDefined( attrs.ngFocusLost ) ) {
+                    scope.$apply( attrs.ngFocusLost );
+
+                }
+            } );
+        }
+    };
+} );

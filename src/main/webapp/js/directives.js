@@ -2,7 +2,7 @@ angular.module( "template/valid/tooltip.html", [] ).run(
     ["$templateCache",
         function ( $templateCache ) {
             $templateCache.put( "template/valid/tooltip.html", ' \
-                <div class="tooltip right in"> \
+                <div class="tooltip validation right in"> \
                     <div class="tooltip-arrow"></div> \
                     <div class="tooltip-inner" ng-transclude> \
                     &nbsp; \
@@ -15,7 +15,22 @@ angular.module( "template/valid/tooltip.html", [] ).run(
 
 var mod = angular.module( 'migrate.directives', [ 'template/valid/tooltip.html' ] );
 
-mod.directive( 'validTooltip', [ '$log', '$timeout', '$position',
+/**
+ * ## Directive validtip
+ *
+ * This directive allows for a tooltip popup to be tied to an input control and displayed
+ * when there is an angular validation error associated with the model which drives the
+ * input control.
+ *
+ * The position of the tooltip is determined at runtime for proper orientation.
+ *
+ * The <validtip> element may contain one or more content blocks to indicate the specific
+ * type of error that is raised.
+ *
+ * The input field associated with <validtip> is passed in as a text string which
+ * references the name of the form element.
+ */
+mod.directive( 'validtip', [ '$log', '$timeout', '$position',
     function ( $log, $timeout, $position ) {
 
         function getEleByName( names, ele ) {
@@ -28,32 +43,51 @@ mod.directive( 'validTooltip', [ '$log', '$timeout', '$position',
         return {
             restrict : 'EA',
             templateUrl : 'template/valid/tooltip.html',
-            scope : true,
             replace : true,
+            scope: false,
             transclude : true,
             priority : 10,
             link : function link( scope, element, attrs ) {
                 var $element = $( element );
 
-                var target = attrs.inputTarget;
-                if ( !target ) throw 'Directive [valid-tooltip] requires attribute [input-target]';
+                scope.show = false;
+
+                var target = attrs.validtip || attrs.dataValidtip || attrs.xValidtip;
+                if ( !target ) throw 'Directive [validtip] requires a reference to ' +
+                    'the input field with which it is associated';
 
                 // Get the input field referenced by the 'input-target' attribute
                 var inputField = getEleByName( target );
-                if ( !target ) throw 'Directive [valid-tooltip] has attribute \
-                    [input-target] with a value of [' + target + '] but reference not \
-                    found.';
+                if ( !inputField || inputField.length != 1) throw 'Directive [validtip] references a form input ' +
+                    'field with a value of [' + target + '] but reference not found.';
+
+                var showIfInvalid = function(ifUnfocused) {
+                    var isDirty = inputField.hasClass('ng-dirty');
+                    var isInvalid = inputField.hasClass('ng-invalid');
+                    var isFocus = !ifUnfocused && inputField.is(':focus');
+//                    $log.info( isDirty, isInvalid, isFocus, !ifUnfocused );
+                    if (isDirty && isInvalid && isFocus) $element.fadeIn( 'fast' );
+                    else $element.fadeOut( 'fast' );
+                };
+
+                // Watch for changes to the model
+                inputField.on('propertychange keyup input paste', function (e) {
+                    showIfInvalid();
+                });
+
+                inputField.blur(function() {
+                    showIfInvalid();
+                });
 
                 var placement = function () {
                     // Get the position of the input field. Note: $position will throw an
                     // exception if DOM is not ready.
-                    try {
-                        var position = $position.position( inputField );
-                    } catch ( e ) {
-                        $timeout( placement, 100 );
-                        return;
-                    }
+//                    var position = inputField.position();
+                    var position = inputField.offset();
+                    position.width = inputField.outerWidth();
+                    position.height = inputField.outerHeight();
 
+//                    $log.info( 'Input position', position );
                     // Get the height and width of the tooltip so we can center it.
                     var ttWidth = $element.width();
                     var ttHeight = $element.height();
@@ -69,153 +103,127 @@ mod.directive( 'validTooltip', [ '$log', '$timeout', '$position',
                     $element.css( ttPosition );
                 };
 
-                // Set the initial positioning.
-                $element.css( { top : -5000, left : 0 } );
-                inputField.after( $element );
-
                 // Can't just go after the position of the input field. It's not set yet.
-                $timeout( placement, 0 );
-
-                /*              We could just sit here and watch for changes in our form validation
-                 status, and show/hide the tooltip whenever the error status changes. But,
-                 since the tooltip is a sibling to the input field, and the input field is
-                 already marked up with classes to indicate errors, this step can be done
-                 completely by css. We lose the fade effect, meh.
-                 */
-
-                // This expression will determine when the tooltip is shown/hidden.
-//                 var expression = target + '.$invalid';
-                /*
-                 var expression = target + '.$dirty && ' + target + '.$invalid';
-
-                 scope.$watch(expression, function(newValue, oldValue) {
-                 console.log( 'expression change: ' + newValue + ', ' + oldValue );
-                 if (newValue) {
-                 // Show the tooltip
-                 $element.fadeIn();
-                 } else {
-                 // Hide the tooltip
-                 $element.hide();
-                 }
-                 });
-                 */
+                $timeout( placement, 1000 );
+                $element.appendTo( 'body' );
+                showIfInvalid();
             }
         }
     }
 ] );
 
-    // The following functionality is a custom-based poly-fill placeholder for AngularJS
-    // @example  <input id="weight" name="weight" type="number" default-text="lbs" min="50" max="500" required />
-    // For browsers lower than IE 10 the in-built placeholder functionality is used, otherwise
-    // the poly-fill is used.
-    // https://github.com/ferronrsmith/angularjs-placeholder
+// The following functionality is a custom-based poly-fill placeholder for AngularJS
+// @example  <input id="weight" name="weight" type="number" default-text="lbs" min="50" max="500" required />
+// For browsers lower than IE 10 the in-built placeholder functionality is used, otherwise
+// the poly-fill is used.
+// https://github.com/ferronrsmith/angularjs-placeholder
 mod.directive( 'placeholder',
     ['$log', '$timeout',
-    function ( $log, $timeout ) {
-        $log.info( 'Support for placeholder? ', Modernizr.input.placeholder );
-        if ( Modernizr.input.placeholder === true ) return {};
-        return {
-            link : function ( scope, elm, attrs ) {
-                if ( attrs.type === 'password' ) {
-                    return;
-                }
-                $timeout( function () {
-                    $( elm ).val( attrs.placeholder ).focus(function () {
-                        if ( $( this ).val() == $( this ).attr( 'placeholder' ) ) {
-                            $( this ).val( '' );
-                        }
-                    } ).blur( function () {
-                            if ( $( this ).val() == '' ) {
-                                $( this ).val( $( this ).attr( 'placeholder' ) );
+        function ( $log, $timeout ) {
+            $log.info( 'Support for placeholder? ', Modernizr.input.placeholder );
+            if ( Modernizr.input.placeholder === true ) return {};
+            return {
+                link : function ( scope, elm, attrs ) {
+                    if ( attrs.type === 'password' ) {
+                        return;
+                    }
+                    $timeout( function () {
+                        $( elm ).val( attrs.placeholder ).focus(function () {
+                            if ( $( this ).val() == $( this ).attr( 'placeholder' ) ) {
+                                $( this ).val( '' );
                             }
-                        } );
-                } );
-            }
-        };
-    }
+                        } ).blur( function () {
+                                if ( $( this ).val() == '' ) {
+                                    $( this ).val( $( this ).attr( 'placeholder' ) );
+                                }
+                            } );
+                    } );
+                }
+            };
+        }
     ] );
 
-    // This directive is applied to a password input field. We will create a clone of the
-    // input field and toggle between the original and the copy when the bound expression
-    // tells us to. The only difference between the two input fields is that the original
-    // is a password field, and the other is a text field.
+// This directive is applied to a password input field. We will create a clone of the
+// input field and toggle between the original and the copy when the bound expression
+// tells us to. The only difference between the two input fields is that the original
+// is a password field, and the other is a text field.
 mod.directive( 'passXray',
     [ '$compile', '$timeout', '$parse', '$position', '$log',
-    function ( $compile, $timeout, $parse, $position, $log ) {
+        function ( $compile, $timeout, $parse, $position, $log ) {
 
-        return {
-            restrict : 'A',
-            scope : false,
-            replace : false,
-            transclude : false,
-            link : function ( scope, element, attrs ) {
-                var $password = $( element );
-                if ( 'INPUT' !== $password.prop( 'tagName' ) )
-                    throw 'Directive [pass-xray] must be applied to an input field';
-                if ( 'password' !== $password.prop( 'type' ) )
-                    throw 'Directive [pass-xray] must be applied to an input field of type="password"';
+            return {
+                restrict : 'A',
+                scope : false,
+                replace : false,
+                transclude : false,
+                link : function ( scope, element, attrs ) {
+                    var $password = $( element );
+                    if ( 'INPUT' !== $password.prop( 'tagName' ) )
+                        throw 'Directive [pass-xray] must be applied to an input field';
+                    if ( 'password' !== $password.prop( 'type' ) )
+                        throw 'Directive [pass-xray] must be applied to an input field of type="password"';
 
-                var model = attrs['ngModel'];
-                var cloneElement = function ( element ) {
-                    $clone = $( "<input />" );
-                    $clone.attr( {
-                        'type' : 'text',
-                        'ng-model' : model,
-                        'class' : element.attr( 'class' ),
-                        'style' : element.attr( 'style' ),
-                        'size' : element.attr( 'size' ),
-                        'name' : element.attr( 'name' ) + '-clone',
-                        'placeholder' : element.attr( 'placeholder' ),
-                        'tabindex' : element.attr( 'tabindex' )
-                    } );
+                    var model = attrs['ngModel'];
+                    var cloneElement = function ( element ) {
+                        $clone = $( "<input />" );
+                        $clone.attr( {
+                            'type' : 'text',
+                            'ng-model' : model,
+                            'class' : element.attr( 'class' ),
+                            'style' : element.attr( 'style' ),
+                            'size' : element.attr( 'size' ),
+                            'name' : element.attr( 'name' ) + '-clone',
+                            'placeholder' : element.attr( 'placeholder' ),
+                            'tabindex' : element.attr( 'tabindex' )
+                        } );
 
-                    var ele = element;
-                    $.each( ['required'], function ( index, a ) {
-                        if ( element.attr( a ) ) $clone.attr( a, element.attr( a ) );
-                    } );
+                        var ele = element;
+                        $.each( ['required'], function ( index, a ) {
+                            if ( element.attr( a ) ) $clone.attr( a, element.attr( a ) );
+                        } );
 
-                    return $( '<div/>' ).append( $clone ).html();
-                };
+                        return $( '<div/>' ).append( $clone ).html();
+                    };
 
-                var newContent = cloneElement( $password );
-                var newElement = $compile( newContent )( scope );
-                var $cleartext = $( newElement ).insertAfter( $password );
-                $password.attr( 'autocomplete', 'false' );
+                    var newContent = cloneElement( $password );
+                    var newElement = $compile( newContent )( scope );
+                    var $cleartext = $( newElement ).insertAfter( $password );
+                    $password.attr( 'autocomplete', 'false' );
 
-                // When the cleartext is flagged as dirty, we need to update the password
-                // as dirty also.
-                var original = $cleartext.val();
-                $cleartext.on( 'propertychange keyup input paste', function ( e ) {
+                    // When the cleartext is flagged as dirty, we need to update the password
+                    // as dirty also.
+                    var original = $cleartext.val();
+                    $cleartext.on( 'propertychange keyup input paste', function ( e ) {
 //                    console.log( 'Original: ' + original + ', current: ' + $cleartext.val() );
-                    if ( original !== $cleartext.val() )
-                        $password.addClass( 'ng-dirty' ).removeClass( 'ng-pristine' );
-                } );
+                        if ( original !== $cleartext.val() )
+                            $password.addClass( 'ng-dirty' ).removeClass( 'ng-pristine' );
+                    } );
 
-                var expression = attrs.passXray;
-                scope.$watch( expression, function ( newValue, oldValue ) {
-                    if ( newValue ) {
-                        $password.hide();
-                        $cleartext.show();
-                        $cleartext.focus();
-                    } else {
-                        $password.show();
-                        $cleartext.hide();
-                        $password.focus();
-                    }
-                } );
+                    var expression = attrs.passXray;
+                    scope.$watch( expression, function ( newValue, oldValue ) {
+                        if ( newValue ) {
+                            $password.hide();
+                            $cleartext.show();
+                            $cleartext.focus();
+                        } else {
+                            $password.show();
+                            $cleartext.hide();
+                            $password.focus();
+                        }
+                    } );
+                }
             }
         }
-    }
-] );
+    ] );
 
 
-mod.directive('eatClick', function() {
-    return function(scope, element, attrs) {
-        $(element).click(function(event) {
+mod.directive( 'eatClick', function () {
+    return function ( scope, element, attrs ) {
+        $( element ).click( function ( event ) {
             event.preventDefault();
-        });
+        } );
     }
-});
+} );
 
 // Released under MIT license: http://www.opensource.org/licenses/mit-license.php
 var placeholderSupport = ("placeholder" in document.createElement( "input" ));

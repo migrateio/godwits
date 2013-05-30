@@ -17,7 +17,7 @@
                             Build: {{buildNumber}}\
                             <span><a href="#" eat-click ng-click="clearTemplateCache()" class="btn btn-mini">Clear Partials</a></span>\
                         </p> \
-                        <div alert ng-repeat="alert in alerts" type="alert.type" close="closeAlert($index)">\
+                        <div alert ng-repeat="alert in _alerts" type="alert.type" close="closeAlert($index)">\
                             <span ng-bind-html-unsafe="alert.msg"></span>\
                         </div>\
                     </div>' );
@@ -31,10 +31,10 @@
         function ( $scope, $templateCache ) {
         $scope.buildNumber = '123';
 
-        $scope.alerts = [];
+        $scope._alerts = [];
 
         $scope.closeAlert = function ( index ) {
-            $scope.alerts.splice( index, 1 );
+            $scope._alerts.splice( index, 1 );
         };
 
         $scope.clearTemplateCache = function(){
@@ -64,21 +64,21 @@
     );
 
     mod.config( ['$httpProvider', function ( $httpProvider ) {
-        var errorInterceptor = ['$log', '$rootScope',
-            function ( $log, $rootScope ) {
+        var errorInterceptor = ['$log', '$rootScope', '$q',
+            function ( $log, $rootScope, $q ) {
                 var success = function ( response ) {
                     return response;
                 };
 
                 var error = function ( response ) {
-                    $log.info( 'Error', response );
+//                    $log.info( 'Error', response );
                     if ( response.status === 500 && response.data) {
-                        $rootScope.alerts.push( {
+                        $rootScope._alerts.push( {
                             type : 'error',
                             msg : response.data.message
                         } );
                     }
-                    return response;
+                    return $q.reject( response );
                 };
 
                 return function ( promise ) {

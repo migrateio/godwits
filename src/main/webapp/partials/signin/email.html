@@ -1,7 +1,5 @@
-<div class="email">
-    <form name="email" novalidate ng-submit="submit()">
-
-        <h3>Email</h3>
+<div class="email" data-ng-controller="signin-email-controller">
+    <form name="formEmail" novalidate ng-submit="submitEmail()">
 
         <div alert ng-repeat="alert in alerts" type="alert.type" close="closeAlert($index)">
             <span ng-bind-html-unsafe="alert.msg"></span>
@@ -10,17 +8,18 @@
         <div class="controls">
             <div class="input-prepend">
                 <span class="add-on"><i class="icon-envelope gray"></i></span>
-                <input name="email" type="email" x-ng-model="email" placeholder="Email" required>
+                <input name="email" type="email" data-ng-model="signup.email"
+                       placeholder="Email" required ng-focus="true" />
             </div>
-            <div x-valid-tooltip input-target="signin.username">
-                <span ng-show="email.email.$error.required">An email address is required</span>
-                <span ng-show="email.email.$error.email">This is not a valid email address</span>
+            <div data-validtip="formEmail.email">
+                <span ng-show="formEmail.email.$error.required">An email address is required</span>
+                <span ng-show="formEmail.email.$error.email">This is not a valid email address</span>
             </div>
         </div>
 
         <div class="controls submit">
-            <input ng-disabled="email.$invalid" class="btn btn-success" type="submit" value="Sign In"/>
-            <p>New user? Go ahead and put in your email address.</p>
+            <p class="callout">New user? Go ahead and put in your email address.</p>
+            <input ng-disabled="formEmail.$invalid" class="btn btn-success" type="submit" value="Sign In"/>
         </div>
     </form>
 </div>

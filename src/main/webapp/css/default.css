@@ -43,6 +43,26 @@ input[type="radio"], input[type="checkbox"] {
     margin: 0 6px 0 0;
 }
 
+input.ng-invalid.ng-dirty, select.ng-invalid.ng-dirty, textarea.ng-invalid.ng-dirty {
+    color: #b94a48;
+    border-color: #e9322d;
+    -webkit-box-shadow: 0 0 6px #f8b9b7;
+    -moz-box-shadow: 0 0 6px #f8b9b7;
+    box-shadow: 0 0 6px #f8b9b7;
+}
+
+div.tooltip.validation div.tooltip-arrow {
+    border-right-color: #8b0000;
+}
+
+div.tooltip.validation div.tooltip-inner {
+    background-color: #8b0000;
+}
+
+div.tooltip.validation div.tooltip-inner span {
+    /*white-space: pre;*/
+}
+
 
 /*
     There are typically two containers on the website because there are background
@@ -260,58 +280,56 @@ input[type="text"], input[type="email"], input[type="password"] {
 */
 
 div.signin {
+    width: 400px;
+    background-color: #f5f5f5;
+    padding: 10px 20px 10px 20px;
+    border: 1px solid #e3e3e3;
+
+    -webkit-border-radius: 4px;
+    -moz-border-radius: 4px;
+    border-radius: 4px;
+
+    -webkit-box-shadow: inset 0 1px 1px rgba(0,0,0,0.05);
+    -moz-box-shadow: inset 0 1px 1px rgba(0,0,0,0.05);
+    box-shadow: inset 0 1px 1px rgba(0,0,0,0.05);
+}
+
+div.signin div.steps {
     height: 200px;
     overflow: hidden;
     position: relative;
 }
 
-div.signin > div {
-    height: 200px;
-    position: absolute;
+div.signin div.step {
+    height: 198px;
+    width: 390px;
+    padding: 5px;
+}
+
+.slideup-leave, .slideup-enter {
     -webkit-transform: translate3d(0, 0, 0);
 }
 
-div.signin .phase-show, div.signin .phase-hide {
+.slideup-enter {
+    position: absolute;
     top: 200px;
     opacity: 0;
 }
 
-div.signin .phase-show {
-}
-
-/* http://matthewlein.com/ceaser/ */
-div.signin .phase-hide {
-    -webkit-transition: all 400ms cubic-bezier(0.205, 0, 0.920, 0); /* older webkit */
-    -webkit-transition: all 400ms cubic-bezier(0.205, -0.180, 0.920, -0.155);
-    -moz-transition: all 400ms cubic-bezier(0.205, -0.180, 0.920, -0.155);
-    -ms-transition: all 400ms cubic-bezier(0.205, -0.180, 0.920, -0.155);
-    -o-transition: all 400ms cubic-bezier(0.205, -0.180, 0.920, -0.155);
-    transition: all 400ms cubic-bezier(0.205, -0.180, 0.920, -0.155); /* custom */
-
-    -webkit-transition-timing-function: cubic-bezier(0.205, 0, 0.920, 0); /* older webkit */
-    -webkit-transition-timing-function: cubic-bezier(0.205, -0.180, 0.920, -0.155);
-    -moz-transition-timing-function: cubic-bezier(0.205, -0.180, 0.920, -0.155);
-    -ms-transition-timing-function: cubic-bezier(0.205, -0.180, 0.920, -0.155);
-    -o-transition-timing-function: cubic-bezier(0.205, -0.180, 0.920, -0.155);
-    transition-timing-function: cubic-bezier(0.205, -0.180, 0.920, -0.155); /* custom */
-    opacity: 0;
-    top: -200px;
-}
-div.signin .phase-show.phase-show-active {
-
-    -webkit-transition: all 400ms cubic-bezier(0.000, 1, 0.495, 1); /* older webkit */
+.slideup-enter.slideup-enter-active {
+    -webkit-transition: all 400ms cubic-bezier(0.000, 1, 0.495, 1);
     -webkit-transition: all 400ms cubic-bezier(0.000, 1.225, 0.495, 1.145);
     -moz-transition: all 400ms cubic-bezier(0.000, 1.225, 0.495, 1.145);
     -ms-transition: all 400ms cubic-bezier(0.000, 1.225, 0.495, 1.145);
     -o-transition: all 400ms cubic-bezier(0.000, 1.225, 0.495, 1.145);
-    transition: all 400ms cubic-bezier(0.000, 1.225, 0.495, 1.145); /* custom */
+    transition: all 400ms cubic-bezier(0.000, 1.225, 0.495, 1.145);
 
-    -webkit-transition-timing-function: cubic-bezier(0.000, 1, 0.495, 1); /* older webkit */
+    -webkit-transition-timing-function: cubic-bezier(0.000, 1, 0.495, 1);
     -webkit-transition-timing-function: cubic-bezier(0.000, 1.225, 0.495, 1.145);
     -moz-transition-timing-function: cubic-bezier(0.000, 1.225, 0.495, 1.145);
     -ms-transition-timing-function: cubic-bezier(0.000, 1.225, 0.495, 1.145);
     -o-transition-timing-function: cubic-bezier(0.000, 1.225, 0.495, 1.145);
-    transition-timing-function: cubic-bezier(0.000, 1.225, 0.495, 1.145); /* custom */
+    transition-timing-function: cubic-bezier(0.000, 1.225, 0.495, 1.145);
 
     transition-delay: 0.400s;
     -webkit-transition-delay: 0.400s;
@@ -320,121 +338,43 @@ div.signin .phase-show.phase-show-active {
     opacity: 1;
 }
 
-
-
-
-div.sign-in, div.sign-up {
-    text-align: center;
-}
-
-div.sign-in .alert, div.sign-up .alert {
-    width: 219px;
-}
-
-div.sign-in .header, div.sign-up .header {
-    position: relative;
-    height: 50px;
-}
-
-div.sign-in .header h3, div.sign-up .header h3 {
+.slideup-leave {
     position: absolute;
-    left: 0;
-    bottom: 0;
-    margin: 10px;
+    top: 0;
+    opacity: 1;
 }
 
-div.sign-in .header span, div.sign-up .header span {
-    position: absolute;
-    right: 0;
-    bottom: 14px;
+.slideup-leave.slideup-leave-active {
+    -webkit-transition: all 400ms cubic-bezier(0.205, 0, 0.920, 0);
+    -webkit-transition: all 400ms cubic-bezier(0.205, -0.180, 0.920, -0.155);
+    -moz-transition: all 400ms cubic-bezier(0.205, -0.180, 0.920, -0.155);
+    -ms-transition: all 400ms cubic-bezier(0.205, -0.180, 0.920, -0.155);
+    -o-transition: all 400ms cubic-bezier(0.205, -0.180, 0.920, -0.155);
+    transition: all 400ms cubic-bezier(0.205, -0.180, 0.920, -0.155);
+
+    -webkit-transition-timing-function: cubic-bezier(0.205, 0, 0.920, 0);
+    -webkit-transition-timing-function: cubic-bezier(0.205, -0.180, 0.920, -0.155);
+    -moz-transition-timing-function: cubic-bezier(0.205, -0.180, 0.920, -0.155);
+    -ms-transition-timing-function: cubic-bezier(0.205, -0.180, 0.920, -0.155);
+    -o-transition-timing-function: cubic-bezier(0.205, -0.180, 0.920, -0.155);
+    transition-timing-function: cubic-bezier(0.205, -0.180, 0.920, -0.155);
+
+    top: -200px;
+    opacity: 0;
 }
 
-div.sign-in form, div.sign-up form {
-    position: relative;
-    margin: 2em;
-    display: inline-block;
-    border: 1px solid #999999;
-    padding: 20px;
-}
 
-div.sign-in form div.submit, div.sign-up form div.submit {
-    text-align: right;
-}
-
-div.sign-in form div.submit > div {
+form p.callout {
+    font-size: 12px;
+    line-height: 14px;
+    color: #999999;
     float: left;
-    padding-top: 5px;
-}
-
-div.sign-in form div.submit > div span.last {
-    font-size: 0.8em;
-    font-style: italic;
-}
-
-div.sign-in form div.submit input {
-    margin: 0;
-}
-
-
-/*
-    General form styling and validation
-*/
-input.ng-invalid.ng-dirty ~ div.tooltip {
-    display: block;
-}
-
-input.ng-invalid.ng-dirty ~ div.tooltip div.tooltip-arrow {
-    border-right-color: #8b0000;
-}
-
-input.ng-invalid.ng-dirty ~ div.tooltip div.tooltip-inner {
-    background-color: #8b0000;
-}
-
-input + div.tooltip {
-    display: none;
+    width: 180px;
+    margin-right: 20px;
 }
 
 
 
-/*
-    The ng-view component is animated using the following classes
-*/
-/*
-.main-leave-setup, .main-enter-setup {
-    -webkit-transform: translate3d(0, 0, 0);
-    -webkit-transition:all linear 0.25s;
-    -moz-transition:all linear 0.25s;
-    -ms-transition:all linear 0.25s;
-    -o-transition:all linear 0.25s;
-    transition:all linear 0.25s;
-}
 
-.main-viewer {
-    position:relative;
-    height: 200px;
-}
 
-.main-viewer > * {
-    display:block;
-    width:100%;
-    position:absolute;
-    top:0;
-    left:0;
-    right:0;
-    bottom:0;
-    padding:10px;
-}
 
-.main-enter-setup {
-    left:100%;
-}
-.main-enter-setup.main-enter-start {
-    left:0;
-}
-
-.main-leave-setup { }
-.main-leave-setup.main-leave-start {
-    left:-100%;
-}
-*/
