@@ -8,9 +8,25 @@ users.factory( '$users', [ '$log', '$http', function ( $log, $http ) {
         return $http.get( '/api/users/signin/' + encodeURIComponent( email ) );
     }
 
+    function createUserRecord( email, firstname ) {
+        return $http.post( '/api/users/signup', {
+            name: firstname,
+            email: {
+                address: email
+            }
+        } );
+    }
+
+    function resendEmailToken( email ) {
+        return $http.post( '/api/users/resendToken/'+ email );
+    }
+
+
 
     return {
-        getByEmail : getByEmail
+        createUserRecord: createUserRecord,
+        getByEmail : getByEmail,
+        resendEmailToken: resendEmailToken
     }
 
 } ] );

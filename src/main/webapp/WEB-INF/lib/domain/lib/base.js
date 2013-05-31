@@ -76,6 +76,8 @@ exports.BaseDomain = Object.subClass( {
         this.validate( newObj );
 
         // Persist the object if validation succeeds
+        if (typeof timeunit === 'string')
+            timeunit = java.util.concurrent.TimeUnit.valueOf( timeunit );
         this.map.put( this.pk( newObj ), newObj, ttl, timeunit );
 
         return newObj;
@@ -115,6 +117,8 @@ exports.BaseDomain = Object.subClass( {
         }
 
         // Persist the object if validation succeeds
+        if (typeof timeunit === 'string')
+            timeunit = java.util.concurrent.TimeUnit.valueOf( timeunit );
         this.map.put( pkey, newObj, ttl, timeunit );
 
         return newObj;
@@ -167,6 +171,9 @@ exports.BaseDomain = Object.subClass( {
             status : 400,
             message : this.name + '::del requires an primary key value'
         };
+
+        // In case the user passes in an object, convert it to a pk
+        if (typeof pkey !== 'string') pkey = this.pk( pkey );
 
         // Get the current object from the map
         return this.map.remove( pkey );

@@ -3,6 +3,10 @@ body {
     font-family: Allerta, "Helvetica Neue", Helvetica, Arial, sans-serif;
 }
 
+a:hover {
+    cursor: pointer;
+}
+
 .gray {
     color: #999999;
 }
@@ -370,9 +374,22 @@ form p.callout {
     color: #999999;
     float: left;
     width: 180px;
-    margin-right: 20px;
+    margin-right: 10px;
 }
 
+form a.back {
+    position: relative;
+    left: -34px;
+    top: -4px;
+    font-size: 11px;
+    color: #d20f17;
+    text-decoration: none;
+}
+
+form .vinegar, form .honey {
+    position: absolute;
+    left: -2310px;
+}
 
 
 

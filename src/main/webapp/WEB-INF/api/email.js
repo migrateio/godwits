@@ -56,12 +56,12 @@ function sendEmail( template, obj ) {
 exports.sendWelcomeEmail = function ( token, user ) {
     var confirm = props['server.web.url'] + 'verify/' + user.id + '?token=' + token;
     var opts = {
-        to : 'success@simulator.amazonses.com',
+//        to : 'success@simulator.amazonses.com',
 //        to : 'suppressionlist@simulator.amazonses.com',
 //        to : 'complaint@simulator.amazonses.com',
 //        to : 'ooto@simulator.amazonses.com',
 //        to : 'bounce@simulator.amazonses.com',
-//        to : user.email.address,
+        to : user.email.address,
         token : token,
         link : {
             support : props['support.web.url'],

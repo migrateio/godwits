@@ -120,7 +120,6 @@ mod.directive( 'validtip', [ '$log', '$timeout', '$position',
 mod.directive( 'placeholder',
     ['$log', '$timeout',
         function ( $log, $timeout ) {
-            $log.info( 'Support for placeholder? ', Modernizr.input.placeholder );
             if ( Modernizr.input.placeholder === true ) return {};
             return {
                 link : function ( scope, elm, attrs ) {
@@ -223,6 +222,30 @@ mod.directive( 'eatClick', function () {
             event.preventDefault();
         } );
     }
+} );
+
+
+// http://stackoverflow.com/questions/14859266/input-autofocus-attribute/14859639#14859639
+angular.module( 'ng' ).directive( 'ngFocus', function ( $timeout ) {
+    return {
+        link : function ( scope, element, attrs ) {
+            scope.$watch( attrs.ngFocus, function ( val ) {
+                if ( angular.isDefined( val ) && val ) {
+                    $timeout( function () {
+                        element[0].select();
+                        element[0].focus();
+                    } );
+                }
+            }, true );
+
+            element.bind( 'blur', function () {
+                if ( angular.isDefined( attrs.ngFocusLost ) ) {
+                    scope.$apply( attrs.ngFocusLost );
+
+                }
+            } );
+        }
+    };
 } );
 
 // Released under MIT license: http://www.opensource.org/licenses/mit-license.php

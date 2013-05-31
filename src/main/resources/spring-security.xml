@@ -21,6 +21,8 @@
         <intercept-url pattern="/partials/jobs.html"
                        access="hasRole('ROLE_USER')" requires-channel="any"/>
         <!-- permit all -->
+        <intercept-url method="POST" pattern="/api/users/resendToken/*" access="permitAll()" requires-channel="https"/>
+        <intercept-url method="POST" pattern="/api/users/signup" access="permitAll()" requires-channel="https"/>
         <intercept-url method="POST" pattern="/api/users/" access="permitAll()" requires-channel="https"/>
         <intercept-url method="GET" pattern="/api/users/signin/*" access="permitAll()" requires-channel="https"/>
 

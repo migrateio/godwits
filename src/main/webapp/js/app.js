@@ -15,6 +15,9 @@ app.config( ['$routeProvider',
         $routeProvider.when( '/signin', {
             templateUrl : 'partials/signin.html'
         } );
+        $routeProvider.when( '/signin/:phase', {
+            templateUrl : 'partials/signin.html'
+        } );
         $routeProvider.when( '/signup', {
             templateUrl : 'partials/signup.html'
         } );
@@ -66,25 +69,3 @@ function whichTransitionEvent() {
     }
 }
 
-// http://stackoverflow.com/questions/14859266/input-autofocus-attribute/14859639#14859639
-angular.module( 'ng' ).directive( 'ngFocus', function ( $timeout ) {
-    return {
-        link : function ( scope, element, attrs ) {
-            scope.$watch( attrs.ngFocus, function ( val ) {
-                if ( angular.isDefined( val ) && val ) {
-                    $timeout( function () {
-                        element[0].select();
-                        element[0].focus();
-                    } );
-                }
-            }, true );
-
-            element.bind( 'blur', function () {
-                if ( angular.isDefined( attrs.ngFocusLost ) ) {
-                    scope.$apply( attrs.ngFocusLost );
-
-                }
-            } );
-        }
-    };
-} );
