@@ -1,5 +1,5 @@
 var log = require( 'ringo/logging' ).getLogger( module.id );
-var {merge} = require( 'ringo/utils/objects' );
+var {merge} = require( 'utility' );
 
 var {Body, Content, Destination, Message, SendEmailRequest} = Packages.com.amazonaws.services.simpleemail.model;
 var {BasicAWSCredentials} = Packages.com.amazonaws.auth;
@@ -67,7 +67,7 @@ exports.EmailService = function ( emailOptions, accessKey, secretKey ) {
      * @param {Object} options
      */
     function send( options ) {
-        var opts = merge( options, emailOptions );
+        var opts = merge( {}, options, emailOptions );
 
         function validate( prop ) {
             if ( !opts[prop] ) throw {

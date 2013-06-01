@@ -21,14 +21,25 @@ users.factory( '$users', [ '$log', '$http', function ( $log, $http ) {
         return $http.post( '/api/users/resendToken/'+ email );
     }
 
+    function verifyToken( userId, token ) {
+        return $http.post( '/api/users/' + userId + '/verify/'+ token );
+    }
+
+    function choosePassword( userId, token, password ) {
+        return $http.post( '/api/users/' + userId + '/password', {
+            token: token,
+            password: password
+        });
+    }
 
 
     return {
+        choosePassword: choosePassword,
         createUserRecord: createUserRecord,
         getByEmail : getByEmail,
-        resendEmailToken: resendEmailToken
+        resendEmailToken: resendEmailToken,
+        verifyToken: verifyToken
     }
-
 } ] );
 
 

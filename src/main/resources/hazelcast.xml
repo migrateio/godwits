@@ -64,10 +64,10 @@
         -->
         <eviction-policy>LFU</eviction-policy>
 
-        <!-- Entities in the cache will live for a period of two minutes. After that time, they
+        <!-- Entities in the cache will live for a period of one hour. After that time, they
              will be fetched from the persistence tier.
         -->
-        <time-to-live-seconds>120</time-to-live-seconds>
+        <time-to-live-seconds>3600</time-to-live-seconds>
 
         <!--
             Maximum size of the map. When max size is reached,
@@ -97,6 +97,19 @@
             -->
             <write-delay-seconds>0</write-delay-seconds>
 
+            <properties>
+                <property name="storeEngine">simpledb</property>
+                <property name="accessKey">AKIAIIQOWQM6FFLQB2EQ</property>
+                <property name="secretKey">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</property>
+            </properties>
+        </map-store>
+    </map>
+
+    <map name="*-tokens">
+        <backup-count>1</backup-count>
+        <time-to-live-seconds>259200</time-to-live-seconds>
+        <map-store enabled="true">
+            <write-delay-seconds>0</write-delay-seconds>
             <properties>
                 <property name="storeEngine">simpledb</property>
                 <property name="accessKey">AKIAIIQOWQM6FFLQB2EQ</property>

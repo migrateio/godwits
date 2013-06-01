@@ -12,10 +12,13 @@ app.config( ['$routeProvider',
         $routeProvider.when( '/signup', {
             templateUrl : 'partials/signup.html'
         } );
-        $routeProvider.when( '/signin', {
+        $routeProvider.when( '/signin/:phase/:userId/:token', {
             templateUrl : 'partials/signin.html'
         } );
         $routeProvider.when( '/signin/:phase', {
+            templateUrl : 'partials/signin.html'
+        } );
+        $routeProvider.when( '/signin', {
             templateUrl : 'partials/signin.html'
         } );
         $routeProvider.when( '/signup', {
@@ -31,7 +34,7 @@ app.config( ['$routeProvider',
             templateUrl : 'partials/profile.html'
         } );
         $routeProvider.otherwise( {
-            redirectTo : '/'
+            redirectTo : '/profile'
         } );
     }
 ] );

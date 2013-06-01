@@ -116,9 +116,9 @@ app.post( '/signup', function( req ) {
         throw e;
     }
 
-    emailService.sendWelcomeEmail( token.id, user );
+    emailService.sendVerificationEmail( token.id, user );
 
-    return response.created().json( user );
+    return response.created().json( { id: user.id } );
 });
 
 /**
@@ -151,7 +151,116 @@ app.post( '/resendToken/:email', function( req, email ) {
         token = tokenHits[0];
     }
 
-    emailService.sendWelcomeEmail( token.id, user );
+    emailService.sendVerificationEmail( token.id, user );
+
+    return response.ok();
+});
+
+/**
+ * ## POST /api/users/:id/verify/:token
+ *
+ * Sends the user's token to their email address again. If the user doesn't have a token
+ * (as it must have expired) a new one is created.
+ *
+ * Responses
+ * > **200** - The token has been verified and the user's email account has been updated
+ *   to verified status.
+ * > **404** - Either the token was not found, or the user record was not found. Either
+ *   way, the token is not valid.
+ *
+ */
+app.post( '/:userId/verify/:tokenId', function( req, userId, tokenId ) {
+    // No security check on this one
+    log.info( 'Verifying token {} for user id {}', tokenId, userId );
+
+    // We will need to load the token for verification purposes
+    var token = tokens.read( tokenId );
+    log.info( 'http handler, token: ', JSON.stringify( token ) );
+
+    // todo: delete the json (used for debugging)
+    if (!token) return response.notFound().json({
+        status: 404,
+        message: 'Token ' + tokenId + ' not found'
+    });
+
+    // The token was found, but is it for the same user?
+    // todo: delete the json (used for debugging)
+    if (token.user.id !== userId) return response.notFound().json({
+        status: 404,
+        message: 'User ' + userId + ' did not match token ' + token.user.id
+    });
+
+    // So, we have a match. Let's update the user's account and remove the token.
+    users.update( {
+        id: token.user.id,
+        email: {
+            status: 'verified'
+        }
+    });
+
+    // We don't delete the token just yet, because the user may not select a password
+    // right away. In these cases, the user will have to verify his token again before
+    // they can choose a new password.
+
+    return response.ok();
+});
+
+/**
+ * ## POST /api/users/:id/password
+ *
+ * Sends the user's token to their email address again. If the user doesn't have a token
+ * (as it must have expired) a new one is created.
+ *
+ * Request Body
+ * > **token** - The email verification token
+ * > **password** - The cleartext password he would like to use
+ *
+ * Responses
+ * > **200** - The token has been verified and the user's email account has been updated
+ *   to verified status.
+ * > **404** - The token was not found and it probably expired. User waited 3 days
+ *   between verifying their email and selecting their password.
+ *
+ */
+app.post( '/:userId/password', function( req, userId ) {
+    // No security check on this one
+    var tokenId = req.params.token;
+    var password = req.params.password;
+
+    if (!tokenId) throw { status: 400,
+        message: 'No tokenId parameter present'
+    };
+    if (!password) throw { status: 400,
+        message: 'No password parameter present'
+    };
+
+    // We will need to load the token for verification purposes
+    var token = tokens.read( tokenId );
+    log.info( 'http handler, token: ', JSON.stringify( token ) );
+
+    // todo: delete the json (used for debugging)
+    if (!token) return response.notFound().json({
+        status: 404,
+        message: 'Token ' + tokenId + ' not found'
+    });
+
+    // The token was found, but is it for the same user?
+    // todo: delete the json (used for debugging)
+    if (token.user.id !== userId) return response.notFound().json({
+        status: 404,
+        message: 'User ' + userId + ' did not match token ' + token.user.id
+    });
+
+    // If all matchy-matchy then we can update the users password.
+    users.update( {
+        id: token.user.id,
+        password: req.params.password
+    });
+
+    // We can delete the token now as it is no longer needed
+    tokens.del( token );
+
+//    emailService.sendWelcomeEmail( user );
 
     return response.ok();
 });

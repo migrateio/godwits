@@ -4,8 +4,7 @@
  */
 var log = require( 'ringo/logging' ).getLogger( module.id );
 var {Deferred} = require( 'ringo/promise' );
-var {merge} = require( 'ringo/utils/objects' );
-var {config, uuid} = require( 'utility' );
+var {config, uuid, merge} = require( 'utility' );
 var machina = require( 'machinajs' )();
 
 log.info( 'UUID: {}', typeof uuid );
@@ -386,7 +385,7 @@ function Event( task, event ) {
         message : 'Event constructor requires parameter [event] as JSON object.'
     };
 
-    event = merge( {
+    event = merge( {}, {
         previousStartedEventId : task.previousStartedEventId,
         startedEventId : task.startedEventId,
         taskToken : task.taskToken,

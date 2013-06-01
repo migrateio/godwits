@@ -67,7 +67,7 @@ mod.directive( 'validtip', [ '$log', '$timeout', '$position',
                     var isFocus = !ifUnfocused && inputField.is(':focus');
 //                    $log.info( isDirty, isInvalid, isFocus, !ifUnfocused );
                     if (isDirty && isInvalid && isFocus) $element.fadeIn( 'fast' );
-                    else $element.fadeOut( 'fast' );
+                    else $element.hide();
                 };
 
                 // Watch for changes to the model

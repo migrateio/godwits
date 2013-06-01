@@ -375,15 +375,7 @@ form p.callout {
     float: left;
     width: 180px;
     margin-right: 10px;
-}
-
-form a.back {
-    position: relative;
-    left: -34px;
-    top: -4px;
-    font-size: 11px;
-    color: #d20f17;
-    text-decoration: none;
+    text-align: left;
 }
 
 form .vinegar, form .honey {
@@ -391,6 +383,23 @@ form .vinegar, form .honey {
     left: -2310px;
 }
 
+form span.error {
+    color: #d20f17;
+}
+
+form span.error a {
+    color: #fa101a;
+    text-decoration: underline;
+}
+
+form div.submit {
+    text-align: right;
+}
+
+form .add-on a, form .add-on a:hover {
+    text-decoration: none;
+    outline: 0;
+}
 
 
 

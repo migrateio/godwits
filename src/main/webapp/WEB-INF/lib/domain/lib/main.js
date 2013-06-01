@@ -6,12 +6,10 @@ var log = require( 'ringo/logging' ).getLogger( module.id );
 var {BCrypt} = Packages.org.springframework.security.crypto.bcrypt;
 
 /**
- * Returns a random character from the list of tokenChars. Little funky as it overwrites
- * itself in order to keep things from polluting the parent namespace, but this is what
- * I like about JavaScript.
- * 6 character permutation will represent 48^6 permutations = 12,230,590,464
+ * Returns a random character from the list of tokenChars.
+ * 6 character permutation will represent 55^6 permutations = 27,680,640,625
  */
-var tokenChars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjklmnpqrstuvwxyz';
+var tokenChars = '23456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz';
 var tokenLen = tokenChars.length;
 var random = new java.security.SecureRandom();
 var randomChar = function () {
@@ -27,7 +25,7 @@ exports.makeToken = function(length) {
 };
 
 exports.bcrypt = function (raw, salt) {
-    if (!salt) salt = BCrype.gensalt();
+    if (!salt) salt = BCrypt.gensalt();
     return BCrypt.hashpw(raw, salt);
 };
 

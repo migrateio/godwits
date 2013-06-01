@@ -1,5 +1,5 @@
 var log = require( 'ringo/logging' ).getLogger( module.id );
-var {merge} = require( 'ringo/utils/objects' );
+var {merge} = require( 'utility' );
 var {JsonSchema} = require( 'tv4' );
 
 
@@ -43,8 +43,7 @@ exports.BaseDomain = Object.subClass( {
         };
     },
 
-    preCreate: function ( json ) {
-        return json;
+    prevalidate: function ( json ) {
     },
 
     validate: function( json ) {
@@ -67,10 +66,10 @@ exports.BaseDomain = Object.subClass( {
         // Clone json object because we don't want to modify its properties
         json = JSON.parse( JSON.stringify( json ) );
 
-        this.preCreate( json );
-
         // Flesh out the object with default/required values from the schema
         var newObj = this.generateDefaults( json );
+
+        this.prevalidate( newObj );
 
         // Validate the new object
         this.validate( newObj );
@@ -105,7 +104,11 @@ exports.BaseDomain = Object.subClass( {
         };
 
         // Combine the existing object with the update json
-        var newObj = merge( obj, json );
+        var newObj = merge( {}, obj, json );
+        log.info( 'Merging {} into object {}, resulting in {}',
+            JSON.stringify( json ), JSON.stringify( obj ), JSON.stringify( newObj ) );
+
+        this.prevalidate( newObj );
 
         // Validate the new object
         var schema = this.validateSchema( newObj );

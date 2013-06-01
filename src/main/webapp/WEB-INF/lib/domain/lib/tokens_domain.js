@@ -5,13 +5,34 @@ var {format} = java.lang.String;
 var {BaseDomain} = require( './base' );
 var {makeToken} = require( './main' );
 
+// When the time-to-live expires on members of this map, we want to remove the
+// token from the map store. At this point, the map has already evicted the entry.
+var removeOnEvict = module.singleton('listeners', function() {
+    var listeners = {};
+    return function(map) {
+        if (listeners[map.name]) return;
+        map.addEntryListener( {
+            name : map.name,
+            entryEvicted : function ( entry ) {
+                log.info( 'Evicted the entry, key: ' + entry.key );
+                map.remove( entry.key );
+            },
+            entryRemoved : function ( entry ) {
+                log.info( 'Removed the entry, key: ' + entry.key );
+            }
+        } );
+        listeners[map.name] = true;
+    };
+});
+
 exports.Tokens = BaseDomain.subClass( {
 
+    // todo: Some of this code (ie event listeners) we don't want to run more than once
     init : function ( environment ) {
         var {schema} = require( 'domain/schema/tokens.js' );
 
         var map = store.getMap( environment + '-tokens' );
-        this.removeOnEvict( map );
+        removeOnEvict( map );
 
         var pk = function ( token ) {
             return token.id;
@@ -39,10 +60,12 @@ exports.Tokens = BaseDomain.subClass( {
     filterResults: function( result ) {
         if ( result ) {
             var isArray = Array.isArray( result );
+            var now = java.lang.System.currentTimeMillis();
+            var period = this.expirationPeriod;
             result = [].concat( result ).filter( function ( token ) {
-                var createdTime = new Date( token.created ).time;
-                var expiresAt = createdTime + this.expirationPeriod;
-                return expiresAt > java.lang.System.currentTimeMillis();
+                var createdTime = new Date( token.created ).getTime();
+                var expiresAt = createdTime + period;
+                return expiresAt > now;
             } );
             if ( isArray ) return result;
             return result.length === 0 ? null : result[0];
@@ -88,23 +111,8 @@ exports.Tokens = BaseDomain.subClass( {
      *
      * @param json
      */
-    preCreate : function ( json ) {
+    prevalidate : function ( json ) {
         json.created = new Date().toISOString();
         if ( !json.id ) json.id = makeToken( 6 );
-    },
-
-    // When the time-to-live expires on members of this map, we want to remove the
-    // token from the map store. At this point, the map has already evicted the entry.
-    removeOnEvict : function ( map ) {
-        map.addEntryListener( {
-            name : map.name,
-            entryEvicted : function ( entry ) {
-                log.info( 'Evicted the entry, key: ' + entry.key );
-                map.remove( entry.key );
-            },
-            entryRemoved : function ( entry ) {
-                log.info( 'Removed the entry, key: ' + entry.key );
-            }
-        } );
     }
 } );
