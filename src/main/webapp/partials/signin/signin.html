@@ -1,14 +1,14 @@
 <div class="btn-group">
-    <button type="button" class="btn btn-primary" ng-model="state.phase" btn-radio="'email'">email</button>
-    <button type="button" class="btn btn-primary" ng-model="state.phase" btn-radio="'signup'">signup</button>
-    <button type="button" class="btn btn-primary" ng-model="state.phase" btn-radio="'verify'">verify</button>
-    <button type="button" class="btn btn-primary" ng-model="state.phase" btn-radio="'secure'">secure</button>
-    <button type="button" class="btn btn-primary" ng-model="state.phase" btn-radio="'expire'">expire</button>
-    <button type="button" class="btn btn-primary" ng-model="state.phase" btn-radio="'password'">password</button>
-    <button type="button" class="btn btn-primary" ng-model="state.phase" btn-radio="'welcome'">welcome</button>
-    <button type="button" class="btn btn-primary" ng-model="state.phase" btn-radio="'error'">error</button>
+    <button type="button" class="btn btn-primary" ng-model="state.step" btn-radio="'email'">email</button>
+    <button type="button" class="btn btn-primary" ng-model="state.step" btn-radio="'signup'">signup</button>
+    <button type="button" class="btn btn-primary" ng-model="state.step" btn-radio="'verify'">verify</button>
+    <button type="button" class="btn btn-primary" ng-model="state.step" btn-radio="'secure'">secure</button>
+    <button type="button" class="btn btn-primary" ng-model="state.step" btn-radio="'recover'">recover</button>
+    <button type="button" class="btn btn-primary" ng-model="state.step" btn-radio="'password'">password</button>
+    <button type="button" class="btn btn-primary" ng-model="state.step" btn-radio="'recovery'">recovery</button>
+    <button type="button" class="btn btn-primary" ng-model="state.step" btn-radio="'error'">error</button>
 </div>
-<div class="signin" data-ng-switch="state.phase" data-ng-animate="'slideup'">
+<div class="signin" data-ng-switch="state.step" data-ng-animate="'slideup'">
     <div class="steps">
         <div data-ng-switch-when="email">
             <div class="step" data-ng-include src="'partials/signin/email.html'" ></div>
@@ -22,14 +22,14 @@
         <div data-ng-switch-when="secure">
             <div class="step" data-ng-include src="'partials/signin/secure.html'" ></div>
         </div>
-        <div data-ng-switch-when="expire">
-            <div class="step" data-ng-include src="'partials/signin/expire.html'" ></div>
+        <div data-ng-switch-when="recover">
+            <div class="step" data-ng-include src="'partials/signin/recover.html'" ></div>
         </div>
         <div data-ng-switch-when="password">
             <div class="step" data-ng-include src="'partials/signin/password.html'" ></div>
         </div>
-        <div data-ng-switch-when="welcome">
-            <div class="step" data-ng-include src="'partials/signin/welcome.html'" ></div>
+        <div data-ng-switch-when="recovery">
+            <div class="step" data-ng-include src="'partials/signin/recovery.html'" ></div>
         </div>
         <div data-ng-switch-when="error">
             <div class="step" data-ng-include src="'partials/signin/error.html'" ></div>

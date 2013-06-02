@@ -122,15 +122,54 @@ app.post( '/signup', function( req ) {
 });
 
 /**
- * ## POST /api/users/resendToken
+ * ## POST /api/users/:userId/resendtoken
  *
  * Sends the user's token to their email address again. If the user doesn't have a token
  * (as it must have expired) a new one is created.
  *
  */
-app.post( '/resendToken/:email', function( req, email ) {
+app.post( '/:userId/resendtoken', function( req, userId ) {
+    // We will need both the user and the token to send the email again
+    var token;
+
+    var user = users.read( userId );
+    if (!user) return response.notFound();
+
+    var tokenHits = tokens.readByEmail( user.email.account );
+
+    // The token may have expired
+    if (tokenHits.length === 0) {
+        // Generate a new token for this user
+        token = tokens.create( {user : user} );
+    }
+
+    if (tokenHits.length > 0) {
+        // We really shouldn't be getting more than one of these. If there is a business
+        // reason for duplicates in the future, perhaps we should sort these and return
+        // the most recent one.
+        token = tokenHits[0];
+    }
+
+    emailService.sendVerificationEmail( token.id, user );
+
+    return response.ok();
+});
+
+/**
+ * ## POST /api/users/passwordreset
+ *
+ * Sends the user's token to their email address again. If the user doesn't have a token
+ * (as it must have expired) a new one is created.
+ *
+ */
+app.post( '/passwordreset', function( req ) {
     // We will need both the user and the token to send the email again
     var user, token;
+
+    var email = req.params.email;
+    if (!email) throw { status: 400,
+        message: 'reset password api requires parameter [email]'
+    };
 
     var tokenHits = tokens.readByEmail( email );
 
@@ -151,7 +190,7 @@ app.post( '/resendToken/:email', function( req, email ) {
         token = tokenHits[0];
     }
 
-    emailService.sendVerificationEmail( token.id, user );
+    emailService.sendResetPasswordEmail( token.id, user );
 
     return response.ok();
 });
@@ -208,8 +247,8 @@ app.post( '/:userId/verify/:tokenId', function( req, userId, tokenId ) {
 /**
  * ## POST /api/users/:id/password
  *
- * Sends the user's token to their email address again. If the user doesn't have a token
- * (as it must have expired) a new one is created.
+ * Resets the user's password to the value they choose. For security purposes, the user
+ * must be aware of the email verification token associated with the user account.
  *
  * Request Body
  * > **token** - The email verification token
@@ -252,7 +291,7 @@ app.post( '/:userId/password', function( req, userId ) {
     });
 
     // If all matchy-matchy then we can update the users password.
-    users.update( {
+    var user = users.update( {
         id: token.user.id,
         password: req.params.password
     });
@@ -262,7 +301,9 @@ app.post( '/:userId/password', function( req, userId ) {
 
 //    emailService.sendWelcomeEmail( user );
 
-    return response.ok();
+    return response.ok().json( {
+        email: user.email.address
+    } );
 });
 
 /**

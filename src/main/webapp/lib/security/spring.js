@@ -16,7 +16,9 @@
             var originalPath;
 
             $rootScope.$on( authEvents.EVENT_LOGIN_REQUIRED, function (e, path) {
-                originalPath = path;
+                // If the original path is going to be something that starts with /signin
+                // then we will just redirect to home when finished.
+                originalPath = /^\/signin/i.test( path ) ? '/' : path;
                 $location.path( '/signin' );
             } );
 

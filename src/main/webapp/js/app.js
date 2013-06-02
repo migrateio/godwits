@@ -9,23 +9,14 @@ app.config( ['$routeProvider',
         $routeProvider.when( '/', {
             templateUrl : 'partials/home.html'
         } );
-        $routeProvider.when( '/signup', {
-            templateUrl : 'partials/signup.html'
-        } );
-        $routeProvider.when( '/signin/:phase/:userId/:token', {
+        $routeProvider.when( '/signin/:step/:userId/:tokenId', {
             templateUrl : 'partials/signin.html'
         } );
-        $routeProvider.when( '/signin/:phase', {
+        $routeProvider.when( '/signin/:step', {
             templateUrl : 'partials/signin.html'
         } );
         $routeProvider.when( '/signin', {
             templateUrl : 'partials/signin.html'
-        } );
-        $routeProvider.when( '/signup', {
-            templateUrl : 'partials/signup.html'
-        } );
-        $routeProvider.when( '/verify/:id', {
-            templateUrl : 'partials/verify.html'
         } );
         $routeProvider.when( '/jobs', {
             templateUrl : 'partials/jobs.html'
@@ -34,7 +25,7 @@ app.config( ['$routeProvider',
             templateUrl : 'partials/profile.html'
         } );
         $routeProvider.otherwise( {
-            redirectTo : '/profile'
+            redirectTo : '/'
         } );
     }
 ] );

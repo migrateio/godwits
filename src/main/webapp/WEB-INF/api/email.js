@@ -69,6 +69,37 @@ exports.sendVerificationEmail = function ( token, user ) {
         }
     };
     log.info( 'Sending verification email:', JSON.stringify( opts, null, 4 ) );
-    return sendEmail( 'email.verification', opts );
+    return sendEmail( 'emailVerification', opts );
+};
+
+/**
+ * Sends a password recovery email to the user.
+ * {
+ *     token: '',
+ *      link: {
+ *          confirm: 'url',
+ *          support: 'url',
+ *      }
+ *  }
+ *
+ * @param template
+ * @param user
+ */
+exports.sendResetPasswordEmail = function ( token, user ) {
+    var confirm = props['server.web.url'] + '#/signin/verify/' + user.id + '/' + token;
+    var opts = {
+//        to : 'success@simulator.amazonses.com',
+//        to : 'suppressionlist@simulator.amazonses.com',
+//        to : 'complaint@simulator.amazonses.com',
+//        to : 'ooto@simulator.amazonses.com',
+//        to : 'bounce@simulator.amazonses.com',
+        to : user.email.address,
+        token : token,
+        link : {
+            support : props['support.web.url'],
+            confirm : confirm
+        }
+    };
+    return sendEmail( 'resetPassword', opts );
 };
 

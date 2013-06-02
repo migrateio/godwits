@@ -17,8 +17,8 @@ users.factory( '$users', [ '$log', '$http', function ( $log, $http ) {
         } );
     }
 
-    function resendEmailToken( email ) {
-        return $http.post( '/api/users/resendToken/'+ email );
+    function resendEmailToken( userId ) {
+        return $http.post( '/api/users/' + userId + '/resendtoken' );
     }
 
     function verifyToken( userId, token ) {
@@ -32,10 +32,17 @@ users.factory( '$users', [ '$log', '$http', function ( $log, $http ) {
         });
     }
 
+    function generateRecoveryToken( email ) {
+        return $http.post( '/api/users/passwordreset', {
+            email: email
+        });
+    }
+
 
     return {
         choosePassword: choosePassword,
         createUserRecord: createUserRecord,
+        generateRecoveryToken: generateRecoveryToken,
         getByEmail : getByEmail,
         resendEmailToken: resendEmailToken,
         verifyToken: verifyToken

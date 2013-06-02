@@ -8,7 +8,7 @@
         <div class="controls">
             <div class="input-prepend input-append">
                 <span class="add-on"><i class="icon-envelope gray"></i></span>
-                <input name="email" readonly type="email" data-ng-model="signup.email"
+                <input name="email" readonly type="email" data-ng-model="model.email"
                        placeholder="email" required/>
                 <span class="add-on"><a data-ng-click="back()"><i class="icon-hand-left gray"></i></a></span>
             </div>
@@ -18,7 +18,7 @@
         <div class="controls">
             <div class="input-prepend">
                 <span class="add-on"><i class="icon-user gray"></i></span>
-                <input name="firstname" type="text" data-ng-model="signup.firstname"
+                <input name="firstname" type="text" data-ng-model="model.firstname"
                        placeholder="first name" required data-ng-focus="true"/>
             </div>
             <div data-validtip="formSignup.firstname">
@@ -28,11 +28,10 @@
 
         <div class="controls submit">
             <p class="callout">
-                I agree to <a href="#">terms and conditions</a>
+                I agree to <a ng-click="showTandC()">terms and conditions</a>
             </p>
-            <input class="vinegar" data-ng-model="signup.vinegar" type="text" />
-            <input class="honey" data-ng-model="signup.honey" type="text" />
-            <input data-ng-disabled="formSignup.$invalid" class="btn btn-success" type="submit" value="Sign In"/>
+            <input class="honey" name="username" data-ng-model="honey" type="text" />
+            <input data-ng-disabled="formSignup.$invalid" class="btn btn-success" type="submit" value="Sign Up"/>
         </div>
     </form>
 </div>
