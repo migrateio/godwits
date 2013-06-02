@@ -402,5 +402,69 @@ form .add-on a, form .add-on a:hover {
 }
 
 
+/*
+    Jobs
+*/
+
+ul.job-stack {
+    position: relative;
+    height: 230px;
+}
+
+.jobs ul {
+    clear: both;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    background-color: pink;
+    width: 960px;
+}
+
+/* ***     Job Row      *** */
+
+ul.job-row {
+    position: relative;
+    z-index: 10;
+}
+
+ul.job-row > li {
+    float: left;
+    background-color: white;
+    width: 180px;
+    height: 100px;
+    border: 10px solid #ddebec;
+    border-left: 0;
+    border-bottom: 0;
+}
+
+ul.job-row > li:first-child {
+    border-left: 10px solid #ddebec;
+}
+
+
+/* ***   Job Choices   *** */
+
+ul.job-choices {
+    position: absolute;
+    width: 960px;
+    height: 120px;
+    overflow: hidden;
+    top: 110px;   /* animate */
+}
+
+ul.job-choices > li  {
+    float: left;
+    background-color: white;
+    width: 180px;
+    height: 100px;
+    border: 10px solid #ddebec;
+    border-left: 0;
+}
+
+ul.job-choices > li:first-child {
+    border-left: 10px solid #ddebec;
+}
+
+
 
 

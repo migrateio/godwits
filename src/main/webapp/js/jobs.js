@@ -9,7 +9,7 @@ jobs.controller( 'jobs-controller', [ '$log', '$scope', '$jobs',
 //                $scope.$apply(function() {
 //                    $scope.jobs = data;
 //                });
-                $scope.jobs = JSON.stringify(data);
+                $scope.jobs = JSON.stringify( data );
             } )
             .error( function ( data ) {
                 $log.error( 'Whaaa!', data );
@@ -20,6 +20,14 @@ jobs.controller( 'jobs-controller', [ '$log', '$scope', '$jobs',
         } );
     }
 ] );
+
+
+jobs.directive( 'job', [function () {
+    return function ( scope, element, attrs ) {
+
+    };
+}] );
+
 
 jobs.factory( '$jobs', [ '$log', '$http', function ( $log, $http ) {
 
