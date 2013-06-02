@@ -10,13 +10,12 @@ var {props} = require( 'utility' );
 var users = new domain.Users( props['environment'] );
 
 /**
- * Create the admin user account. Passwords are BCrypt.
- * Password: 'secret'
+ * Create the admin user account.
  */
 users.create( {
     id : 'admin',
     name : 'Admin',
-    password : '$2a$10$Grfvl//Ag7f3eTR2lPJUgut0ABB76WsafqhjJIj4Aa.H3aDZ0oxRu',
+    password : 'secret',
     email : {
         status : 'verified',
         address : 'admin@migrate.io'
@@ -29,7 +28,7 @@ users.create( {
 users.create( {
     id : 'fred',
     name : 'Fred',
-    password : '$2a$10$Grfvl//Ag7f3eTR2lPJUgut0ABB76WsafqhjJIj4Aa.H3aDZ0oxRu',
+    password : 'secret',
     email : {
         status : 'verified',
         address : 'fred@poolpicks.com'

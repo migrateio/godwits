@@ -494,10 +494,6 @@
                 <!-- AWS App Access -->
                 <aws.app.access_key>AKIAIIQOWQM6FFLQB2EQ</aws.app.access_key>
                 <aws.app.secret_key>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</aws.app.secret_key>
-
-                <!-- AWS Email Access -->
-                <aws.email.access_key>AKIAIHRK73TADPMVP2KA</aws.email.access_key>
-                <aws.email.secret_key>AqHImRRpYfzX53F+azTiwVR/NVoC1szfYC4A+VHLCOyV</aws.email.secret_key>
             </properties>
         </profile>
         <profile>
@@ -523,10 +519,6 @@
                 <!-- AWS App Access -->
                 <aws.app.access_key>AKIAJUK7QWOGW5XMHLXQ</aws.app.access_key>
                 <aws.app.secret_key>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</aws.app.secret_key>
-
-                <!-- AWS Email Access -->
-                <aws.email.access_key>AKIAIHRK73TADPMVP2KA</aws.email.access_key>
-                <aws.email.secret_key>AqHImRRpYfzX53F+azTiwVR/NVoC1szfYC4A+VHLCOyV</aws.email.secret_key>
             </properties>
         </profile>
         <profile>
@@ -552,10 +544,6 @@
                 <!-- AWS App Access -->
                 <aws.app.access_key>${migrate.aws.app.access_key}</aws.app.access_key>
                 <aws.app.secret_key>${migrate.aws.app.secret_key}</aws.app.secret_key>
-
-                <!-- AWS Email Access -->
-                <aws.email.access_key>AKIAIHRK73TADPMVP2KA</aws.email.access_key>
-                <aws.email.secret_key>AqHImRRpYfzX53F+azTiwVR/NVoC1szfYC4A+VHLCOyV</aws.email.secret_key>
             </properties>
         </profile>
         <profile>

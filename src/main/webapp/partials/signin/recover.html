@@ -1,0 +1,23 @@
+<div data-ng-controller="signin-reset-controller">
+    <form name="formReset" novalidate ng-submit="submit()">
+
+        <div class="controls">
+            <div class="input-prepend">
+                <span class="add-on"><i class="icon-envelope gray"></i></span>
+                <input name="email" type="email" data-ng-model="email"
+                       placeholder="email" required ng-focus="true" />
+            </div>
+            <div data-validtip="formReset.email">
+                <span ng-show="formReset.email.$error.required">An email address is required</span>
+                <span ng-show="formReset.email.$error.email">This is not a valid email address</span>
+            </div>
+        </div>
+
+        <div class="controls submit">
+            <p class="callout" data-ng-bind-html-unsafe="callout"></p>
+            <input class="honey" name="username" data-ng-model="honey" type="text" />
+            <input ng-disabled="formReset.$invalid" class="btn btn-success" type="submit" value="Reset"/>
+        </div>
+    </form>
+</div>
+

@@ -3,12 +3,22 @@
 
     var mod = angular.module( 'spring-security', ['angular-auth'] )
         .run( ['$log', '$rootScope', '$location', 'authEvents',
+        /**
+         * ## Module spring-security setup
+         *
+         * This code block will listen for authentication events and keep track of the
+         * url that was present at the time authentication was triggered. When
+         * authentication is complete, it will make sure the user's path is updated to
+         * point to its original destination, or the home page if none was discovered.
+         */
         function ( $log, $rootScope, $location, authEvents ) {
 
             var originalPath;
 
             $rootScope.$on( authEvents.EVENT_LOGIN_REQUIRED, function (e, path) {
-                originalPath = path;
+                // If the original path is going to be something that starts with /signin
+                // then we will just redirect to home when finished.
+                originalPath = /^\/signin/i.test( path ) ? '/' : path;
                 $location.path( '/signin' );
             } );
 
@@ -76,47 +86,29 @@
         }
     ] );
 
-/*
-    mod.controller( 'signin-controller',
-        ['$log', '$rootScope', '$scope', '$http', 'authService',
-            function ( $log, $rootScope, $scope, $http, authService ) {
+    mod.factory( '$springService',
+        ['$log', '$q', '$http', 'authService',
+            function ( $log, $q, $http, authService ) {
 
-//                $scope.username = '';
-//                $scope.password = '';
-                $scope.username = 'admin@migrate.io';
-                $scope.password = 'secret';
-                $scope.remember = false;
-                $scope.alerts = [];
 
-                $scope.closeAlert = function ( index ) {
-                    $scope.alerts.splice( index, 1 );
-                };
-
-                $scope.submit = function () {
-                    $scope.alerts = [];
+                function authenticate (email, password, remember) {
+                    var deferred = $q.defer();
 
                     var success = function ( data ) {
                         $log.info( 'Response from auth request:', JSON.stringify( data ) );
                         switch ( data.status || data ) {
                             case 'AUTH_SUCCESS' :
                                 authService.loginConfirmed( data.user );
+                                deferred.resolve( data.user );
                                 break;
                             case 'AUTH_INACTIVE' :
-                                // todo: Handle case where user has not yet verified their email address
+                                deferred.reject( data.status || data );
                                 break;
                             case 'AUTH_BAD_CREDENTIALS' :
-                                $scope.alerts.push( {
-                                    type : 'error',
-                                    msg : 'Your email address or password isn\'t correct. \
-                                        Please try again.'
-                                } );
+                                deferred.reject( data.status || data );
                                 break;
                             default :
-                                $scope.alerts.push( {
-                                    type : 'error',
-                                    msg : 'Unknown error occurred while signing in. \
-                                        This isn\'t your fault, it is ours. We are on it.'
-                                } );
+                                deferred.reject( data.status || data );
                                 break;
                         }
                     };
@@ -128,9 +120,9 @@
                     };
 
                     var data = {
-                        j_username : $scope.username,
-                        j_password : $scope.password,
-                        _spring_security_remember_me : $scope.remember
+                        j_username : email,
+                        j_password : password,
+                        _spring_security_remember_me : remember
                     };
 
                     $log.info( 'Data:', data );
@@ -140,55 +132,13 @@
                         .error( function () {
                             success( 'AUTH_ERROR' );
                         } );
+
+                    return deferred.promise;
                 }
 
-            }
-        ]
-    );
-*/
-
-    mod.controller( 'signup-controller',
-        ['$log', '$rootScope', '$scope', '$http', '$location',
-            function ( $log, $rootScope, $scope, $http, $location ) {
-
-                $scope.firstname = '';
-                $scope.email = '';
-                $scope.alerts = [];
-
-                $scope.closeAlert = function ( index ) {
-                    $scope.alerts.splice( index, 1 );
-                };
-
-                $scope.submit = function () {
-                    $scope.alerts = [];
-
-                    var success = function ( data ) {
-                        $log.info( 'Response from create user request:', JSON.stringify( data ) );
-                        $location.path( '/verify/' + data.id + '?signup' );
-                    };
-
-                    var data = {
-                        name: $scope.firstname,
-                        email : {
-                            address : $scope.email
-                        }
-                    };
-
-                    $log.info( 'Data:', data );
-
-                    $http.post( '/api/users/', data )
-                        .success( success )
-                        .error( function () {
-                            $scope.alerts.push( {
-                                type : 'error',
-                                msg : 'We are unable to create your account at this time. \
-                                        This isn\'t your fault, it is ours. We are on it.'
-                            } );
-                        } );
+                return {
+                    authenticate: authenticate
                 }
-
             }
-        ]
-    );
-
+        ] );
 })();

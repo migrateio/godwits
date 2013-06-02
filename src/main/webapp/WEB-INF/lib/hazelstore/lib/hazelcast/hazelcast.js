@@ -70,18 +70,19 @@ exports.init = function () {
     // Iterate over map configs and setup those map stores that need it.
     config.mapConfigs.entrySet().toArray().forEach( initializeMapStores );
 
-    // If there is already an instance of Hazelcast with the same name running we will
-    // use that instance instead of creating a brand new one.
-    var name = config.groupConfig.name;
-    var instance = Hazelcast.getHazelcastInstanceByName(name);
-    if (instance) {
-        log.info( 'init::bazelcast instance is already running' );
-        hazelcast = instance;
-        return;
-    }
+    // If there is already an instance of Hazelcast running in the same group, then we
+    // will use that instance instead of creating a brand new one.
+    var groupName = config.groupConfig.name;
+    Hazelcast.allHazelcastInstances.toArray().forEach(function(instance) {
+        var instanceGroupName = instance.config.groupConfig.name;
+        if (instanceGroupName === groupName) {
+            hazelcast = instance;
+        }
+    } );
 
-    // If we get here, we are creating the first instance of Hazelcast with this JVM
-    hazelcast = Hazelcast.newHazelcastInstance( config );
+    if (!hazelcast) {
+        hazelcast = Hazelcast.newHazelcastInstance( config );
+    }
 
     /*
      log.warn( 'Adding hazelcast shutdown hook' );

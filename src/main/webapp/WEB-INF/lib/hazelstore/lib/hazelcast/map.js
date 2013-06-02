@@ -191,7 +191,7 @@ function Map( hazelcast, mapName ) {
      */
     var get = function ( key ) {
         var value = map.get( key );
-
+        log.info( 'Checking map for key [{}] and found: {}', key, value );
         if ( typeof value === 'string' ) {
             return JSON.parse( value );
         } else {

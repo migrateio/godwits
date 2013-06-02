@@ -72,7 +72,8 @@
 
                 var error = function ( response ) {
 //                    $log.info( 'Error', response );
-                    if ( response.status === 500 && response.data) {
+                    if ( response.data
+                        && (response.status === 500 || response.status == 400) ) {
                         $rootScope._alerts.push( {
                             type : 'error',
                             msg : response.data.message

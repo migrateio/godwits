@@ -2,7 +2,7 @@ var log = require( 'ringo/logging' ).getLogger( module.id );
 
 var {EmailService} = require( 'ses' );
 var {trimpathString} = require( 'trimpath' );
-var {merge} = require( 'ringo/utils/objects' );
+var {merge} = require( 'utility' );
 
 
 //var service = module.singleton( 'emailService', function () {
@@ -30,7 +30,7 @@ function sendEmail( template, obj ) {
     if ( emailHtmlTemplate )
         emailHtml = trimpathString( emailHtmlTemplate, obj );
 
-    var opts = merge( obj, {
+    var opts = merge( {}, obj, {
         htmlBody : emailHtml,
         textBody : emailText,
         subject : subject,
@@ -41,7 +41,7 @@ function sendEmail( template, obj ) {
 }
 
 /**
- * Sends the welcome email to the user.
+ * Sends the verification email to the user.
  * {
  *     token: '',
  *      link: {
@@ -53,22 +53,53 @@ function sendEmail( template, obj ) {
  * @param template
  * @param obj
  */
-exports.sendWelcomeEmail = function ( token, user ) {
-    var confirm = props['server.web.url'] + 'verify/' + user.id + '?token=' + token;
+exports.sendVerificationEmail = function ( token, user ) {
+    var confirm = props['server.web.url'] + '#/signin/verify/' + user.id + '/' + token;
     var opts = {
-        to : 'success@simulator.amazonses.com',
+//        to : 'success@simulator.amazonses.com',
 //        to : 'suppressionlist@simulator.amazonses.com',
 //        to : 'complaint@simulator.amazonses.com',
 //        to : 'ooto@simulator.amazonses.com',
 //        to : 'bounce@simulator.amazonses.com',
-//        to : user.email.address,
+        to : user.email.address,
         token : token,
         link : {
             support : props['support.web.url'],
             confirm : confirm
         }
     };
-    log.info( 'Sending welcome email:', JSON.stringify( opts, null, 4 ) );
-    return sendEmail( 'email.welcome', opts );
+    log.info( 'Sending verification email:', JSON.stringify( opts, null, 4 ) );
+    return sendEmail( 'emailVerification', opts );
+};
+
+/**
+ * Sends a password reset email to the user.
+ * {
+ *     token: '',
+ *      link: {
+ *          confirm: 'url',
+ *          support: 'url',
+ *      }
+ *  }
+ *
+ * @param template
+ * @param user
+ */
+exports.sendResetPasswordEmail = function ( token, user ) {
+    var confirm = props['server.web.url'] + '#/signin/verify/' + user.id + '/' + token;
+    var opts = {
+//        to : 'success@simulator.amazonses.com',
+//        to : 'suppressionlist@simulator.amazonses.com',
+//        to : 'complaint@simulator.amazonses.com',
+//        to : 'ooto@simulator.amazonses.com',
+//        to : 'bounce@simulator.amazonses.com',
+        to : user.email.address,
+        token : token,
+        link : {
+            support : props['support.web.url'],
+            confirm : confirm
+        }
+    };
+    return sendEmail( 'resetPassword', opts );
 };
 

@@ -1,5 +1,5 @@
 var log = require( 'ringo/logging' ).getLogger( module.id );
-var {merge} = require( 'ringo/utils/objects' );
+var {merge} = require( 'utility' );
 var {JsonSchema} = require( 'tv4' );
 
 
@@ -43,8 +43,7 @@ exports.BaseDomain = Object.subClass( {
         };
     },
 
-    preCreate: function ( json ) {
-        return json;
+    prevalidate: function ( json ) {
     },
 
     validate: function( json ) {
@@ -67,15 +66,17 @@ exports.BaseDomain = Object.subClass( {
         // Clone json object because we don't want to modify its properties
         json = JSON.parse( JSON.stringify( json ) );
 
-        this.preCreate( json );
-
         // Flesh out the object with default/required values from the schema
         var newObj = this.generateDefaults( json );
+
+        this.prevalidate( newObj );
 
         // Validate the new object
         this.validate( newObj );
 
         // Persist the object if validation succeeds
+        if (typeof timeunit === 'string')
+            timeunit = java.util.concurrent.TimeUnit.valueOf( timeunit );
         this.map.put( this.pk( newObj ), newObj, ttl, timeunit );
 
         return newObj;
@@ -103,7 +104,11 @@ exports.BaseDomain = Object.subClass( {
         };
 
         // Combine the existing object with the update json
-        var newObj = merge( obj, json );
+        var newObj = merge( {}, obj, json );
+        log.info( 'Merging {} into object {}, resulting in {}',
+            JSON.stringify( json ), JSON.stringify( obj ), JSON.stringify( newObj ) );
+
+        this.prevalidate( newObj );
 
         // Validate the new object
         var schema = this.validateSchema( newObj );
@@ -115,6 +120,8 @@ exports.BaseDomain = Object.subClass( {
         }
 
         // Persist the object if validation succeeds
+        if (typeof timeunit === 'string')
+            timeunit = java.util.concurrent.TimeUnit.valueOf( timeunit );
         this.map.put( pkey, newObj, ttl, timeunit );
 
         return newObj;
@@ -167,6 +174,9 @@ exports.BaseDomain = Object.subClass( {
             status : 400,
             message : this.name + '::del requires an primary key value'
         };
+
+        // In case the user passes in an object, convert it to a pk
+        if (typeof pkey !== 'string') pkey = this.pk( pkey );
 
         // Get the current object from the map
         return this.map.remove( pkey );

@@ -13,5 +13,5 @@ exports.schema = {
         }
     },
     additionalProperties: false,
-    required: ['id', 'userId']
+    required: ['id', 'user', 'created']
 };

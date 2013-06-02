@@ -9,17 +9,14 @@ app.config( ['$routeProvider',
         $routeProvider.when( '/', {
             templateUrl : 'partials/home.html'
         } );
-        $routeProvider.when( '/signup', {
-            templateUrl : 'partials/signup.html'
+        $routeProvider.when( '/signin/:step/:userId/:tokenId', {
+            templateUrl : 'partials/signin.html'
+        } );
+        $routeProvider.when( '/signin/:step', {
+            templateUrl : 'partials/signin.html'
         } );
         $routeProvider.when( '/signin', {
             templateUrl : 'partials/signin.html'
-        } );
-        $routeProvider.when( '/signup', {
-            templateUrl : 'partials/signup.html'
-        } );
-        $routeProvider.when( '/verify/:id', {
-            templateUrl : 'partials/verify.html'
         } );
         $routeProvider.when( '/jobs', {
             templateUrl : 'partials/jobs.html'
@@ -66,25 +63,3 @@ function whichTransitionEvent() {
     }
 }
 
-// http://stackoverflow.com/questions/14859266/input-autofocus-attribute/14859639#14859639
-angular.module( 'ng' ).directive( 'ngFocus', function ( $timeout ) {
-    return {
-        link : function ( scope, element, attrs ) {
-            scope.$watch( attrs.ngFocus, function ( val ) {
-                if ( angular.isDefined( val ) && val ) {
-                    $timeout( function () {
-                        element[0].select();
-                        element[0].focus();
-                    } );
-                }
-            }, true );
-
-            element.bind( 'blur', function () {
-                if ( angular.isDefined( attrs.ngFocusLost ) ) {
-                    scope.$apply( attrs.ngFocusLost );
-
-                }
-            } );
-        }
-    };
-} );

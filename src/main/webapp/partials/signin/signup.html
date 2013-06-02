@@ -1,8 +1,38 @@
-<div class="signup">
-    <form name="signup" novalidate ng-submit="submit()">
+<div data-ng-controller="signin-signup-controller">
+    <form name="formSignup" novalidate data-ng-submit="submit()">
 
-        <h3>Signup</h3>
+        <div alert data-ng-repeat="alert in alerts" type="alert.type" close="closeAlert($index)">
+            <span data-ng-bind-html-unsafe="alert.msg"></span>
+        </div>
 
+        <div class="controls">
+            <div class="input-prepend input-append">
+                <span class="add-on"><i class="icon-envelope gray"></i></span>
+                <input name="email" readonly type="email" data-ng-model="model.email"
+                       placeholder="email" required/>
+                <span class="add-on"><a data-ng-click="back()"><i class="icon-hand-left gray"></i></a></span>
+            </div>
+
+        </div>
+
+        <div class="controls">
+            <div class="input-prepend">
+                <span class="add-on"><i class="icon-user gray"></i></span>
+                <input name="firstname" type="text" data-ng-model="model.firstname"
+                       placeholder="first name" required data-ng-focus="true"/>
+            </div>
+            <div data-validtip="formSignup.firstname">
+                <span data-ng-show="formSignup.firstname.$error.required">Please tell us what to call you</span>
+            </div>
+        </div>
+
+        <div class="controls submit">
+            <p class="callout">
+                I agree to <a ng-click="showTandC()">terms and conditions</a>
+            </p>
+            <input class="honey" name="username" data-ng-model="honey" type="text" />
+            <input data-ng-disabled="formSignup.$invalid" class="btn btn-success" type="submit" value="Sign Up"/>
+        </div>
     </form>
 </div>
 
