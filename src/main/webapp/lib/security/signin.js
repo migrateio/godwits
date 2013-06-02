@@ -360,7 +360,7 @@
             // Advance the next message. A couple of these advances mean the user wishes
             // to resend the email token.
             $scope.nextmsg = function () {
-                $scope.state.step = 'recover';
+                $scope.state.step = 'reset';
             };
 
             // When the user modifies the password, remove the "incorrect password" msg
@@ -405,21 +405,21 @@
 
 
     /**
-     * ## Controller - signin-recover-controller
+     * ## Controller - signin-reset-controller
      *
      * Generate and send the user a link which they can use to start the email
      * verification process. This email link will be accepted by the verify link which
      * will proceed as if the user entered the verification code on her own.
      *
      */
-    mod.controller( 'signin-recover-controller', ['$log', '$scope', '$users', '$compile',
+    mod.controller( 'signin-reset-controller', ['$log', '$scope', '$users', '$compile',
         function ( $log, $scope, $users, $compile ) {
 
-            $scope.email = '';
+            $scope.email = $scope.model.email;
 
             $scope.msgindex = 0;
             var messages = [
-                '<span>Enter your email and we will email you a recovery link.</span>',
+                '<span>Enter your email and we will send you a link to reset your password.</span>',
                 '<span class="error">Sorry, we don\'t recognize that email address.</span>',
             ].map( function ( message ) {
                     return $compile( message )( $scope );
@@ -445,14 +445,14 @@
                 if (!$scope.email) return;
 
                 var success = function ( response, status ) {
-                    $scope.state.step = 'recovery';
+                    $scope.state.step = 'resetmsg';
                 };
 
                 var error = function ( response, status ) {
                     $scope.msgindex = 1;
                 };
 
-                $users.generateRecoveryToken( $scope.email )
+                $users.generatePasswordReset( $scope.email )
                     .then( success, error );
             }
         }

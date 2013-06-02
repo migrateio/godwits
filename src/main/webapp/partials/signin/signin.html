@@ -3,9 +3,9 @@
     <button type="button" class="btn btn-primary" ng-model="state.step" btn-radio="'signup'">signup</button>
     <button type="button" class="btn btn-primary" ng-model="state.step" btn-radio="'verify'">verify</button>
     <button type="button" class="btn btn-primary" ng-model="state.step" btn-radio="'secure'">secure</button>
-    <button type="button" class="btn btn-primary" ng-model="state.step" btn-radio="'recover'">recover</button>
+    <button type="button" class="btn btn-primary" ng-model="state.step" btn-radio="'reset'">reset</button>
     <button type="button" class="btn btn-primary" ng-model="state.step" btn-radio="'password'">password</button>
-    <button type="button" class="btn btn-primary" ng-model="state.step" btn-radio="'recovery'">recovery</button>
+    <button type="button" class="btn btn-primary" ng-model="state.step" btn-radio="'resetmsg'">resetmsg</button>
     <button type="button" class="btn btn-primary" ng-model="state.step" btn-radio="'error'">error</button>
 </div>
 <div class="signin" data-ng-switch="state.step" data-ng-animate="'slideup'">
@@ -22,14 +22,14 @@
         <div data-ng-switch-when="secure">
             <div class="step" data-ng-include src="'partials/signin/secure.html'" ></div>
         </div>
-        <div data-ng-switch-when="recover">
-            <div class="step" data-ng-include src="'partials/signin/recover.html'" ></div>
+        <div data-ng-switch-when="reset">
+            <div class="step" data-ng-include src="'partials/signin/reset.html'" ></div>
         </div>
         <div data-ng-switch-when="password">
             <div class="step" data-ng-include src="'partials/signin/password.html'" ></div>
         </div>
-        <div data-ng-switch-when="recovery">
-            <div class="step" data-ng-include src="'partials/signin/recovery.html'" ></div>
+        <div data-ng-switch-when="resetmsg">
+            <div class="step" data-ng-include src="'partials/signin/resetmsg.html'" ></div>
         </div>
         <div data-ng-switch-when="error">
             <div class="step" data-ng-include src="'partials/signin/error.html'" ></div>

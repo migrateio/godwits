@@ -73,7 +73,7 @@ exports.sendVerificationEmail = function ( token, user ) {
 };
 
 /**
- * Sends a password recovery email to the user.
+ * Sends a password reset email to the user.
  * {
  *     token: '',
  *      link: {

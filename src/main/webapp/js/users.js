@@ -32,7 +32,7 @@ users.factory( '$users', [ '$log', '$http', function ( $log, $http ) {
         });
     }
 
-    function generateRecoveryToken( email ) {
+    function generatePasswordReset( email ) {
         return $http.post( '/api/users/passwordreset', {
             email: email
         });
@@ -42,7 +42,7 @@ users.factory( '$users', [ '$log', '$http', function ( $log, $http ) {
     return {
         choosePassword: choosePassword,
         createUserRecord: createUserRecord,
-        generateRecoveryToken: generateRecoveryToken,
+        generatePasswordReset: generatePasswordReset,
         getByEmail : getByEmail,
         resendEmailToken: resendEmailToken,
         verifyToken: verifyToken
