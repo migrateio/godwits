@@ -1,0 +1,20 @@
+<ul class="job-stack">
+    <li>
+        <ul class="job-row">
+            <li ng-repeat="block in blocks" ng-class="{active:block.selected}">
+                <a ng-click="select(block)">{{block.name}}</a>
+            </li>
+        </ul>
+    </li>
+    <li>
+        <ul class="job-choices" mio-job-detail="source" ng-show="block.selected" ng-animate="'job-detail'">
+            <li>imap</li>
+            <li>gmail</li>
+            <li>google docs</li>
+            <li>exchange</li>
+            <li>skydrive</li>
+            <li>yahoo</li>
+            <li>outlook</li>
+        </ul>
+    </li>
+</ul>

@@ -406,11 +406,6 @@ form .add-on a, form .add-on a:hover {
     Jobs
 */
 
-ul.job-stack {
-    position: relative;
-    height: 230px;
-}
-
 .jobs ul {
     clear: both;
     list-style: none;
@@ -418,6 +413,11 @@ ul.job-stack {
     padding: 0;
     background-color: pink;
     width: 960px;
+}
+
+.job-stack {
+    position: relative;
+    height: 230px;
 }
 
 /* ***     Job Row      *** */
@@ -429,42 +429,69 @@ ul.job-row {
 
 ul.job-row > li {
     float: left;
-    background-color: white;
     width: 180px;
     height: 100px;
     border: 10px solid #ddebec;
     border-left: 0;
-    border-bottom: 0;
 }
 
 ul.job-row > li:first-child {
     border-left: 10px solid #ddebec;
 }
 
+.job-row > li {
+    background-color: white;
+}
+
+.job-row > li.active {
+    border-bottom-width: 0;
+}
 
 /* ***   Job Choices   *** */
 
 ul.job-choices {
     position: absolute;
+    top: 110px;
     width: 960px;
     height: 120px;
     overflow: hidden;
-    top: 110px;   /* animate */
 }
 
 ul.job-choices > li  {
     float: left;
-    background-color: white;
     width: 180px;
     height: 100px;
     border: 10px solid #ddebec;
     border-left: 0;
+    background-color: white;
+
 }
 
 ul.job-choices > li:first-child {
+    border-top-width: 0;
+    padding-top: 10px;
     border-left: 10px solid #ddebec;
 }
 
+.job-detail-show, .job-detail-hide {
+    -webkit-transition:all cubic-bezier(0.250, 0.460, 0.450, 0.940) 0.125s;
+    -moz-transition:all cubic-bezier(0.250, 0.460, 0.450, 0.940) 0.125s;
+    -o-transition:all cubic-bezier(0.250, 0.460, 0.450, 0.940) 0.125s;
+    transition:all cubic-bezier(0.250, 0.460, 0.450, 0.940) 0.125s;
+}
 
+ul.job-detail-show {
+    top: 0;
+}
 
+.job-detail-show.job-detail-show-active {
+    top: 110px;
+}
 
+.job-detail-hide {
+    top: 110px;
+}
+
+.job-detail-hide.job-detail-hide-active {
+    top: 0;
+}
