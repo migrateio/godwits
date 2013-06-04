@@ -246,7 +246,6 @@ input[type="text"], input[type="email"], input[type="password"] {
 
 .footer h3 {
     color: #fdfdfb;
-    letter-spacing: -0.1em;
 }
 
 /*
@@ -259,7 +258,6 @@ input[type="text"], input[type="email"], input[type="password"] {
 
 .footer .twitter h3 {
     color: #fdfdfb;
-    letter-spacing: -0.1em;
     /*font-size: 12px;*/
 }
 
@@ -406,65 +404,138 @@ form .add-on a, form .add-on a:hover {
     Jobs
 */
 
-ul.job-stack {
-    position: relative;
-    height: 230px;
-}
-
 .jobs ul {
     clear: both;
     list-style: none;
     margin: 0;
     padding: 0;
-    background-color: pink;
-    width: 960px;
+    background-color: white;
+    /*background-color: #ccffcc;*/
+    width: 940px;
 }
+
+.job-stack {
+    position: relative;
+    height: 100px;
+    border: 10px solid #ddebec;
+    transition: height linear 0.125s;
+}
+
+.job-stack.open {
+    height: 210px;
+}
+
 
 /* ***     Job Row      *** */
 
-ul.job-row {
+.job-row {
     position: relative;
     z-index: 10;
 }
 
-ul.job-row > li {
+.job-row > li {
     float: left;
-    background-color: white;
-    width: 180px;
-    height: 100px;
-    border: 10px solid #ddebec;
-    border-left: 0;
-    border-bottom: 0;
-}
-
-ul.job-row > li:first-child {
+    box-sizing: content-box;
+    transition-delay: 0.125s;
+    -webkit-transition-delay: 0.125s;
+    padding: 10px;
+    border-bottom: 10px solid #ddebec;
     border-left: 10px solid #ddebec;
 }
 
+.job-row > li > div {
+    width: 160px;
+    height: 80px;
+}
+
+
+.job-row > li:first-child {
+    margin-left: -10px;
+}
+
+.job-row > li.active {
+    transition-delay: 0s;
+    -webkit-transition-delay: 0s;
+    border-bottom-color: transparent;
+}
 
 /* ***   Job Choices   *** */
 
-ul.job-choices {
+div.job-choices {
     position: absolute;
-    width: 960px;
-    height: 120px;
-    overflow: hidden;
-    top: 110px;   /* animate */
-}
-
-ul.job-choices > li  {
-    float: left;
-    background-color: white;
-    width: 180px;
+    bottom: 0;    /* sticks to the bottom of the job-stack, which shrinks/grows height */
+    width: 940px;
     height: 100px;
-    border: 10px solid #ddebec;
-    border-left: 0;
+    overflow: hidden;
 }
 
-ul.job-choices > li:first-child {
-    border-left: 10px solid #ddebec;
+.job-choices > ul  {       /* This element is positioned by 'left' to simulate scrolling */
+    position: relative;
+    height: 100px;
+    width: 950px;
+    white-space: nowrap;
+    font-size: 0;             /* Dealing with the whitespace issue between li elements */
+    margin-left: -10px;
 }
 
+.job-choices li  {
+    font-size: 13px;
+    display: inline-block;
+    padding: 10px;
+    margin-left: 10px;
+}
 
+.job-choices li > div:first-child {
+    width: 160px;
+    height: 80px;
+    float: left;
+}
 
+.job-choices li > div.blocks1, .job-choices li > div.blocks2,
+.job-choices li > div.blocks3, .job-choices li > div.blocks4  {
+    -webkit-transition:all linear 0.125s;
+    -moz-transition:all linear 0.125s;
+    -o-transition:all linear 0.125s;
+    transition:all linear 0.125s;
+    float: left;
+    overflow: hidden;
+    width: 0;
+}
 
+.job-choices li.active > div.blocks1 {
+    width: 190px;
+}
+.job-choices li.active > div.blocks2 {
+    width: 380px;
+}
+.job-choices li.active > div.blocks3 {
+    width: 570px;
+}
+.job-choices li.active > div.blocks4 {
+    width: 760px;
+}
+
+/*
+.job-detail-show, .job-detail-hide {
+    -webkit-transition:all linear 0.125s;
+    -moz-transition:all linear 0.125s;
+    -o-transition:all linear 0.125s;
+    transition:all linear 0.125s;
+}
+
+ul.job-detail-show {
+    top: 0;
+}
+
+.job-detail-show.job-detail-show-active {
+    top: 130px;
+}
+
+.job-detail-hide {
+    top: 130px;
+}
+
+.job-detail-hide.job-detail-hide-active {
+    top: 0;
+}
+*/

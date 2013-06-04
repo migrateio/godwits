@@ -1,27 +1,11 @@
 <div class="container jobs" ng-controller="jobs-controller">
     <h2>Jobs</h2>
 
-    <ul class="job-stack">
-        <li>
-            <ul class="job-row">
-                <li>source</li>
-                <li>destination</li>
-                <li>content</li>
-                <li>action</li>
-                <li>progress</li>
-            </ul>
-        </li>
-        <li>
-            <ul class="job-choices">
-                <li>imap</li>
-                <li>gmail</li>
-                <li>google docs</li>
-                <li>exchange</li>
-                <li>skydrive</li>
-                <li>yahoo</li>
-                <li>outlook</li>
-            </ul>
-        </li>
-    </ul>
+    <div class="job-stack" data-mio-job="job"
+         data-ng-class="{'open':open, 'closed':!open}"></div>
+
+    <a ng-click="newJob()" class="btn btn-info">New Job</a>
+    <a ng-click="newSource()" class="btn btn-info">New Source</a>
 </div>
+
 

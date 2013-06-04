@@ -100,6 +100,7 @@ exports.bcrypt = function (raw, salt) {
 
 exports.Users = require( './users_domain' ).Users;
 exports.Tokens = require( './tokens_domain' ).Tokens;
+exports.Jobs = require( './jobs_domain' ).Jobs;
 
 
 
