@@ -1,7 +1,7 @@
 
 body {
     margin: 0;
-    font-family: Allerta, "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-family: "AmbleLight", "Helvetica Neue", Helvetica, Arial, sans-serif;
     font-size: 13px;
     color: #6b6b6b;
     background-color: #ffffff;
@@ -22,6 +22,7 @@ h4,
 h5,
 h6 {
     color: #21b6ce;
+    font-family: "AmbleBold", sans-serif ;
 }
 
 .page-header {

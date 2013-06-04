@@ -1,6 +1,5 @@
 body {
     padding-bottom: 60px;
-    font-family: Allerta, "Helvetica Neue", Helvetica, Arial, sans-serif;
 }
 
 a:hover {
@@ -118,7 +117,6 @@ div.tooltip.validation div.tooltip-inner span {
 
 .hero h1 {
     color: #fdfdfb;
-    letter-spacing: -0.1em;
 }
 
 .hero h2 {
@@ -131,13 +129,11 @@ div.tooltip.validation div.tooltip-inner span {
     font-size: 20pt;
     line-height: 24pt;
     font-weight: normal;
-    letter-spacing: -0.05em;
     margin: 5px 0 20px 0;
 }
 
 .hero .btn {
     font-size: 22px;
-    letter-spacing: -0.05em;
 }
 
 
@@ -150,12 +146,12 @@ div.tooltip.validation div.tooltip-inner span {
 
 .marketing h4 {
     color: #65c6d8;
-    font-size: 120%;
+    font-size: 140%;
 }
 
 .marketing p {
     color: #909090;
-    font-size: 110%;
+    font-size: 120%;
 }
 
 
@@ -177,11 +173,15 @@ div.tooltip.validation div.tooltip-inner span {
 
 .features h4 {
     font-weight: normal;
+    font-size: 160%;
 }
 
 .features p {
-    font-size: 110%;
-    color: #8a8d8d;
+    font-family: "AmbleLightCondensed", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-size: 140%;
+    line-height: 130%;
+    color: #909090;
+    padding: 0.5em 1em;
 }
 
 /*
