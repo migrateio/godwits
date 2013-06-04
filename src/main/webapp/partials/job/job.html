@@ -2,19 +2,45 @@
     <li>
         <ul class="job-row">
             <li ng-repeat="block in blocks" ng-class="{active:block.selected}">
-                <a ng-click="select(block)">{{block.name}}</a>
+                <div>
+                    <a ng-click="select(block)">{{block.name}}</a>
+                </div>
             </li>
         </ul>
     </li>
     <li>
-        <ul class="job-choices" mio-job-detail="source" ng-show="block.selected" ng-animate="'job-detail'">
-            <li>imap</li>
-            <li>gmail</li>
-            <li>google docs</li>
-            <li>exchange</li>
-            <li>skydrive</li>
-            <li>yahoo</li>
-            <li>outlook</li>
-        </ul>
+        <div class="job-choices">
+            <ul mio-job-detail="source" ng-show="block.selected">
+                <li class="active">
+                    <div>imap</div>
+                    <div class="blocks4">
+                        <input type="text" placeholder="server">
+                        <input type="text" placeholder="email address">
+                        <input type="password" placeholder="password">
+                    </div>
+                </li>
+                <li>
+                    <div>gmail</div>
+                    <div class="blocks1">
+                        <a ng-click="" class="btn">Link</a>
+                    </div>
+                </li>
+                <li>
+                    <div>google docs</div>
+                </li>
+                <li>
+                    <div>exchange</div>
+                </li>
+                <li>
+                    <div>skydrive</div>
+                </li>
+                <li>
+                    <div>yahoo</div>
+                </li>
+                <li>
+                    <div>outlook</div>
+                </li>
+            </ul>
+        </div>
     </li>
 </ul>

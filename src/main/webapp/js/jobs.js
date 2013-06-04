@@ -31,48 +31,70 @@
         }
     ] );
 
-    jobs.controller( 'mioJobController', ['$log', '$scope', function ( $log, $scope ) {
+    jobs.controller( 'mioJobController', ['$log', '$scope', '$timeout',
+        function ( $log, $scope, $timeout ) {
 
-        var blocks = $scope.blocks = [
-            {
-                name : 'source',
-                selected : false
-            },
-            {
-                name : 'destination',
-                selected : false
-            },
-            {
-                name : 'content',
-                selected : false
-            },
-            {
-                name : 'action',
-                selected : false
-            },
-            {
-                name : 'status',
-                selected : false
+            var transtionEnd = 'transitionend webkitTransitionEnd oTransitionEnd otransitionend MSTransitionEnd';
+
+            var blocks = $scope.blocks = [
+                {
+                    name : 'source',
+                    selected : false
+                },
+                {
+                    name : 'destination',
+                    selected : false
+                },
+                {
+                    name : 'content',
+                    selected : false
+                },
+                {
+                    name : 'action',
+                    selected : false
+                },
+                {
+                    name : 'status',
+                    selected : false
+                }
+            ];
+
+            function getBlockByName( name ) {
+                for ( var i = 0, c = blocks.length; i < c; i++ ) {
+                    if ( name === blocks[i].name ) return $scope.blocks[i];
+                }
+                return null;
             }
-        ];
 
-        function getBlockByName( name ) {
-            for ( var i = 0, c = blocks.length; i < c; i++ ) {
-                if ( name === blocks[i].name ) return $scope.blocks[i];
+            function closeThen( func ) {
+                if ( $scope.open ) {
+                    $scope.open = false;
+                    $timeout( func, 300 );
+                } else {
+                    func();
+                }
             }
-            return null;
-        }
 
-        $scope.select = function selectBlock( block ) {
-            var wasSelected = block.selected;
-            ng.forEach( blocks, function ( block ) {
-                block.selected = false;
-            } );
-            if (!wasSelected) block.selected = true;
-        };
+            $scope.select = function ( block ) {
+                closeThen( function () {
+                    var wasSelected = block.selected;
+                    ng.forEach( blocks, function ( block ) {
+                        block.selected = false;
+                    } );
+                    if ( !wasSelected ) {
+                        block.selected = true;
+                        $scope.open = true;
+                    } else {
+                        $scope.open = false;
+                    }
+                } );
+            };
 
-        this.getBlockByName = getBlockByName;
-    }] );
+            // Controls whether the detail row is shown or not
+            $scope.open = false;
+
+            this.getBlockByName = getBlockByName;
+        }] );
 
     jobs.directive( 'mioJob', ['$log', '$parse', function ( $log, $parse ) {
         return {
@@ -104,44 +126,6 @@
         }
     }] );
 
-
-    /**
-     * The job-row represents the tier-1 row of 5 blocks arranged left-to-right which contain
-     * the source, destination, content, action and progress blocks. The job-row appears top
-     * most with the other views stacked behind it. When the blocks in the job-row are
-     * interacted with, the tier-2 rows will slide down. Most of this transitional behavior
-     * is tied to the "active" class being set on one of the job-row's block elements.
-     *
-     *
-     */
-    /*
-     jobs.directive( 'jobRow', ['$log', function ( $log ) {
-     return {
-     require: '^jobStack',
-     restrict : 'MACE',
-     scope: {
-     showRow: '='
-     },
-     link : function ( scope, element, attrs, jobCtrl ) {
-     // All of the direct `li` descendants of the `ul` element
-     var blocks = element.children( 'li' );
-
-     // Blocks will toggle on/off their `active` class. A new block being
-     // marked active will toggle off other blocks which are active.
-     blocks.on( 'click', function () {
-     var isActive = $( this ).hasClass( 'active' );
-     blocks.removeClass( 'active' );
-     if ( !isActive ) {
-     $( this ).addClass( 'active' );
-     scope.showRow( 'kathy' );
-     }
-     } );
-
-     }
-     }
-     }] );
-
-     */
 
     jobs.factory( '$jobs', [ '$log', '$http', function ( $log, $http ) {
 

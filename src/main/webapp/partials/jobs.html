@@ -1,7 +1,8 @@
 <div class="container jobs" ng-controller="jobs-controller">
     <h2>Jobs</h2>
 
-    <div class="job-stack" data-mio-job="job"></div>
+    <div class="job-stack" data-mio-job="job"
+         data-ng-class="{'open':open, 'closed':!open}"></div>
 
     <a ng-click="newJob()" class="btn btn-info">New Job</a>
     <a ng-click="newSource()" class="btn btn-info">New Source</a>
