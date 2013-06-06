@@ -21,8 +21,8 @@
 
 .jobs div.job-stack {
     position: relative;
-    height: 100px;
     border: 10px solid #ddeeee;
+    height: 100px;
     margin-bottom: 20px;
     transition: height linear 0.125s;
 }
@@ -36,6 +36,7 @@
 .jobs div.job-tabs {
     position: relative;
     width: 940px;
+    height: 100px;
     z-index: 10;
 }
 
@@ -48,17 +49,12 @@
 
 .jobs div.job-tabs > ul > li {
     margin-left: 10px;
-    margin-bottom: 10px;
     padding: 10px;
+    margin-bottom: 10px;
     background-color: #ffffff;
     color: #21b6ce;
     text-align: center;
     vertical-align: top;
-}
-
-.jobs div.job-tabs > ul > li.active {
-    margin-bottom: 0;
-    height: 90px;
 }
 
 .jobs div.job-tabs > ul > li > div {
@@ -68,6 +64,7 @@
 
 .jobs div.job-tabs > ul > li .btn {
     text-align: left;
+    font-size: 13px;
 }
 
 .jobs div.job-tabs > ul > li:first-child .btn {
@@ -76,6 +73,25 @@
 
 .jobs div.job-tabs > ul > li:nth-child(2) .btn {
     color: #1da3b8;
+}
+
+.jobs div.job-tabs > ul > li {
+    transition-delay: 0.100s;
+    -webkit-transition-delay: 0.100s;
+    padding-bottom: 10px;
+    margin-bottom: 10px;
+}
+
+.jobs .job-stack.source div.job-tabs li.source,
+.jobs .job-stack.destination div.job-tabs li.destination,
+.jobs .job-stack.content div.job-tabs li.content,
+.jobs .job-stack.action div.job-tabs li.action,
+.jobs .job-stack.status div.job-tabs li.status
+{
+    transition-delay: 0.01s;
+    -webkit-transition-delay: 0.01s;
+    padding-bottom: 20px;
+    margin-bottom: 0;
 }
 
 /** job-detail */
@@ -109,7 +125,6 @@
     width: 160px;
     height: 80px;
 }
-
 
 
 /*

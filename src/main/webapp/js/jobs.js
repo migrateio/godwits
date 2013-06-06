@@ -102,18 +102,11 @@
 
             $scope.newJobs = newJobs;
             newJobs();
-
-            $log.info( 'mio-jobs-controller scope', $scope );
         }
     ] );
 
     jobs.controller( 'mio-job-controller', ['$log', '$scope', '$timeout', '$element',
         function ( $log, $scope, $timeout, $element ) {
-            $log.info( 'mio-job-controller scope', $scope, 'element:', $element );
-
-            var obj = {};
-
-            $scope.open = false;
             $scope.detailName = '';
 
             /**
@@ -123,8 +116,30 @@
              * it will reopen to reveal the new drawer.
              */
             this.toggleDetailName = function (detailName) {
-                $scope.detailName = $scope.detailName === detailName ? '' : detailName;
+                // Give the ui animation time to close the drawer if it was open
+                var delay = $scope.ui.open ? 200 : 0;
+
+                // We will always close the drawer
+                $scope.ui.open = false;
+
+                var newDetailName = $scope.detailName === detailName ? '' : detailName;
+                $element.removeClass( $scope.detailName );
+
+                if (newDetailName) {
+                    $timeout( function () {
+                        // Add the detail name to the element in order to control some
+                        // downstream css styles.
+                        $element.addClass( newDetailName );
+                        $scope.detailName = newDetailName;
+                        $scope.ui.open = true;
+                    }, delay );
+                } else {
+                    $scope.detailName = newDetailName;
+                }
             };
+
+            $scope.ui = {};
+            $scope.ui.open = false;
         }]
     );
 
@@ -139,8 +154,7 @@
                     job : '=mioJob'
                 },
                 templateUrl : '/partials/job/job.html',
-                link : function ( scope, element, attrs, jobController ) {
-                    $log.info( 'mioJob job', scope.job );
+                link : function ( scope, element, attrs, jobCtrl ) {
                 }
             }
         } ] );
@@ -154,7 +168,6 @@
                 scope : {job : '=mioJobTabs'},
                 templateUrl : '/partials/job/job-tabs.html',
                 link : function ( scope, element, attrs, jobCtrl ) {
-                    $log.info( 'mioJobTabs scope', scope );
                 }
             }
         }]
@@ -172,25 +185,23 @@
 
                     var original = {};
                     var detailName = attrs['mioDetailName'];
+                    element.addClass(detailName);
 
                     function beginEdit() {
                         original = ng.copy( scope.tab );
                     }
 
                     function select() {
-                        $log.info( 'Select()', jobCtrl.open );
-                        if (!scope.selected) {
+                        if (jobCtrl.detailName !== detailName) {
                             beginEdit();
                         }
-                        scope.selected = !scope.selected;
-                        jobCtrl.drawer( detailName, scope.selected );
+                        jobCtrl.toggleDetailName( detailName );
                     }
 
                     function cancel() {
                         scope.tab = ng.copy( original );
                     }
 
-                    scope.selected = false;
                     scope.select = select;
                 }
             }
@@ -208,7 +219,6 @@
                 templateUrl : '/partials/job/job-services.html',
                 link : function ( scope, element, attrs, jobCtrl ) {
                     scope.services = uiModel[scope.dataName];
-                    $log.info( 'mioJobServices services', scope.services );
                 }
             }
         }] );
@@ -221,7 +231,6 @@
                 scope : {service : '=mioJobService'},
                 templateUrl : '/partials/job/job-service.html',
                 link : function ( scope, element, attrs, jobCtrl ) {
-                    $log.info( 'mioJobService service', scope.service );
                 }
             }
         }] );
@@ -234,7 +243,6 @@
                 scope : {content : '=mioJobContent'},
                 templateUrl : '/partials/job/job-content.html',
                 link : function ( scope, element, attrs, jobCtrl ) {
-                    $log.info( 'mioJobContent content', scope.content );
                 }
             }
         }] );
@@ -247,7 +255,6 @@
                 scope : {block : '=mioJobAction'},
                 templateUrl : '/partials/job/job-action.html',
                 link : function ( scope, element, attrs, jobCtrl ) {
-                    $log.info( 'mioJobAction scope', scope );
                 }
             }
         }] );
@@ -260,7 +267,6 @@
                 scope : {block : '=mioJobDetail'},
                 templateUrl : '/partials/job/job-status.html',
                 link : function ( scope, element, attrs, jobCtrl ) {
-                    $log.info( 'mioJobStatus scope', scope );
                 }
             }
         }] );
@@ -272,7 +278,6 @@
                 restrict : 'MACE',
                 scope : {block : '=mioJobDetail'},
                 link : function ( scope, element, attrs, jobCtrl ) {
-                    $log.info( 'mioJobDetail scope', scope );
                 }
             }
         }] );
