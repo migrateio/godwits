@@ -1,11 +1,14 @@
-<div class="container jobs" ng-controller="jobs-controller">
+<div class="container jobs" data-ng-controller="mio-jobs-controller">
     <h2>Jobs</h2>
 
-    <div class="job-stack" data-mio-job="job"
-         data-ng-class="{'open':open, 'closed':!open}"></div>
+    <ul>
+        <li data-ng-repeat="job in jobs">
+            <div data-mio-job="job"></div>
+        </li>
+    </ul>
 
-    <a ng-click="newJob()" class="btn btn-info">New Job</a>
-    <a ng-click="newSource()" class="btn btn-info">New Source</a>
+
+    <a data-ng-click="newJobs()" class="btn btn-info">New Jobs</a>
 </div>
 
 

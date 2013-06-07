@@ -215,14 +215,48 @@ mod.directive( 'passXray',
         }
     ] );
 
+mod.directive('myTransclude', function() {
+    return {
+        compile: function(tElement, tAttrs, transclude) {
+            return function(scope, iElement, iAttrs) {
+                transclude(scope.$new(), function(clone) {
+                    iElement.append(clone);
+                });
+            };
+        }
+    };
+});
 
-mod.directive( 'eatClick', function () {
-    return function ( scope, element, attrs ) {
-        $( element ).click( function ( event ) {
-            event.preventDefault();
-        } );
+/**
+ * Works by using Method 3 for vertical centering as found on:
+ * http://blog.themeforest.net/tutorials/vertical-centering-with-css/
+ *
+ * Needs accompanying css:
+ *   .va-floater	{float:left; height:50%; margin-bottom:-120px;}
+ *   .va-content	{clear:both; height:240px; position:relative;}
+ *
+ */
+mod.directive( 'verticalCenter', function () {
+    return {
+        restrict : 'AC',
+/*
+         replace: true,
+         template : ' \
+            <div> \
+              <div style="display:inline-block; vertical-align:middle; height:100%;"></div> \
+              <div style="display:inline-block; vertical-align:middle; white-space:normal;" ng-transclude></div> \
+            </div>',
+*/
+        template : ' \
+            <div style="display: table; width: 100%; height: 100%"> \
+                <div style="display: table-cell; vertical-align:middle;" my-transclude> \
+                </div>\
+            </div>',
+        transclude : true,
+        scope: false
     }
-} );
+});
+
 
 
 // http://stackoverflow.com/questions/14859266/input-autofocus-attribute/14859639#14859639

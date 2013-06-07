@@ -1,23 +1,23 @@
 <div data-ng-controller="signin-verify-controller">
-    <form name="formVerify" novalidate ng-submit="submit()">
+    <form name="formVerify" novalidate data-ng-submit="submit()">
 
         <div class="controls">
             <div class="input-prepend">
                 <span class="add-on"><i class="icon-ticket gray"></i></span>
                 <input name="token" type="text" data-ng-model="model.tokenId"
                        data-ng-pattern="/^[23456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz]{6}$/"
-                       placeholder="token" required ng-focus="true" />
+                       placeholder="token" required data-ng-focus="true" />
             </div>
             <div data-validtip="formVerify.token">
-                <span ng-show="formVerify.token.$error.required">We sent your token in an email</span>
-                <span ng-show="formVerify.token.$error.pattern">This is not a valid token format</span>
+                <span data-ng-show="formVerify.token.$error.required">We sent your token in an email</span>
+                <span data-ng-show="formVerify.token.$error.pattern">This is not a valid token format</span>
             </div>
         </div>
 
         <div class="controls submit">
             <p class="callout" data-ng-bind-html-unsafe="callout"></p>
             <input class="honey" name="username" data-ng-model="honey" type="text" />
-            <input ng-disabled="formVerify.$invalid" class="btn btn-success" type="submit" value="Verify"/>
+            <input data-ng-disabled="formVerify.$invalid" class="btn btn-success" type="submit" value="Verify"/>
         </div>
     </form>
 </div>

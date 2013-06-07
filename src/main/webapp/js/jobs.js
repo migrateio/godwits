@@ -1,134 +1,288 @@
 (function ( $, ng ) {
+    var uiModel = {
+        source : [
+            {
+                name : 'google',
+                auth : 'oauth',
+                types : ['mail', 'calendar', 'contacts', 'documents', 'media']
+            },
+            { name : 'imap',
+                auth : 'password',
+                types : ['mail']
+            },
+            { name : 'yahoo',
+                auth : 'oauth',
+                types : ['mail', 'contacts']
+            },
+            { name : 'microsoft',
+                auth : 'oauth',
+                types : ['mail', 'calendar', 'contacts', 'documents', 'media']
+            },
+            { name : 'skydrive',
+                auth : 'oauth',
+                types : ['documents', 'media']
+            },
+            { name : 'exchange',
+                auth : 'exchange',
+                types : ['mail']
+            },
+            { name : 'outlookpst',
+                auth : 'file',
+                types : ['mail', 'contacts', 'calendar']
+            }
+        ],
+        destination : [
+            {
+                name : 'google',
+                auth : 'oauth',
+                types : ['mail', 'calendar', 'contacts', 'documents', 'media']
+            },
+            { name : 'imap',
+                auth : 'password',
+                types : ['mail']
+            },
+            { name : 'yahoo',
+                auth : 'oauth',
+                types : ['mail', 'contacts']
+            },
+            { name : 'microsoft',
+                auth : 'oauth',
+                types : ['mail', 'calendar', 'contacts', 'documents', 'media']
+            },
+            { name : 'skydrive',
+                auth : 'oauth',
+                types : ['documents', 'media']
+            },
+            { name : 'exchange',
+                auth : 'exchange',
+                types : ['mail']
+            },
+            { name : 'outlookpst',
+                auth : 'file',
+                types : ['mail', 'contacts', 'calendar']
+            }
+        ]    };
+
     var jobs = ng.module( 'migrate.jobs', [] );
 
-    jobs.controller( 'jobs-controller', [ '$log', '$scope', '$jobs',
+    jobs.controller( 'mio-jobs-controller', [ '$log', '$scope', '$jobs',
         function ( $log, $scope, $jobs ) {
 
-            function pick( a ) {
-                var index = Math.floor( Math.random() * a.length );
-                return a[index];
-            }
+            var random = function(len) {
+                return Math.floor( Math.random() * len )
+            };
 
             function newJob() {
-                $scope.job = {
-                    source : {
-                        account : pick( ['google', 'microsoft', 'yahoo', 'imap'] )
+                return {
+                    jobId: '' + (random(1000) + 1000),
+                    source: {
+                        service: uiModel.source[random(uiModel.source.length)].name
+                    },
+                    destination: {
+                        service: uiModel.destination[random(uiModel.source.length)].name
+                    },
+                    content: {
+                        types: ['email']
+                    },
+                    action: {
+                    },
+                    status: {
+                        completion: 1.00
                     }
                 }
             }
 
-            function newSource() {
-                $scope.job.source.account = pick( ['google', 'microsoft', 'yahoo', 'imap'] );
+            function newJobs() {
+                var jobs = [];
+                for ( var i = 0, c = 2; i < c; i++ ) {
+                    jobs.push( newJob() );
+                }
+                $scope.jobs = jobs;
             }
 
-            $scope.$watch( 'job.source.account', function ( newValue ) {
-                $log.info( 'Job source changed: ', newValue );
-            } );
-
-            $scope.newJob = newJob;
-            $scope.newSource = newSource;
-            newJob();
+            $scope.newJobs = newJobs;
+            newJobs();
         }
     ] );
 
-    jobs.controller( 'mioJobController', ['$log', '$scope', '$timeout',
-        function ( $log, $scope, $timeout ) {
+    jobs.controller( 'mio-job-controller', ['$log', '$scope', '$timeout', '$element',
+        function ( $log, $scope, $timeout, $element ) {
+            $scope.detailName = '';
 
-            var transtionEnd = 'transitionend webkitTransitionEnd oTransitionEnd otransitionend MSTransitionEnd';
+            /**
+             * Takes care of transitioning between detail names. If detail name is set,
+             * the drawer will close. If detail name is the same as the current one, the
+             * drawer will stay closed. If the drawer is different than the current one,
+             * it will reopen to reveal the new drawer.
+             */
+            this.toggleDetailName = function (detailName) {
+                // Give the ui animation time to close the drawer if it was open
+                var delay = $scope.ui.open ? 200 : 0;
 
-            var blocks = $scope.blocks = [
-                {
-                    name : 'source',
-                    selected : false
-                },
-                {
-                    name : 'destination',
-                    selected : false
-                },
-                {
-                    name : 'content',
-                    selected : false
-                },
-                {
-                    name : 'action',
-                    selected : false
-                },
-                {
-                    name : 'status',
-                    selected : false
-                }
-            ];
+                // We will always close the drawer
+                $scope.ui.open = false;
 
-            function getBlockByName( name ) {
-                for ( var i = 0, c = blocks.length; i < c; i++ ) {
-                    if ( name === blocks[i].name ) return $scope.blocks[i];
-                }
-                return null;
-            }
+                var newDetailName = $scope.detailName === detailName ? '' : detailName;
+                $element.removeClass( $scope.detailName );
 
-            function closeThen( func ) {
-                if ( $scope.open ) {
-                    $scope.open = false;
-                    $timeout( func, 300 );
+                if (newDetailName) {
+                    $timeout( function () {
+                        // Add the detail name to the element in order to control some
+                        // downstream css styles.
+                        $element.addClass( newDetailName );
+                        $scope.detailName = newDetailName;
+                        $scope.ui.open = true;
+                    }, delay );
                 } else {
-                    func();
+                    $scope.detailName = newDetailName;
                 }
-            }
-
-            $scope.select = function ( block ) {
-                closeThen( function () {
-                    var wasSelected = block.selected;
-                    ng.forEach( blocks, function ( block ) {
-                        block.selected = false;
-                    } );
-                    if ( !wasSelected ) {
-                        block.selected = true;
-                        $scope.open = true;
-                    } else {
-                        $scope.open = false;
-                    }
-                } );
             };
 
-            // Controls whether the detail row is shown or not
-            $scope.open = false;
+            $scope.ui = {};
+            $scope.ui.open = false;
+        }]
+    );
 
-            this.getBlockByName = getBlockByName;
+    jobs.directive( 'mioJob', ['$log', '$parse',
+        function ( $log, $parse ) {
+            return {
+                restrict : 'MACE',
+                transclude : false,
+                replace : true,
+                controller : 'mio-job-controller',
+                scope : {
+                    job : '=mioJob'
+                },
+                templateUrl : '/partials/job/job.html',
+                link : function ( scope, element, attrs, jobCtrl ) {
+                }
+            }
+        } ] );
+
+
+    jobs.directive( 'mioJobTabs', ['$log', '$parse', '$compile',
+        function ( $log, $parse, $compile ) {
+            return {
+                require : '^mioJob',
+                restrict : 'MACE',
+                scope : {job : '=mioJobTabs'},
+                templateUrl : '/partials/job/job-tabs.html',
+                link : function ( scope, element, attrs, jobCtrl ) {
+                }
+            }
+        }]
+    );
+
+    jobs.directive( 'mioJobTab', ['$log', '$parse', '$compile',
+        function ( $log, $parse, $compile ) {
+            return {
+                require : '^mioJob',
+                restrict : 'MACE',
+                scope : {
+                    tab : '=mioJobTab'
+                },
+                link : function ( scope, element, attrs, jobCtrl ) {
+
+                    var original = {};
+                    var detailName = attrs['mioDetailName'];
+                    element.addClass(detailName);
+
+                    function beginEdit() {
+                        original = ng.copy( scope.tab );
+                    }
+
+                    function select() {
+                        if (jobCtrl.detailName !== detailName) {
+                            beginEdit();
+                        }
+                        jobCtrl.toggleDetailName( detailName );
+                    }
+
+                    function cancel() {
+                        scope.tab = ng.copy( original );
+                    }
+
+                    scope.select = select;
+                }
+            }
+        }]
+    );
+
+    jobs.directive( 'mioJobServices', ['$log', '$parse', '$compile',
+        function ( $log, $parse, $compile ) {
+            return {
+                require : '^mioJob',
+                restrict : 'MACE',
+                scope : {
+                    dataName: '@mioJobServices'
+                },
+                templateUrl : '/partials/job/job-services.html',
+                link : function ( scope, element, attrs, jobCtrl ) {
+                    scope.services = uiModel[scope.dataName];
+                }
+            }
         }] );
 
-    jobs.directive( 'mioJob', ['$log', '$parse', function ( $log, $parse ) {
-        return {
-            restrict : 'MACE',
-            transclude : false,
-            replace : true,
-            controller : 'mioJobController',
-            scope : {
-                job : '=mioJob'
-            },
-            templateUrl : '/partials/job/job.html',
-            link : function ( scope, element, attrs, jobController ) {
+    jobs.directive( 'mioJobService', ['$log', '$parse', '$compile',
+        function ( $log, $parse, $compile ) {
+            return {
+                require : '^mioJob',
+                restrict : 'MACE',
+                scope : {service : '=mioJobService'},
+                templateUrl : '/partials/job/job-service.html',
+                link : function ( scope, element, attrs, jobCtrl ) {
+                }
             }
-        }
-    } ] );
+        }] );
 
-
-    jobs.directive( 'mioJobDetail', ['$log', '$timeout', function ( $log, $timeout ) {
-        return {
-            require : '^mioJob',
-            restrict : 'MACE',
-            scope : false,
-            controller : 'mioJobController',
-            link : function ( scope, element, attrs, jobCtrl ) {
-                // Get a reference to the block with which we are associated. Note: the
-                // `getBlockByName()` function must return $scope.block, not this.block.
-                scope.block = jobCtrl.getBlockByName( attrs['mioJobDetail'] );
+    jobs.directive( 'mioJobContent', ['$log', '$parse', '$compile',
+        function ( $log, $parse, $compile ) {
+            return {
+                require : '^mioJob',
+                restrict : 'MACE',
+                scope : {content : '=mioJobContent'},
+                templateUrl : '/partials/job/job-content.html',
+                link : function ( scope, element, attrs, jobCtrl ) {
+                }
             }
-        }
-    }] );
+        }] );
 
+    jobs.directive( 'mioJobAction', ['$log', '$parse', '$compile',
+        function ( $log, $parse, $compile ) {
+            return {
+                require : '^mioJob',
+                restrict : 'MACE',
+                scope : {block : '=mioJobAction'},
+                templateUrl : '/partials/job/job-action.html',
+                link : function ( scope, element, attrs, jobCtrl ) {
+                }
+            }
+        }] );
+
+    jobs.directive( 'mioJobStatus', ['$log', '$parse', '$compile',
+        function ( $log, $parse, $compile ) {
+            return {
+                require : '^mioJob',
+                restrict : 'MACE',
+                scope : {block : '=mioJobDetail'},
+                templateUrl : '/partials/job/job-status.html',
+                link : function ( scope, element, attrs, jobCtrl ) {
+                }
+            }
+        }] );
+
+    jobs.directive( 'mioJobDetail', ['$log', '$parse', '$compile',
+        function ( $log, $parse, $compile ) {
+            return {
+                require : '^mioJob',
+                restrict : 'MACE',
+                scope : {block : '=mioJobDetail'},
+                link : function ( scope, element, attrs, jobCtrl ) {
+                }
+            }
+        }] );
 
     jobs.factory( '$jobs', [ '$log', '$http', function ( $log, $http ) {
-
 
         function loadInProgress() {
             $log.info( 'Loading any jobs in progress' );
