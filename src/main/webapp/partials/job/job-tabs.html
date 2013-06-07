@@ -1,183 +1,28 @@
 <ul>
     <li data-mio-job-tab="job.source" data-mio-detail-name="source">
-        <div data-vertical-center ng-switch="tab.service">
-            <div ng-switch-when="google">
-                <a data-ng-click="select()" class="btn btn-trans">
-                    <img src="/img/services/google.png" width="128" height="44" alt="Google"/>
-                    <br/>
-                    ch&#8230;ong@gmail.com
-                </a>
-            </div>
-            <div ng-switch-when="imap">
-                <a data-ng-click="select()" class="btn btn-trans">
-                    <img src="/img/services/imap.png" width="105" height="36" alt="IMAP"/>
-                    <br/>
-                    ch&#8230;ong@columbus.rr.com
-                </a>
-            </div>
-            <div ng-switch-when="yahoo">
-                <a data-ng-click="select()" class="btn btn-trans">
-                    <img src="/img/services/yahoo.png" width="128" height="24" alt="Yahoo!"/>
-                    <br/>
-                    ch&#8230;ong@yahoo.com
-                </a>
-            </div>
-            <div ng-switch-when="outlook">
-                <a data-ng-click="select()" class="btn btn-trans">
-                    <img src="/img/services/outlook.com.png" width="128" height="19" alt="outlook.com"/>
-                    <br/>
-                    ch&#8230;ng@live.com
-                </a>
-            </div>
-            <div ng-switch-when="exchange">
-                <a data-ng-click="select()" class="btn btn-trans">
-                    <img src="/img/services/exchange.png" width="99" height="44" alt="MS Exchange"/>
-                    <br/>
-                    ch&#8230;ong@corpusa.com
-                </a>
-            </div>
-            <div ng-switch-when="skydrive">
-                <a data-ng-click="select()" class="btn btn-trans">
-                    <img src="/img/services/skydrive.png" width="128" height="26" alt="Skydrive"/>
-                    <br/>
-                    ch&#8230;ong@live.com
-                </a>
-            </div>
-            <div ng-switch-when="aol">
-                <a data-ng-click="select()" class="btn btn-trans">
-                    <img src="/img/services/aol.png" width="112" height="44" alt="AOL"/>
-                    <br/>
-                    che&#8230;dong@aol.com
-                </a>
-            </div>
-            <div ng-switch-when="comcast">
-                <a data-ng-click="select()" class="btn btn-trans">
-                    <img src="/img/services/comcast.png" width="126" height="44" alt="Comcast"/>
-                    <br/>
-                    che&#8230;ng@comcast.com
-                </a>
-            </div>
-            <div ng-switch-when="hotmail">
-                <a data-ng-click="select()" class="btn btn-trans">
-                    <img src="/img/services/hotmail.png" width="52" height="44" alt="Hotmail"/>
-                    <br/>
-                    ch&#8230;ng@hotmail.com
-                </a>
-            </div>
-            <div ng-switch-when="twc">
-                <a data-ng-click="select()" class="btn btn-trans">
-                    <img src="/img/services/twc.png" width="119" height="44" alt="Road Runner"/>
-                    <br/>
-                    &#8230@columbus.rr.com
-                </a>
-            </div>
-            <div ng-switch-when="outlookpst">
-                <a data-ng-click="select()" class="btn btn-trans">
-                    <img src="/img/services/outlook.png" width="128" height="19" alt="MS Outlook PST"/>
-                    <br/>
-                    outlook.pst
-                </a>
-            </div>
-            <div ng-switch-default>
-                <a data-ng-click="select()" class="btn btn-trans default"><i
-                        class="icon-plus-sign icon-2x pull-left"></i> Add source<br/>account</a>
-            </div>
+        <div data-vertical-center>
+            <a data-ng-click="select()" class="btn btn-trans">
+                <div mio-job-btn-service="tab" data-tab-type="source"></div>
+            </a>
         </div>
     </li>
     <li data-mio-job-tab="job.destination" data-mio-detail-name="destination">
-        <div data-vertical-center ng-switch="tab.service">
-            <div ng-switch-when="google">
-                <a data-ng-click="select()" class="btn btn-trans">
-                    <img src="/img/services/google.png" width="128" height="44" alt="Google"/>
-                    <br/>
-                    ch&#8230;ong@gmail.com
-                </a>
-            </div>
-            <div ng-switch-when="imap">
-                <a data-ng-click="select()" class="btn btn-trans">
-                    <img src="/img/services/imap.png" width="105" height="36" alt="IMAP"/>
-                    <br/>
-                    ch&#8230;ong@columbus.rr.com
-                </a>
-            </div>
-            <div ng-switch-when="yahoo">
-                <a data-ng-click="select()" class="btn btn-trans">
-                    <img src="/img/services/yahoo.png" width="128" height="24" alt="Yahoo!"/>
-                    <br/>
-                    ch&#8230;ong@yahoo.com
-                </a>
-            </div>
-            <div ng-switch-when="outlook">
-                <a data-ng-click="select()" class="btn btn-trans">
-                    <img src="/img/services/outlook.com.png" width="128" height="19" alt="outlook.com"/>
-                    <br/>
-                    ch&#8230;ng@live.com
-                </a>
-            </div>
-            <div ng-switch-when="exchange">
-                <a data-ng-click="select()" class="btn btn-trans">
-                    <img src="/img/services/exchange.png" width="99" height="44" alt="MS Exchange"/>
-                    <br/>
-                    ch&#8230;ong@corpusa.com
-                </a>
-            </div>
-            <div ng-switch-when="skydrive">
-                <a data-ng-click="select()" class="btn btn-trans">
-                    <img src="/img/services/skydrive.png" width="128" height="26" alt="Skydrive"/>
-                    <br/>
-                    ch&#8230;ong@live.com
-                </a>
-            </div>
-            <div ng-switch-when="aol">
-                <a data-ng-click="select()" class="btn btn-trans">
-                    <img src="/img/services/aol.png" width="112" height="44" alt="AOL"/>
-                    <br/>
-                    che&#8230;dong@aol.com
-                </a>
-            </div>
-            <div ng-switch-when="comcast">
-                <a data-ng-click="select()" class="btn btn-trans">
-                    <img src="/img/services/comcast.png" width="126" height="44" alt="Comcast"/>
-                    <br/>
-                    che&#8230;ng@comcast.com
-                </a>
-            </div>
-            <div ng-switch-when="hotmail">
-                <a data-ng-click="select()" class="btn btn-trans">
-                    <img src="/img/services/hotmail.png" width="52" height="44" alt="Hotmail"/>
-                    <br/>
-                    ch&#8230;ng@hotmail.com
-                </a>
-            </div>
-            <div ng-switch-when="twc">
-                <a data-ng-click="select()" class="btn btn-trans">
-                    <img src="/img/services/twc.png" width="119" height="44" alt="Road Runner"/>
-                    <br/>
-                    &#8230@columbus.rr.com
-                </a>
-            </div>
-            <div ng-switch-when="outlookpst">
-                <a data-ng-click="select()" class="btn btn-trans">
-                    <img src="/img/services/outlook.png" width="128" height="19" alt="MS Outlook PST"/>
-                    <br/>
-                    outlook.pst
-                </a>
-            </div>
-            <div ng-switch-default>
-                <a data-ng-click="select()" class="btn btn-trans default"><i
-                        class="icon-plus-sign icon-2x pull-left"></i> Add source<br/>account</a>
-            </div>
+        <div data-vertical-center>
+            <a data-ng-click="select()" class="btn btn-trans">
+                <div mio-job-btn-service="tab" data-tab-type="destination"></div>
+            </a>
         </div>
     </li>
     <li data-mio-job-tab="job.content" data-mio-detail-name="content">
         <div data-vertical-center>
-            <a data-ng-click="select()" class="btn btn-trans default">Everything <i
-                    class="icon-caret-down"></i></a>
+            <a data-ng-click="select()" class="btn btn-trans">
+                <div data-mio-job-btn-content="tab"></div>
+            </a>
         </div>
     </li>
     <li data-mio-job-tab="job.action" data-mio-detail-name="action">
         <div data-vertical-center>
-            <a data-ng-click="select()" class="btn btn-success default">Migrate</a>
+            <a data-ng-click="select()" class="btn btn-success">Migrate</a>
         </div>
     </li>
     <li data-mio-job-tab="job.status" data-mio-detail-name="status">

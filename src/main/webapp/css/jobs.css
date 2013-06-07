@@ -31,7 +31,7 @@
     height: 210px;
 }
 
-/* job-tabs */
+/* job-tabs row */
 
 .jobs div.job-tabs {
     position: relative;
@@ -46,6 +46,10 @@
     width: 950px;
     background-color: #ddeeee;
 }
+
+/* The job tab itself takes care of a bottom margin that functions as a
+   border separation.
+*/
 
 .jobs div.job-tabs > ul > li {
     margin-left: 10px;
@@ -62,25 +66,86 @@
     height: 80px;
 }
 
-.jobs div.job-tabs > ul > li .btn {
-    text-align: center;
-    font-size: 10px;
-}
+/* Job tab buttons */
 
-.jobs div.job-tabs > ul > li .default {
+.jobs div.job-tabs > ul > li .btn {
+    width: 132px;
     text-align: left;
     font-size: 13px;
+    line-height: 16px;
 }
 
-.jobs div.job-tabs > ul > li:first-child .btn {
+.jobs div.job-tabs > ul > li.source .btn {
     color: #fcc769;
-    width: 128px;
 }
 
-.jobs div.job-tabs > ul > li:nth-child(2) .btn {
+.jobs div.job-tabs > ul > li.destination .btn {
     color: #1da3b8;
-    width: 128px;
 }
+
+.jobs div.job-tabs > ul > li.content .btn {
+    color: #4a8b5c;
+}
+
+.jobs div.job-tabs > ul > li.action .btn {
+    color: #4a8b5c;
+    font-size: 17.5px;
+    text-align: center;
+    width: auto;
+    padding: 11px 19px;
+}
+
+/* There are several different button layouts for the tabs.
+   .icons-button   - contains one or two icons and one or two rows of text; both of
+                     these elements are vertically centered within the button. The icon
+                     is to the far left and the text is left-justified to the right of
+                     the icon.
+   .service-button - holds a service logo and one or two rows of text beneath it. The
+                     logo/text group is vertically centered in the button and all content
+                     is horizontally centered.
+   .text-button    - contains one or more lines of text centered both vertically and
+                     horizontally in the button.
+
+    Each of these buttons will follow a general semantic structure:
+    <div class="icons-button">
+        <div class="icons"> <i/> or <img/> </div>
+        <div class="text"> ... </div>
+    </div>
+*/
+
+.icons-button {
+    display: table;
+    width: 132px;
+    height: 60px;
+}
+
+.icons-button span {
+    display: table-cell;
+    vertical-align: middle;
+}
+
+.icons-button span.icons {
+    text-align: center;
+}
+
+.icons-button span.icons i {
+    margin-right: 0.35em;
+}
+
+.service-button {
+}
+
+.service-button span {
+    display: block;
+    text-align: center;
+}
+
+.service-button span.text {
+    overflow: hidden;
+}
+
+
+/* A delayed transition takes care of show/hide on the bottom of the tab row */
 
 .jobs div.job-tabs > ul > li {
     transition-delay: 0.100s;
