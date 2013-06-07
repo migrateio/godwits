@@ -2,64 +2,117 @@
     var uiModel = {
         source : [
             {
+                name: ''
+            },
+            {
+                name : 'aol',
+                auth : 'password',
+                content : ['mails', 'calendars', 'contacts']
+            },
+            {
+                name : 'comcast',
+                auth : 'password',
+                content : ['mails']
+            },
+            {
+                name : 'exchange',
+                auth : 'exchange',
+                content : ['mails']
+            },
+            {
                 name : 'google',
                 auth : 'oauth',
-                types : ['mail', 'calendar', 'contacts', 'documents', 'media']
+                content : ['mails', 'calendars', 'contacts', 'documents', 'media']
             },
-            { name : 'imap',
+            {
+                name : 'hotmail',
                 auth : 'password',
-                types : ['mail']
+                content : ['mails', 'calendars', 'contacts']
             },
-            { name : 'yahoo',
+            {
+                name : 'imap',
+                auth : 'password',
+                content : ['mails']
+            },
+            {
+                name : 'outlook',
                 auth : 'oauth',
-                types : ['mail', 'contacts']
+                content : ['mails', 'calendars', 'contacts']
             },
-            { name : 'microsoft',
-                auth : 'oauth',
-                types : ['mail', 'calendar', 'contacts', 'documents', 'media']
-            },
-            { name : 'skydrive',
-                auth : 'oauth',
-                types : ['documents', 'media']
-            },
-            { name : 'exchange',
-                auth : 'exchange',
-                types : ['mail']
-            },
-            { name : 'outlookpst',
+            {
+                name : 'outlookpst',
                 auth : 'file',
-                types : ['mail', 'contacts', 'calendar']
+                content : ['mails', 'calendars', 'contacts']
+            },
+            {
+                name : 'skydrive',
+                auth : 'oauth',
+                content : ['documents', 'media']
+            },
+            {
+                name : 'twc',
+                auth : 'password',
+                content : ['mails']
+            },
+            {
+                name : 'yahoo',
+                auth : 'oauth',
+                content : ['mails', 'contacts']
             }
         ],
         destination : [
             {
+                name: ''
+            },
+            {
+                name : 'aol',
+                auth : 'password',
+                content : ['mails', 'calendars', 'contacts']
+            },
+            {
+                name : 'comcast',
+                auth : 'password',
+                content : ['mails']
+            },
+            {
+                name : 'exchange',
+                auth : 'exchange',
+                content : ['mails']
+            },
+            {
                 name : 'google',
                 auth : 'oauth',
-                types : ['mail', 'calendar', 'contacts', 'documents', 'media']
+                content : ['mails', 'calendars', 'contacts', 'documents', 'media']
             },
-            { name : 'imap',
+            {
+                name : 'hotmail',
                 auth : 'password',
-                types : ['mail']
+                content : ['mails', 'calendars', 'contacts']
             },
-            { name : 'yahoo',
+            {
+                name : 'imap',
+                auth : 'password',
+                content : ['mails']
+            },
+            {
+                name : 'outlook',
                 auth : 'oauth',
-                types : ['mail', 'contacts']
+                content : ['mails', 'calendars', 'contacts']
             },
-            { name : 'microsoft',
+            {
+                name : 'skydrive',
                 auth : 'oauth',
-                types : ['mail', 'calendar', 'contacts', 'documents', 'media']
+                content : ['documents', 'media']
             },
-            { name : 'skydrive',
+            {
+                name : 'twc',
+                auth : 'password',
+                content : ['mails']
+            },
+            {
+                name : 'yahoo',
                 auth : 'oauth',
-                types : ['documents', 'media']
-            },
-            { name : 'exchange',
-                auth : 'exchange',
-                types : ['mail']
-            },
-            { name : 'outlookpst',
-                auth : 'file',
-                types : ['mail', 'contacts', 'calendar']
+                content : ['mails', 'contacts']
             }
         ]    };
 
@@ -72,24 +125,46 @@
                 return Math.floor( Math.random() * len )
             };
 
+            function combine(source, dest) {
+                function intersect_safe(a, b) {
+                    for (var i = a.length - 1; i >= 0; i--) {
+                        var index = b.indexOf( a[i] );
+                        if (index < 0) a.splice(i,1);
+                    }
+                    $log.info( 'Result:', a );
+                    return a;
+                }
+
+                $log.info( 'Intersection', source, dest );
+                return intersect_safe( source, dest );
+            }
+
             function newJob() {
-                return {
+                var sourceService = uiModel.source[random(uiModel.source.length)];
+                var destService = uiModel.destination[random(uiModel.destination.length)];
+
+                var result = {
                     jobId: '' + (random(1000) + 1000),
                     source: {
-                        service: uiModel.source[random(uiModel.source.length)].name
+                        service: sourceService.name || ''
                     },
                     destination: {
-                        service: uiModel.destination[random(uiModel.source.length)].name
+                        service: destService.name || ''
                     },
-                    content: {
-                        types: ['email']
-                    },
+                    content: combine(sourceService.content || [], destService.content || []),
                     action: {
                     },
                     status: {
                         completion: 1.00
                     }
-                }
+                };
+                if (result.source.service) 
+                    result.source.username = 'cherry.chevapravatdumrong@'
+                        + result.source.service + '.com'; 
+                if (result.destination.service) 
+                    result.destination.username = 'cherry.chevapravatdumrong@'
+                        + result.destination.service + '.com'; 
+                return result;
             }
 
             function newJobs() {
@@ -182,7 +257,7 @@
                     tab : '=mioJobTab'
                 },
                 link : function ( scope, element, attrs, jobCtrl ) {
-
+                    $log.info( 'mioJobTab scope', scope );
                     var original = {};
                     var detailName = attrs['mioDetailName'];
                     element.addClass(detailName);
@@ -280,7 +355,142 @@
                 link : function ( scope, element, attrs, jobCtrl ) {
                 }
             }
-        }] );
+        }]
+    );
+
+
+    jobs.directive( 'mioJobBtnService', ['$log', '$parse', '$compile',
+        function ( $log, $parse, $compile ) {
+            return {
+                require : '^mioJob',
+                restrict : 'MACE',
+                scope : {
+                    tab: '=mioJobBtnService',
+                    tabType: '@tabType'
+                },
+                replace: true,
+                template: '\
+                        <div>\
+                            <div ng-if="tab.service" class="service-button">\
+                                <span class="icons"> \
+                                    <img data-ng-src="/img/services/{{tab.service}}.png" /> \
+                                </span> \
+                                <span class="text"> \
+                                    {{tab.username|regex:"(.*)@"}} \
+                                </span>\
+                            </div>\
+                            <div ng-if="!tab.service" class="icons-button">\
+                                <span class="icons"> \
+                                     <i class="icon-plus-sign icon-2x"></i> \
+                                </span> \
+                                <span class="text"> \
+                                     Add {{tabType}} account \
+                                </span>\
+                            </div>\
+                        </div>',
+                link : function ( scope, element, attrs, jobCtrl ) {
+                    $log.info( 'mioJobBtnService', scope.tab, element );
+                    function redraw(tab) {
+                    }
+
+                    scope.$watch( 'tab', redraw );
+                }
+            }
+        }]
+    );
+
+    /**
+     * ## Directive - mioJobBtnContent
+     *
+     * This button has several different appearances based on how many selections have
+     * been made by the user and the status of the source and destination account.
+     *
+     * * **No source or no destination** - Present the 'plus' icon and the text
+     *   "Add content"
+     * * **No items selected** - Present the 'plus' icon and the text "Add content"
+     * * **One or two items selected** - Present icons for the selected items and text
+     *   to describe each icon.
+     * * **Three or more items selected** - Display icons only with no text.
+     *
+     * Note: the choices made for source and destination will impact which content
+     * options are available to the user. This component is not concerned with that
+     * logic, and it will render the choices present in the `job.content` property.
+     */
+    jobs.directive( 'mioJobBtnContent', ['$log', '$parse', '$compile',
+        function ( $log, $parse, $compile ) {
+            return {
+                require : '^mioJob',
+                restrict : 'MACE',
+                scope : {content: '=mioJobBtnContent'},
+                template: '\
+                        <div>\
+                            <div ng-if="content.length > 0" class="icons-button">\
+                                <span class="icons"> \
+                                </span> \
+                                <span class="text"> \
+                                </span>\
+                            </div>\
+                            <div ng-if="content.length === 0" class="icons-button">\
+                                <span class="icons"> \
+                                     <i class="icon-plus-sign icon-2x"></i> \
+                                </span> \
+                                <span class="text"> \
+                                     Add Content\
+                                </span>\
+                            </div>\
+                        </div>',
+                link : function ( scope, element, attrs, jobCtrl ) {
+                    var i,
+                        imageHtml = '<img alt="{name}" data-ng-src="/img/content/{name}.png" />',
+                        textName = {
+                            mails: 'Email',
+                            calendars: 'Calendars',
+                            contacts: 'Contacts',
+                            documents: 'Documents',
+                            media: 'Media Files'
+                        },
+                        iconName = {
+                            mails: 'icon-envelope-alt',
+                            calendars: 'icon-calendar',
+                            contacts: 'icon-user',
+                            documents: 'icon-file',
+                            media: 'icon-picture'
+                        };
+
+                    $log.info( 'mioJobBtnContent, content', scope.content, scope.content.length );
+                    function redrawContent(content) {
+                        if (content && content.length > 0) {
+                            var iconSpan = element.find( 'span.icons' );
+                            for (i = 0; i < content.length; i++) {
+//                                iconSpan.append( imageHtml.replace( /\{name\}/ig, content[i] ) );
+                                var icon = ng.element( '<i class="icon-2x"/>' )
+                                    .addClass( iconName[content[i]] );
+                                iconSpan.append(icon);
+                            }
+                        }
+                        var iconText = element.find( 'span.text' )
+                            .css( 'width', 'auto' );
+                        if (content && content.length < 3) {
+                            iconText
+                                .css( 'width', '100%' )
+                                .append( textName[content[0]] );
+                            if (content.length > 1)
+                                iconText.append( '<br/>' ).append( textName[content[1]] );
+                        }
+                    }
+
+                    scope.$watch( 'content', redrawContent );
+                }
+            }
+        }]
+    );
+
+    jobs.filter('regex', function() {
+        return function(input, regex) {
+            var value = new RegExp(regex).exec(input);
+            return value && value[1] ? value[1] : input;
+        }
+    });
 
     jobs.factory( '$jobs', [ '$log', '$http', function ( $log, $http ) {
 

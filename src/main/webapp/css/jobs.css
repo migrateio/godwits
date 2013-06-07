@@ -31,7 +31,7 @@
     height: 210px;
 }
 
-/* job-tabs */
+/* job-tabs row */
 
 .jobs div.job-tabs {
     position: relative;
@@ -46,6 +46,10 @@
     width: 950px;
     background-color: #ddeeee;
 }
+
+/* The job tab itself takes care of a bottom margin that functions as a
+   border separation.
+*/
 
 .jobs div.job-tabs > ul > li {
     margin-left: 10px;
@@ -62,18 +66,86 @@
     height: 80px;
 }
 
+/* Job tab buttons */
+
 .jobs div.job-tabs > ul > li .btn {
+    width: 132px;
     text-align: left;
     font-size: 13px;
+    line-height: 16px;
 }
 
-.jobs div.job-tabs > ul > li:first-child .btn {
+.jobs div.job-tabs > ul > li.source .btn {
     color: #fcc769;
 }
 
-.jobs div.job-tabs > ul > li:nth-child(2) .btn {
+.jobs div.job-tabs > ul > li.destination .btn {
     color: #1da3b8;
 }
+
+.jobs div.job-tabs > ul > li.content .btn {
+    color: #4a8b5c;
+}
+
+.jobs div.job-tabs > ul > li.action .btn {
+    color: #4a8b5c;
+    font-size: 17.5px;
+    text-align: center;
+    width: auto;
+    padding: 11px 19px;
+}
+
+/* There are several different button layouts for the tabs.
+   .icons-button   - contains one or two icons and one or two rows of text; both of
+                     these elements are vertically centered within the button. The icon
+                     is to the far left and the text is left-justified to the right of
+                     the icon.
+   .service-button - holds a service logo and one or two rows of text beneath it. The
+                     logo/text group is vertically centered in the button and all content
+                     is horizontally centered.
+   .text-button    - contains one or more lines of text centered both vertically and
+                     horizontally in the button.
+
+    Each of these buttons will follow a general semantic structure:
+    <div class="icons-button">
+        <div class="icons"> <i/> or <img/> </div>
+        <div class="text"> ... </div>
+    </div>
+*/
+
+.icons-button {
+    display: table;
+    width: 132px;
+    height: 60px;
+}
+
+.icons-button span {
+    display: table-cell;
+    vertical-align: middle;
+}
+
+.icons-button span.icons {
+    text-align: center;
+}
+
+.icons-button span.icons i {
+    margin-right: 0.35em;
+}
+
+.service-button {
+}
+
+.service-button span {
+    display: block;
+    text-align: center;
+}
+
+.service-button span.text {
+    overflow: hidden;
+}
+
+
+/* A delayed transition takes care of show/hide on the bottom of the tab row */
 
 .jobs div.job-tabs > ul > li {
     transition-delay: 0.100s;
@@ -125,147 +197,3 @@
     width: 160px;
     height: 80px;
 }
-
-
-/*
-.jobs ul {
-    clear: both;
-    list-style: none;
-    margin: 0;
-    padding: 0;
-    background-color: white;
-    */
-/*background-color: #ccffcc;*//*
-
-    width: 940px;
-}
-
-.job-stack {
-}
-
-
-
-*/
-/* ***     Job Row      *** *//*
-
-
-.job-row {
-    position: relative;
-    z-index: 10;
-}
-
-.job-row > li {
-    float: left;
-    box-sizing: content-box;
-    transition-delay: 0.125s;
-    -webkit-transition-delay: 0.125s;
-    padding: 10px;
-    border-bottom: 10px solid #ddebec;
-    border-left: 10px solid #ddebec;
-}
-
-.job-row > li > div {
-    width: 160px;
-    height: 80px;
-}
-
-
-.job-row > li:first-child {
-    margin-left: -10px;
-}
-
-.job-row > li.active {
-    transition-delay: 0s;
-    -webkit-transition-delay: 0s;
-    border-bottom-color: transparent;
-}
-
-*/
-/* ***   Job Choices   *** *//*
-
-
-div.job-choices {
-    position: absolute;
-    bottom: 0;    */
-/* sticks to the bottom of the job-stack, which shrinks/grows height *//*
-
-    width: 940px;
-    height: 100px;
-    overflow: hidden;
-}
-
-.job-choices > ul  {       */
-/* This element is positioned by 'left' to simulate scrolling *//*
-
-    position: relative;
-    height: 100px;
-    width: 950px;
-    white-space: nowrap;
-    font-size: 0;             */
-/* Dealing with the whitespace issue between li elements *//*
-
-    margin-left: -10px;
-}
-
-.job-choices li  {
-    font-size: 13px;
-    display: inline-block;
-    padding: 10px;
-    margin-left: 10px;
-}
-
-.job-choices li > div:first-child {
-    width: 160px;
-    height: 80px;
-    float: left;
-}
-
-.job-choices li > div.blocks1, .job-choices li > div.blocks2,
-.job-choices li > div.blocks3, .job-choices li > div.blocks4  {
-    -webkit-transition:all linear 0.125s;
-    -moz-transition:all linear 0.125s;
-    -o-transition:all linear 0.125s;
-    transition:all linear 0.125s;
-    float: left;
-    overflow: hidden;
-    width: 0;
-}
-
-.job-choices li.active > div.blocks1 {
-    width: 190px;
-}
-.job-choices li.active > div.blocks2 {
-    width: 380px;
-}
-.job-choices li.active > div.blocks3 {
-    width: 570px;
-}
-.job-choices li.active > div.blocks4 {
-    width: 760px;
-}
-
-*/
-/*
-.job-detail-show, .job-detail-hide {
-    -webkit-transition:all linear 0.125s;
-    -moz-transition:all linear 0.125s;
-    -o-transition:all linear 0.125s;
-    transition:all linear 0.125s;
-}
-
-ul.job-detail-show {
-    top: 0;
-}
-
-.job-detail-show.job-detail-show-active {
-    top: 130px;
-}
-
-.job-detail-hide {
-    top: 130px;
-}
-
-.job-detail-hide.job-detail-hide-active {
-    top: 0;
-}
-*/
