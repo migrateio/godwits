@@ -2,64 +2,111 @@
     var uiModel = {
         source : [
             {
-                name : 'google',
-                auth : 'oauth',
-                types : ['mail', 'calendar', 'contacts', 'documents', 'media']
+                name : 'aol',
+                auth : 'password',
+                types : ['mail', 'calendar', 'contacts']
             },
-            { name : 'imap',
+            {
+                name : 'comcast',
                 auth : 'password',
                 types : ['mail']
             },
-            { name : 'yahoo',
-                auth : 'oauth',
-                types : ['mail', 'contacts']
-            },
-            { name : 'microsoft',
-                auth : 'oauth',
-                types : ['mail', 'calendar', 'contacts', 'documents', 'media']
-            },
-            { name : 'skydrive',
-                auth : 'oauth',
-                types : ['documents', 'media']
-            },
-            { name : 'exchange',
+            {
+                name : 'exchange',
                 auth : 'exchange',
                 types : ['mail']
             },
-            { name : 'outlookpst',
-                auth : 'file',
-                types : ['mail', 'contacts', 'calendar']
-            }
-        ],
-        destination : [
             {
                 name : 'google',
                 auth : 'oauth',
                 types : ['mail', 'calendar', 'contacts', 'documents', 'media']
             },
-            { name : 'imap',
+            {
+                name : 'hotmail',
+                auth : 'password',
+                types : ['mail', 'calendar', 'contacts']
+            },
+            {
+                name : 'imap',
                 auth : 'password',
                 types : ['mail']
             },
-            { name : 'yahoo',
+            {
+                name : 'outlook',
                 auth : 'oauth',
-                types : ['mail', 'contacts']
+                types : ['mail', 'calendar', 'contacts']
             },
-            { name : 'microsoft',
-                auth : 'oauth',
-                types : ['mail', 'calendar', 'contacts', 'documents', 'media']
+            {
+                name : 'outlookpst',
+                auth : 'file',
+                types : ['mail', 'calendar', 'contacts']
             },
-            { name : 'skydrive',
+            {
+                name : 'skydrive',
                 auth : 'oauth',
                 types : ['documents', 'media']
             },
-            { name : 'exchange',
+            {
+                name : 'twc',
+                auth : 'password',
+                types : ['mail']
+            },
+            {
+                name : 'yahoo',
+                auth : 'oauth',
+                types : ['mail', 'contacts']
+            }
+        ],
+        destination : [
+            {
+                name : 'aol',
+                auth : 'password',
+                types : ['mail', 'calendar', 'contacts']
+            },
+            {
+                name : 'comcast',
+                auth : 'password',
+                types : ['mail']
+            },
+            {
+                name : 'exchange',
                 auth : 'exchange',
                 types : ['mail']
             },
-            { name : 'outlookpst',
-                auth : 'file',
-                types : ['mail', 'contacts', 'calendar']
+            {
+                name : 'google',
+                auth : 'oauth',
+                types : ['mail', 'calendar', 'contacts', 'documents', 'media']
+            },
+            {
+                name : 'hotmail',
+                auth : 'password',
+                types : ['mail', 'calendar', 'contacts']
+            },
+            {
+                name : 'imap',
+                auth : 'password',
+                types : ['mail']
+            },
+            {
+                name : 'outlook',
+                auth : 'oauth',
+                types : ['mail', 'calendar', 'contacts']
+            },
+            {
+                name : 'skydrive',
+                auth : 'oauth',
+                types : ['documents', 'media']
+            },
+            {
+                name : 'twc',
+                auth : 'password',
+                types : ['mail']
+            },
+            {
+                name : 'yahoo',
+                auth : 'oauth',
+                types : ['mail', 'contacts']
             }
         ]    };
 
@@ -76,10 +123,11 @@
                 return {
                     jobId: '' + (random(1000) + 1000),
                     source: {
+//                        service: 'google'
                         service: uiModel.source[random(uiModel.source.length)].name
                     },
                     destination: {
-                        service: uiModel.destination[random(uiModel.source.length)].name
+                        service: uiModel.destination[random(uiModel.destination.length)].name
                     },
                     content: {
                         types: ['email']
@@ -182,7 +230,7 @@
                     tab : '=mioJobTab'
                 },
                 link : function ( scope, element, attrs, jobCtrl ) {
-
+                    $log.info( 'mioJobTab scope', scope );
                     var original = {};
                     var detailName = attrs['mioDetailName'];
                     element.addClass(detailName);
@@ -280,7 +328,8 @@
                 link : function ( scope, element, attrs, jobCtrl ) {
                 }
             }
-        }] );
+        }]
+    );
 
     jobs.factory( '$jobs', [ '$log', '$http', function ( $log, $http ) {
 

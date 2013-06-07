@@ -1,9 +1,12 @@
 <div class="container jobs" data-ng-controller="mio-jobs-controller">
-    <h2>Jobs</h2>
+    <h2>
+        Jobs <a data-ng-click="newJobs()" class="btn btn-info">New Jobs</a>
+    </h2>
 
     <ul>
         <li data-ng-repeat="job in jobs">
             <div data-mio-job="job"></div>
+            <div><pre>{{ job | json }}</pre></div>
         </li>
     </ul>
 

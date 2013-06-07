@@ -63,16 +63,23 @@
 }
 
 .jobs div.job-tabs > ul > li .btn {
+    text-align: center;
+    font-size: 10px;
+}
+
+.jobs div.job-tabs > ul > li .default {
     text-align: left;
     font-size: 13px;
 }
 
 .jobs div.job-tabs > ul > li:first-child .btn {
     color: #fcc769;
+    width: 128px;
 }
 
 .jobs div.job-tabs > ul > li:nth-child(2) .btn {
     color: #1da3b8;
+    width: 128px;
 }
 
 .jobs div.job-tabs > ul > li {
@@ -125,147 +132,3 @@
     width: 160px;
     height: 80px;
 }
-
-
-/*
-.jobs ul {
-    clear: both;
-    list-style: none;
-    margin: 0;
-    padding: 0;
-    background-color: white;
-    */
-/*background-color: #ccffcc;*//*
-
-    width: 940px;
-}
-
-.job-stack {
-}
-
-
-
-*/
-/* ***     Job Row      *** *//*
-
-
-.job-row {
-    position: relative;
-    z-index: 10;
-}
-
-.job-row > li {
-    float: left;
-    box-sizing: content-box;
-    transition-delay: 0.125s;
-    -webkit-transition-delay: 0.125s;
-    padding: 10px;
-    border-bottom: 10px solid #ddebec;
-    border-left: 10px solid #ddebec;
-}
-
-.job-row > li > div {
-    width: 160px;
-    height: 80px;
-}
-
-
-.job-row > li:first-child {
-    margin-left: -10px;
-}
-
-.job-row > li.active {
-    transition-delay: 0s;
-    -webkit-transition-delay: 0s;
-    border-bottom-color: transparent;
-}
-
-*/
-/* ***   Job Choices   *** *//*
-
-
-div.job-choices {
-    position: absolute;
-    bottom: 0;    */
-/* sticks to the bottom of the job-stack, which shrinks/grows height *//*
-
-    width: 940px;
-    height: 100px;
-    overflow: hidden;
-}
-
-.job-choices > ul  {       */
-/* This element is positioned by 'left' to simulate scrolling *//*
-
-    position: relative;
-    height: 100px;
-    width: 950px;
-    white-space: nowrap;
-    font-size: 0;             */
-/* Dealing with the whitespace issue between li elements *//*
-
-    margin-left: -10px;
-}
-
-.job-choices li  {
-    font-size: 13px;
-    display: inline-block;
-    padding: 10px;
-    margin-left: 10px;
-}
-
-.job-choices li > div:first-child {
-    width: 160px;
-    height: 80px;
-    float: left;
-}
-
-.job-choices li > div.blocks1, .job-choices li > div.blocks2,
-.job-choices li > div.blocks3, .job-choices li > div.blocks4  {
-    -webkit-transition:all linear 0.125s;
-    -moz-transition:all linear 0.125s;
-    -o-transition:all linear 0.125s;
-    transition:all linear 0.125s;
-    float: left;
-    overflow: hidden;
-    width: 0;
-}
-
-.job-choices li.active > div.blocks1 {
-    width: 190px;
-}
-.job-choices li.active > div.blocks2 {
-    width: 380px;
-}
-.job-choices li.active > div.blocks3 {
-    width: 570px;
-}
-.job-choices li.active > div.blocks4 {
-    width: 760px;
-}
-
-*/
-/*
-.job-detail-show, .job-detail-hide {
-    -webkit-transition:all linear 0.125s;
-    -moz-transition:all linear 0.125s;
-    -o-transition:all linear 0.125s;
-    transition:all linear 0.125s;
-}
-
-ul.job-detail-show {
-    top: 0;
-}
-
-.job-detail-show.job-detail-show-active {
-    top: 130px;
-}
-
-.job-detail-hide {
-    top: 130px;
-}
-
-.job-detail-hide.job-detail-hide-active {
-    top: 0;
-}
-*/
