@@ -5,6 +5,16 @@
                 name: ''
             },
             {
+                name : 'flickr',
+                auth : 'oauth',
+                content : ['media']
+            },
+            {
+                name : 'picasa',
+                auth : 'oauth',
+                content : ['media']
+            },
+            {
                 name : 'aol',
                 auth : 'password',
                 content : ['mails', 'calendars', 'contacts']
@@ -63,6 +73,16 @@
         destination : [
             {
                 name: ''
+            },
+            {
+                name : 'flickr',
+                auth : 'oauth',
+                content : ['media']
+            },
+            {
+                name : 'picasa',
+                auth : 'oauth',
+                content : ['media']
             },
             {
                 name : 'aol',
@@ -318,6 +338,8 @@
                 scope : {content : '=mioJobContent'},
                 templateUrl : '/partials/job/job-content.html',
                 link : function ( scope, element, attrs, jobCtrl ) {
+                    scope.availableContent = ['mails', 'contacts', 'calendars;
+
                 }
             }
         }] );

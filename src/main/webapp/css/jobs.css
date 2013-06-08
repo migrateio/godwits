@@ -15,6 +15,7 @@
 .jobs li {
     display: inline-block;
     font-size: 13px;
+    line-height: 16px;
 }
 
 /* job-stack */
@@ -85,6 +86,11 @@
 
 .jobs div.job-tabs > ul > li.content .btn {
     color: #4a8b5c;
+    font-size: 16px;
+}
+
+.jobs div.job-tabs > ul > li.content .btn i {
+    font-size: 20px;
 }
 
 .jobs div.job-tabs > ul > li.action .btn {
@@ -191,9 +197,49 @@
     color: #21b6ce;
     text-align: center;
     vertical-align: top;
+    white-space: normal;
 }
 
 .jobs div.job-detail > ul > li > div {
     width: 160px;
     height: 80px;
 }
+
+/* The content detail row */
+
+.jobs .job-content li:first-child:after {
+    content: url("/img/content/angled_separator.png");
+    position: absolute;
+    left: 190px;
+    top: 20px;
+}
+
+.jobs .job-content div.static {
+    text-align: left;
+}
+
+.jobs .job-content div.static a {
+    font-size: 80%;
+}
+
+.jobs .job-content li.wide4 > div {
+    width: 728px;
+}
+
+.jobs .job-content li.wide4 .btn {
+    vertical-align: baseline;
+    margin: 1em 5px;
+    padding: 10px 12px;
+    font-size: 16px;
+}
+
+.jobs .job-content li.wide4 .btn i {
+    font-size: 18px;
+}
+
+.jobs .job-content p.info {
+    font-size: 90%;
+    color: #999999;
+    /*margin-top: 1em;*/
+}
+
