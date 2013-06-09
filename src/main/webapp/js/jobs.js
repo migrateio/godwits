@@ -136,6 +136,15 @@
             }
         ]    };
 
+    function intersect(a, b) {
+        a = ng.copy(a);
+        for (var i = a.length - 1; i >= 0; i--) {
+            var index = b.indexOf( a[i] );
+            if (index < 0) a.splice(i,1);
+        }
+        return a;
+    }
+
     var jobs = ng.module( 'migrate.jobs', [] );
 
     jobs.controller( 'mio-jobs-controller', [ '$log', '$scope', '$jobs',
@@ -145,23 +154,14 @@
                 return Math.floor( Math.random() * len )
             };
 
-            function combine(source, dest) {
-                function intersect_safe(a, b) {
-                    for (var i = a.length - 1; i >= 0; i--) {
-                        var index = b.indexOf( a[i] );
-                        if (index < 0) a.splice(i,1);
-                    }
-                    $log.info( 'Result:', a );
-                    return a;
-                }
-
-                $log.info( 'Intersection', source, dest );
-                return intersect_safe( source, dest );
-            }
-
             function newJob() {
                 var sourceService = uiModel.source[random(uiModel.source.length)];
                 var destService = uiModel.destination[random(uiModel.destination.length)];
+                var content = intersect(
+                    sourceService.content || [],
+                    destService.content || []
+                );
+                $log.info( 'Intersection', sourceService, destService, content );
 
                 var result = {
                     jobId: '' + (random(1000) + 1000),
@@ -171,7 +171,7 @@
                     destination: {
                         service: destService.name || ''
                     },
-                    content: combine(sourceService.content || [], destService.content || []),
+                    content: content,
                     action: {
                     },
                     status: {
@@ -203,6 +203,39 @@
     jobs.controller( 'mio-job-controller', ['$log', '$scope', '$timeout', '$element',
         function ( $log, $scope, $timeout, $element ) {
             $scope.detailName = '';
+
+
+            function getPropValue(obj, prop) {
+                var props = prop.split( '.' );
+                prop = props.shift();
+                while (prop) {
+                    obj = obj[prop];
+                    if (typeof obj === 'undefined') return null;
+                    prop = props.shift();
+                }
+                return obj;
+            }
+
+            function getUIModel(target) {
+                if ($scope.job[target] && $scope.job[target].service) {
+                    var name = $scope.job[target].service;
+                    for (var i = 0, c = uiModel[target].length; i < c; i++) {
+                        if (uiModel[target][i].name === name) return uiModel[target][i];
+                    }
+                }
+                return {};
+            }
+
+            /**
+             * Based on the source and destination services, calculate the content types
+             * which they both have in common.
+             */
+            this.getContentIntersection = function() {
+                var sourceService = getUIModel('source');
+                var destService = getUIModel('destination');
+
+                return intersect( sourceService.content || [], destService.content || [] );
+            };
 
             /**
              * Takes care of transitioning between detail names. If detail name is set,
@@ -338,11 +371,44 @@
                 scope : {content : '=mioJobContent'},
                 templateUrl : '/partials/job/job-content.html',
                 link : function ( scope, element, attrs, jobCtrl ) {
-                    scope.availableContent = ['mails', 'contacts', 'calendars;
+                    var availableContent = jobCtrl.getContentIntersection();
 
+                    // Because of IE8, we can't use indexOf...
+                    function indexOf(arr, name) {
+                        for (var i = arr.length - 1; i >= 0; i--)
+                            if (arr[i] === name) return i;
+                        return -1;
+                    }
+
+                    function contains(arr, name) {
+                        return indexOf(arr, name) >= 0;
+                    }
+
+                    scope.available = function(name) {
+                        return contains( availableContent, name );
+                    };
+
+                    scope.selected = function(name) {
+                        var result = contains( scope.content, name );
+//                        $log.info( 'Is ' + name + ' in ', scope.content, result );
+                        return result;
+                    };
+
+                    scope.toggle = function(name) {
+                        if (scope.available(name)) {
+                            if (scope.selected(name)) {
+                                // Remove the name from content
+                                scope.content.splice( indexOf( scope.content, name ), 1 );
+                            } else {
+                                // Add the name to content
+                                scope.content.push( name );
+                            }
+                        }
+                    };
                 }
             }
-        }] );
+        }]
+    );
 
     jobs.directive( 'mioJobAction', ['$log', '$parse', '$compile',
         function ( $log, $parse, $compile ) {
@@ -392,24 +458,24 @@
                 },
                 replace: true,
                 template: '\
-                        <div>\
-                            <div ng-if="tab.service" class="service-button">\
-                                <span class="icons"> \
-                                    <img data-ng-src="/img/services/{{tab.service}}.png" /> \
-                                </span> \
-                                <span class="text"> \
-                                    {{tab.username|regex:"(.*)@"}} \
-                                </span>\
-                            </div>\
-                            <div ng-if="!tab.service" class="icons-button">\
-                                <span class="icons"> \
-                                     <i class="icon-plus-sign icon-2x"></i> \
-                                </span> \
-                                <span class="text"> \
-                                     Add {{tabType}} account \
-                                </span>\
-                            </div>\
-                        </div>',
+                    <div>\
+                        <div ng-if="tab.service" class="service-button">\
+                            <span class="icons"> \
+                                <img data-ng-src="/img/services/{{tab.service}}.png" /> \
+                            </span> \
+                            <span class="text"> \
+                                {{tab.username|regex:"(.*)@"}} \
+                            </span>\
+                        </div>\
+                        <div ng-if="!tab.service" class="icons-button">\
+                            <span class="icons"> \
+                                 <i class="icon-plus-sign icon-2x"></i> \
+                            </span> \
+                            <span class="text"> \
+                                 Add {{tabType}} account \
+                            </span>\
+                        </div>\
+                    </div>',
                 link : function ( scope, element, attrs, jobCtrl ) {
                     $log.info( 'mioJobBtnService', scope.tab, element );
                     function redraw(tab) {
@@ -479,29 +545,34 @@
                             media: 'icon-picture'
                         };
 
-                    $log.info( 'mioJobBtnContent, content', scope.content, scope.content.length );
                     function redrawContent(content) {
+                        $log.info( 'mioJobBtnContent, content', scope.content, scope.content.length );
+
                         if (content && content.length > 0) {
-                            var iconSpan = element.find( 'span.icons' );
+                            var iconSpan = element.find( 'span.icons' ).empty();
                             for (i = 0; i < content.length; i++) {
 //                                iconSpan.append( imageHtml.replace( /\{name\}/ig, content[i] ) );
                                 var icon = ng.element( '<i class="icon-2x"/>' )
                                     .addClass( iconName[content[i]] );
                                 iconSpan.append(icon);
+                                $log.info('Added icon: ', content, content[i])
                             }
-                        }
-                        var iconText = element.find( 'span.text' )
-                            .css( 'width', 'auto' );
-                        if (content && content.length < 3) {
-                            iconText
-                                .css( 'width', '100%' )
-                                .append( textName[content[0]] );
-                            if (content.length > 1)
-                                iconText.append( '<br/>' ).append( textName[content[1]] );
+                            var iconText = element.find( 'span.text' )
+                                .empty()
+                                .css( 'width', 'auto' );
+                            if (content && content.length < 3) {
+                                iconText
+                                    .css( 'width', '100%' )
+                                    .append( textName[content[0]] );
+                                if (content.length > 1)
+                                    iconText.append( '<br/>' ).append( textName[content[1]] );
+                            }
                         }
                     }
 
-                    scope.$watch( 'content', redrawContent );
+                    scope.$watch( 'content', function() {
+                        redrawContent(scope.content);
+                    }, true );
                 }
             }
         }]
