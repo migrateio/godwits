@@ -15,6 +15,7 @@
 .jobs li {
     display: inline-block;
     font-size: 13px;
+    line-height: 16px;
 }
 
 /* job-stack */
@@ -85,6 +86,11 @@
 
 .jobs div.job-tabs > ul > li.content .btn {
     color: #4a8b5c;
+    font-size: 16px;
+}
+
+.jobs div.job-tabs > ul > li.content .btn i {
+    font-size: 20px;
 }
 
 .jobs div.job-tabs > ul > li.action .btn {
@@ -179,6 +185,7 @@
 
 .jobs div.job-detail > ul {
     position: absolute;
+    top: 0;
     left: -10px;
     white-space: nowrap;
 }
@@ -187,13 +194,112 @@
     display: inline-block;
     margin-left: 10px;
     padding: 10px;
-    background-color: #ffffee;
+    /*background-color: #ffffee;*/
     color: #21b6ce;
     text-align: center;
     vertical-align: top;
+    white-space: normal;
 }
 
 .jobs div.job-detail > ul > li > div {
     width: 160px;
     height: 80px;
 }
+
+/* The source/destination detail rows */
+
+.jobs div.job-detail > ul.job-services > li > div {
+    width: auto;
+}
+
+.jobs ul.job-services .service {
+    background-color: #ffeeff;
+    position: relative;
+    overflow: hidden;
+    transition: all linear 0.25s;
+    width: 160px;
+    height: 80px;
+}
+
+.jobs .job-services .service.active {
+    width: 730px;
+}
+
+.jobs .job-services .service .btn-holder {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 160px;
+    height: 80px;
+    background-color: #ffffff;
+    z-index: 2;
+}
+
+.jobs .job-services .service .job-auth {
+    position: absolute;
+    right: 0;
+    top: 24px;
+}
+
+.jobs .job-services .job-auth form {
+    white-space: nowrap;
+    margin: 0;
+}
+
+.jobs .job-services .job-auth form input[type="email"],
+.jobs .job-services .job-auth form input[type="text"],
+.jobs .job-services .job-auth form input[type="password"] {
+    width: 180px;
+}
+
+
+/* The content detail row */
+
+.jobs .job-content li:first-child:after {
+    content: url("/img/content/angled_separator.png");
+    position: absolute;
+    left: 190px;
+    top: 20px;
+}
+
+.jobs .job-content div.static {
+    text-align: left;
+}
+
+.jobs .job-content div.static a {
+    font-size: 80%;
+}
+
+.jobs .job-content li.wide4 > div {
+    width: 728px;
+}
+
+.jobs .job-content li.wide4 .btn {
+    vertical-align: baseline;
+    margin: 1em 5px;
+    padding: 10px 12px;
+    font-size: 16px;
+}
+
+.jobs .job-content li.wide4 .btn i {
+    font-size: 18px;
+}
+
+.jobs .job-content p.info {
+    font-size: 90%;
+    color: #999999;
+    transition: opacity linear 0.125s;
+}
+
+.jobs .job-content a.disabled:hover ~ p.info {
+    transition-delay: 0.2s;
+    -webkit-transition-delay: 0.2s;
+    opacity: 1;
+}
+
+.jobs .job-content a.disabled ~ p.info {
+    transition-delay: 0.2s;
+    -webkit-transition-delay: 0.2s;
+    opacity: 0;
+}
+

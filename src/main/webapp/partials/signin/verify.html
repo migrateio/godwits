@@ -8,7 +8,7 @@
                        data-ng-pattern="/^[23456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz]{6}$/"
                        placeholder="token" required data-ng-focus="true" />
             </div>
-            <div data-validtip="formVerify.token">
+            <div data-validtip="token">
                 <span data-ng-show="formVerify.token.$error.required">We sent your token in an email</span>
                 <span data-ng-show="formVerify.token.$error.pattern">This is not a valid token format</span>
             </div>

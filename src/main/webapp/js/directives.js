@@ -13,7 +13,7 @@ angular.module( "template/valid/tooltip.html", [] ).run(
 );
 
 
-var mod = angular.module( 'migrate.directives', [ 'template/valid/tooltip.html' ] );
+var mod = angular.module( 'migrate-directives', [ 'template/valid/tooltip.html' ] );
 
 /**
  * ## Directive validtip
@@ -57,7 +57,7 @@ mod.directive( 'validtip', [ '$log', '$timeout', '$position',
                     'the input field with which it is associated';
 
                 // Get the input field referenced by the 'input-target' attribute
-                var inputField = getEleByName( target );
+                var inputField = $( 'input[name="' + target + '"]', $element.parents('form') );
                 if ( !inputField || inputField.length != 1) throw 'Directive [validtip] references a form input ' +
                     'field with a value of [' + target + '] but reference not found.';
 

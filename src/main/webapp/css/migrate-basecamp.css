@@ -244,6 +244,26 @@ input[type="color"],
 }
 
 
+.btn-select {
+    color: #ffffff;
+    background-image: -moz-linear-gradient(top, #7bcf90, #7bcf90);
+    background-image: -ms-linear-gradient(top, #7bcf90, #7bcf90);
+    background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#7bcf90), to(#7bcf90));
+    background-image: -webkit-linear-gradient(top, #7bcf90, #7bcf90);
+    background-image: -o-linear-gradient(top, #7bcf90, #7bcf90);
+    background-image: linear-gradient(top, #7bcf90, #7bcf90);
+    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr=#7bcf90, endColorstr=#7bcf90, GradientType=0);
+    border-width: 0;
+}
+.btn-select:hover,
+.btn-select:active,
+.btn-select.active,
+.btn-select.disabled,
+.btn-select[disabled] {
+    background-color: #7bcf90;
+}
+
+
 .btn-large .caret {
     border-top: 6px solid rgb(255, 255, 255);
     border-right: 6px solid transparent;
