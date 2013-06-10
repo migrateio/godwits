@@ -185,6 +185,7 @@
 
 .jobs div.job-detail > ul {
     position: absolute;
+    top: 0;
     left: -10px;
     white-space: nowrap;
 }
@@ -204,6 +205,53 @@
     width: 160px;
     height: 80px;
 }
+
+/* The source/destination detail rows */
+
+.jobs div.job-detail > ul.job-services > li > div {
+    width: auto;
+}
+
+.jobs ul.job-services .service {
+    background-color: #ffeeff;
+    position: relative;
+    overflow: hidden;
+    transition: all linear 0.25s;
+    width: 160px;
+    height: 80px;
+}
+
+.jobs .job-services .service.active {
+    width: 730px;
+}
+
+.jobs .job-services .service .btn-holder {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 160px;
+    height: 80px;
+    background-color: #ffffff;
+    z-index: 2;
+}
+
+.jobs .job-services .service .job-auth {
+    position: absolute;
+    right: 0;
+    top: 24px;
+}
+
+.jobs .job-services .job-auth form {
+    white-space: nowrap;
+    margin: 0;
+}
+
+.jobs .job-services .job-auth form input[type="email"],
+.jobs .job-services .job-auth form input[type="text"],
+.jobs .job-services .job-auth form input[type="password"] {
+    width: 180px;
+}
+
 
 /* The content detail row */
 
