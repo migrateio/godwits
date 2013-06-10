@@ -8,7 +8,7 @@
 (function () {
     'use strict';
 
-    angular.module( 'template/devbar.html', [] ).run(
+    angular.module( 'template/devbar.html', ['template/oauth.html'] ).run(
         ['$templateCache', '$log',
             function ( $templateCache, $log ) {
                 $templateCache.put( 'template/devbar.html', ' \
@@ -16,6 +16,7 @@
                         <p>\
                             Build: {{buildNumber}}\
                             <span><a href="#" eat-click ng-click="clearTemplateCache()" class="btn btn-mini">Clear Partials</a></span>\
+                            <div oauth-link></div>\
                         </p> \
                         <div alert ng-repeat="alert in _alerts" type="alert.type" close="closeAlert($index)">\
                             <span ng-bind-html-unsafe="alert.msg"></span>\

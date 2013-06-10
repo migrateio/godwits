@@ -1,18 +1,43 @@
 (function ( ng, undefined ) {
     'use strict';
 
-    var migrate_oauth = ng.module( 'migrateIOApp', [] );
+    angular.module( "template/oauth.html", [] ).run(
+        ["$templateCache",
+            function ( $templateCache ) {
+                $templateCache.put( "template/oauth.html", ' \
+                <button class="btn btn-primary"> \
+                    Link \
+                </button>' );
+            }
+        ]
+    );
 
-    migrate_oauth.config( function ( $routeProvider ) {
-        $routeProvider.when( '/', {
-            templateUrl : 'lib/local/partials/oauth_tester.html'
-        } );
-        $routeProvider.when( '/:id', {
-            templateUrl : 'lib/local/partials/oauth_tester.html'
-        } );
-    } );
+    var oauth = ng.module( 'migrate-oauth', ['template/oauth.html'] );
 
-    migrate_oauth.controller( 'oauth_testing',
+    oauth.directive( 'oauthLink', [function () {
+        return {
+            restrict : 'A',
+            templateUrl : 'template/oauth.html',
+            transclude : true,
+            link : function link( scope, element, attrs ) {
+
+            }
+        };
+    }] );
+
+    oauth.controller( 'oauthCtrl', [function () {
+        $scope.link = function () {
+
+            var url = ['.', 'api', 'oauth', job_id, service, ''].join( '/' );
+
+            $http.get( url )
+                .success( function ( data ) {
+                    $window.open( data.url, '_blank' );
+                } );
+        }
+    }] );
+
+    oauth.controller( 'oauth_testing',
         ['$scope', '$log', '$http', '$window',
             function ( $scope, $log, $http, $window ) {
 
@@ -64,6 +89,4 @@
                 };
 
             }] );
-
-    /// things that are being typed ...
 })( window.angular );
