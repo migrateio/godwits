@@ -1,1 +1,49 @@
-{{service.name}}
+<div class="service" data-ng-class="{ active : active }">
+    <div>
+        <div class="btn-holder" data-vertical-center>
+            <a class="btn btn-trans" data-ng-click="toggle()"
+               data-ng-class="{ disabled: valid( {{serviceDef.name}} ) }">
+                <span class="icons">
+                    <img data-ng-src="/img/services/{{serviceDef.name}}.png" alt="{{serviceDef.name}}"/>
+                </span>
+                <span class="text">
+                    {{auth.username|regex:"(.*)@"}}
+                </span>
+            </a>
+        </div>
+
+        <div data-ng-switch="'password'" class="job-auth">
+            <div ng-switch-when="oauth">
+
+            </div>
+            <div ng-switch-when="password">
+                <form name="service" class="form-inline" novalidate data-ng-submit="submit()">
+                    <div class="input-prepend">
+                        <span class="add-on"><i class="icon-envelope gray"></i></span>
+                        <input name="email" type="email" data-ng-model="auth.username"
+                               placeholder="email" required data-ng-focus="true"/>
+                    </div>
+                    <div data-validtip="email">
+                        <span data-ng-show="service.email.$error.required">An email address is required</span>
+                        <span data-ng-show="service.email.$error.email">This is not a valid email address</span>
+                    </div>
+                    &nbsp;&nbsp;
+                    <div class="input-prepend">
+                        <span class="add-on"><a data-ng-click="togglePass()"><span class="gray" ng-class="showPassword ? 'icon-unlock' : 'icon-lock'"></span></a></span>
+                        <input data-pass-xray="showPassword" type="password" name="password"
+                               data-ng-model="auth.password" placeholder="Password" required/>
+                    </div>
+                    <div data-validtip="password">
+                        <span data-ng-show="service.password.$error.required">Please provide a password</span>
+                    </div>
+                    &nbsp;&nbsp;
+                    <input data-ng-disabled="service.$invalid" class="btn btn-success" type="submit" value="Sign In"/>
+                    &nbsp;&nbsp;
+                </form>
+            </div>
+            <div ng-switch-when="file">
+
+            </div>
+        </div>
+    </div>
+</div>
