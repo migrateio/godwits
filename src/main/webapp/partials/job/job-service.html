@@ -30,7 +30,7 @@
                     &nbsp;&nbsp;
                     <div class="input-prepend">
                         <span class="add-on"><a data-ng-click="togglePass()"><span class="gray" ng-class="showPassword ? 'icon-unlock' : 'icon-lock'"></span></a></span>
-                        <input data-pass-xray="showPassword" type="password" name="password"
+                        <input type="password" name="password"
                                data-ng-model="auth.password" placeholder="Password" required/>
                     </div>
                     <div data-validtip="password">
@@ -40,6 +40,7 @@
                     <input data-ng-disabled="service.$invalid" class="btn btn-success" type="submit" value="Sign In"/>
                     &nbsp;&nbsp;
                 </form>
+                <p class="error">{{errorMsg}}</p>
             </div>
             <div ng-switch-when="file">
 

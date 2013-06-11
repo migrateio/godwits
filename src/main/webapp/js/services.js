@@ -114,8 +114,8 @@
 
     var mod = ng.module( 'migrate-services', [] );
 
-    mod.factory( 'mioServices', [ '$log', '$http', '$timeout',
-        function ( $log, $http, $timeout ) {
+    mod.factory( 'mioServices', [ '$log', '$http', '$timeout', '$q',
+        function ( $log, $http, $timeout, $q ) {
             /**
              * Attempts an authentication against the specified service. Returns a
              * promise indicating success or failure.
@@ -139,7 +139,10 @@
             function authenticate( service, options ) {
                 var deferred = $q.defer();
                 $timeout( function () {
-                    deferred.resolve();
+                    if (options && options.password === 'secret')
+                        deferred.resolve();
+                    else
+                        deferred.reject();
                 }, 4000 );
                 return deferred.promise;
             }

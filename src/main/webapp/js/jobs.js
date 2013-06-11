@@ -40,7 +40,12 @@
         ['$log', '$scope', '$timeout', '$element', 'mioServices',
         function ( $log, $scope, $timeout, $element, mioServices ) {
 
-            /**
+            this.authenticate = function( serviceName, options ) {
+                return mioServices.authenticate( serviceName, options );
+            };
+
+
+                /**
              * Based on the source and destination services, calculate the content types
              * which they both have in common.
              */
@@ -177,6 +182,24 @@
         }]
     );
 
+    mod.directive( 'mioJobScroller', ['$log', '$compile',
+        function ( $log, $compile ) {
+            return {
+                require : '^mioJob',
+                restrict : 'MACE',
+                replace: true,
+                scope : {
+                    services: '=mioJobScroller',
+                    dir : '@mioJobScrollerDir'
+                },
+                templateUrl : '/partials/job/job-scroller.html',
+                link : function ( scope, element, attrs, jobCtrl ) {
+                    $log.info( 'mioJobScroller, scope', scope );
+                }
+            }
+        }]
+    );
+
     mod.directive( 'mioJobServices', ['$log', '$compile',
         function ( $log, $compile ) {
             return {
@@ -188,11 +211,11 @@
                 },
                 templateUrl : '/partials/job/job-services.html',
                 link : function ( scope, element, attrs, jobCtrl ) {
-                    $log.info( 'mioJobServices, scope', scope );
                     scope.services = jobCtrl.getServices(scope.dataName);
                 }
             }
-        }] );
+        }]
+    );
 
     mod.directive( 'mioJobService', ['$log', '$compile',
         function ( $log, $compile ) {
@@ -211,13 +234,23 @@
                         password : ''
                     };
 
+                    // Keep track of an error message which will be displayed in the view
+                    scope.errorMsg = '';
+                    // Reset the error message when the user changes the username or
+                    // password.
+                    scope.$watch(function() {
+                        return scope.auth.username + '/' + scope.auth.password;
+                    }, function() {
+                        scope.errorMsg = '';
+                    });
+
                     scope.submit = function () {
                         jobCtrl.authenticate( service.service.name, scope.auth ).then(
                             function () {
                                 $log.info( 'mioJobService, save auth', scope.auth );
                             },
-                            function () {
-                                $log.error( 'mioJobService, save error', arguments );
+                            function (msg) {
+                                scope.errorMsg = msg || 'Bad username or password';
                             }
                         );
                     };

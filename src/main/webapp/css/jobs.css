@@ -241,6 +241,13 @@
     top: 24px;
 }
 
+.jobs .job-services .job-auth p.error {
+    font-size: 90%;
+    color: #990000;
+    margin: 4px 8px 0 0;
+    text-align: right;
+}
+
 .jobs .job-services .job-auth form {
     white-space: nowrap;
     margin: 0;
@@ -250,6 +257,19 @@
 .jobs .job-services .job-auth form input[type="text"],
 .jobs .job-services .job-auth form input[type="password"] {
     width: 180px;
+}
+
+
+/* The scroll buttons */
+
+.jobs .job-stack .job-detail > div {
+    position: absolute;
+    top: 0;
+    background-color: red;
+    width: 100px;
+    left: 30px;
+    height: 100px;
+    z-index: 100000;
 }
 
 
