@@ -176,17 +176,19 @@
 
 .jobs div.job-detail {
     position: absolute;
-    width: 940px;
+    width: 960px;
     height: 100px;
     overflow: hidden;
     z-index: 2;
+    left: -10px;
     bottom: 0;
 }
 
 .jobs div.job-detail > ul {
     position: absolute;
     top: 0;
-    left: -10px;
+    transition: left linear 0.125s;
+    left: 0;
     white-space: nowrap;
 }
 
@@ -265,11 +267,36 @@
 .jobs .job-stack .job-detail > div {
     position: absolute;
     top: 0;
-    background-color: red;
-    width: 100px;
-    left: 30px;
+    background-color: #ddeeee;
+    width: 10px;
     height: 100px;
-    z-index: 100000;
+    z-index: 5;
+    line-height: 100px;
+    font-size: 14px;
+    color: #b8c7c8;
+    transition: all linear 0.125s;
+    cursor: pointer;
+    text-align: center;
+}
+
+.jobs .job-stack .job-detail > div.left {
+    left: 0;
+    margin-left: -1px;
+}
+
+.jobs .job-stack .job-detail > div.right {
+    right: 0;
+}
+
+.jobs .job-stack .job-detail > div:hover {
+    background-color: #ccdddd;
+    width: 30px;
+    font-size: 20px;
+    color: #f1feff;
+}
+
+.jobs .job-stack .job-detail > div.left:hover {
+    margin-left: -5px;
 }
 
 
