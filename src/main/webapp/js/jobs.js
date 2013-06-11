@@ -228,7 +228,7 @@
                 },
                 templateUrl : '/partials/job/job-service.html',
                 link : function ( scope, element, attrs, jobCtrl ) {
-                    var authObj = scope.serviceObj.auth || {};
+                    var authObj = scope.serviceObj && scope.serviceObj.auth || {};
                     scope.auth = {
                         username : authObj.username || '',
                         password : ''
