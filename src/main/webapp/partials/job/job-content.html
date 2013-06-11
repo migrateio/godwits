@@ -1,0 +1,41 @@
+<ul class="job-content">
+    <li>
+        <div class="static" data-vertical-center>
+            Choose the content items you want to migrate<br>
+            <a href="#">Advanced</a>
+        </div>
+    </li>
+    <li class="wide4">
+        <div data-vertical-center>
+            <a class="btn"
+               data-ng-click="toggle('mails')"
+               data-ng-class="{ disabled: !available('mails'), 'btn-select': selected('mails'), 'btn-info': !selected('mails') }">
+                <i class="icon-envelope-alt"/> Email
+            </a>
+            <a class="btn"
+               data-ng-click="toggle('contacts')"
+               data-ng-class="{ disabled: !available('contacts'), 'btn-select': selected('contacts'), 'btn-info': !selected('contacts') }">
+            <i class="icon-user"/> Contacts
+            </a>
+            <a class="btn"
+               data-ng-click="toggle('calendars')"
+               data-ng-class="{ disabled: !available('calendars'), 'btn-select': selected('calendars'), 'btn-info': !selected('calendars') }">
+            <i class="icon-calendar"/> Calendars
+            </a>
+            <a class="btn"
+               data-ng-click="toggle('documents')"
+               data-ng-class="{ disabled: !available('documents'), 'btn-select': selected('documents'), 'btn-info': !selected('documents') }">
+            <i class="icon-file"/> Documents
+            </a>
+            <a class="btn"
+               data-ng-click="toggle('media')"
+               data-ng-class="{ disabled: !available('media'), 'btn-select': selected('media'), 'btn-info': !selected('media') }">
+            <i class="icon-picture"/> Media
+            </a>
+
+            <p class="info">
+                This option is disabled because both services do not support this type.
+            </p>
+        </div>
+    </li>
+</ul>

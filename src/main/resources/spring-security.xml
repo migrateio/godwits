@@ -28,6 +28,7 @@
         <intercept-url method="POST" pattern="/api/users/passwordreset" access="permitAll()" requires-channel="https"/>
         <intercept-url method="POST" pattern="/api/users/signup" access="permitAll()" requires-channel="https"/>
         <intercept-url method="POST" pattern="/api/users/" access="permitAll()" requires-channel="https"/>
+        <intercept-url method="GET" pattern="/api/oauth/**" access="permitAll()" requires-channel="https"/>
 
         <intercept-url pattern="/api/auth/" access="isAuthenticated() or isAnonymous()" requires-channel="https"/>
         <intercept-url pattern="/api/**" access="isAuthenticated()" requires-channel="https"/>

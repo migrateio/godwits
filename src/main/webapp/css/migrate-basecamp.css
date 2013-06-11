@@ -69,6 +69,7 @@ input[type="color"],
 
 .btn {
     color: #333333;
+    padding: 8px 12px;
     background-image: -moz-linear-gradient(top, #ffffff, #e6e6e6);
     background-image: -ms-linear-gradient(top, #ffffff, #e6e6e6);
     background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#ffffff), to(#e6e6e6));
@@ -79,6 +80,10 @@ input[type="color"],
     -webkit-border-radius:5px;
     -moz-border-radius:5px;
     border-radius:5px;
+    -webkit-transition:all linear 0.125s;
+    -moz-transition:all linear 0.125s;
+    -o-transition:all linear 0.125s;
+    transition:all linear 0.125s;
 }
 
 .btn:hover, .btn:focus, .btn:active, .btn.active, .btn.disabled, .btn[disabled] {
@@ -88,6 +93,10 @@ input[type="color"],
     transition: none;
     outline: none;
     outline-offset: 0;
+    -webkit-transition:all linear 0.125s;
+    -moz-transition:all linear 0.125s;
+    -o-transition:all linear 0.125s;
+    transition:all linear 0.125s;
 }
 
 
@@ -137,6 +146,24 @@ input[type="color"],
 .btn-header.disabled,
 .btn-header[disabled] {
     background-color: #1da3b8;
+}
+
+.btn-trans {
+    background-color: #ffffff;
+    background-image: none;
+    color: #cccccc;
+    border-width: 0;
+    webkit-box-shadow: none;
+    -moz-box-shadow: none;
+    box-shadow: none;
+}
+
+.btn-trans:hover,
+.btn-trans:active,
+.btn-trans.active,
+.btn-trans.disabled,
+.btn-trans[disabled] {
+    background-color: #f4f4f4;
 }
 
 .btn-warning {
@@ -214,6 +241,26 @@ input[type="color"],
 .btn-info.disabled,
 .btn-info[disabled] {
     background-color: #d1d1d1;
+}
+
+
+.btn-select {
+    color: #ffffff;
+    background-image: -moz-linear-gradient(top, #7bcf90, #7bcf90);
+    background-image: -ms-linear-gradient(top, #7bcf90, #7bcf90);
+    background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#7bcf90), to(#7bcf90));
+    background-image: -webkit-linear-gradient(top, #7bcf90, #7bcf90);
+    background-image: -o-linear-gradient(top, #7bcf90, #7bcf90);
+    background-image: linear-gradient(top, #7bcf90, #7bcf90);
+    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr=#7bcf90, endColorstr=#7bcf90, GradientType=0);
+    border-width: 0;
+}
+.btn-select:hover,
+.btn-select:active,
+.btn-select.active,
+.btn-select.disabled,
+.btn-select[disabled] {
+    background-color: #7bcf90;
 }
 
 

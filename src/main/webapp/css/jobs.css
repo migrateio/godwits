@@ -1,0 +1,305 @@
+/*
+    Jobs
+*/
+
+/* general */
+
+.jobs ul {
+    clear: both;
+    list-style-type: none;
+    font-size: 0;
+    margin: 0;
+    padding: 0;
+}
+
+.jobs li {
+    display: inline-block;
+    font-size: 13px;
+    line-height: 16px;
+}
+
+/* job-stack */
+
+.jobs div.job-stack {
+    position: relative;
+    border: 10px solid #ddeeee;
+    height: 100px;
+    margin-bottom: 20px;
+    transition: height linear 0.125s;
+}
+
+.jobs div.job-stack.open {
+    height: 210px;
+}
+
+/* job-tabs row */
+
+.jobs div.job-tabs {
+    position: relative;
+    width: 940px;
+    height: 100px;
+    z-index: 10;
+}
+
+.jobs div.job-tabs > ul {
+    position: absolute;
+    left: -10px;
+    width: 950px;
+    background-color: #ddeeee;
+}
+
+/* The job tab itself takes care of a bottom margin that functions as a
+   border separation.
+*/
+
+.jobs div.job-tabs > ul > li {
+    margin-left: 10px;
+    padding: 10px;
+    margin-bottom: 10px;
+    background-color: #ffffff;
+    color: #21b6ce;
+    text-align: center;
+    vertical-align: top;
+}
+
+.jobs div.job-tabs > ul > li > div {
+    width: 160px;
+    height: 80px;
+}
+
+/* Job tab buttons */
+
+.jobs div.job-tabs > ul > li .btn {
+    width: 132px;
+    text-align: left;
+    font-size: 13px;
+    line-height: 16px;
+}
+
+.jobs div.job-tabs > ul > li.source .btn {
+    color: #fcc769;
+}
+
+.jobs div.job-tabs > ul > li.destination .btn {
+    color: #1da3b8;
+}
+
+.jobs div.job-tabs > ul > li.content .btn {
+    color: #4a8b5c;
+    font-size: 16px;
+}
+
+.jobs div.job-tabs > ul > li.content .btn i {
+    font-size: 20px;
+}
+
+.jobs div.job-tabs > ul > li.action .btn {
+    color: #4a8b5c;
+    font-size: 17.5px;
+    text-align: center;
+    width: auto;
+    padding: 11px 19px;
+}
+
+/* There are several different button layouts for the tabs.
+   .icons-button   - contains one or two icons and one or two rows of text; both of
+                     these elements are vertically centered within the button. The icon
+                     is to the far left and the text is left-justified to the right of
+                     the icon.
+   .service-button - holds a service logo and one or two rows of text beneath it. The
+                     logo/text group is vertically centered in the button and all content
+                     is horizontally centered.
+   .text-button    - contains one or more lines of text centered both vertically and
+                     horizontally in the button.
+
+    Each of these buttons will follow a general semantic structure:
+    <div class="icons-button">
+        <div class="icons"> <i/> or <img/> </div>
+        <div class="text"> ... </div>
+    </div>
+*/
+
+.icons-button {
+    display: table;
+    width: 132px;
+    height: 60px;
+}
+
+.icons-button span {
+    display: table-cell;
+    vertical-align: middle;
+}
+
+.icons-button span.icons {
+    text-align: center;
+}
+
+.icons-button span.icons i {
+    margin-right: 0.35em;
+}
+
+.service-button {
+}
+
+.service-button span {
+    display: block;
+    text-align: center;
+}
+
+.service-button span.text {
+    overflow: hidden;
+}
+
+
+/* A delayed transition takes care of show/hide on the bottom of the tab row */
+
+.jobs div.job-tabs > ul > li {
+    transition-delay: 0.100s;
+    -webkit-transition-delay: 0.100s;
+    padding-bottom: 10px;
+    margin-bottom: 10px;
+}
+
+.jobs .job-stack.source div.job-tabs li.source,
+.jobs .job-stack.destination div.job-tabs li.destination,
+.jobs .job-stack.content div.job-tabs li.content,
+.jobs .job-stack.action div.job-tabs li.action,
+.jobs .job-stack.status div.job-tabs li.status
+{
+    transition-delay: 0.01s;
+    -webkit-transition-delay: 0.01s;
+    padding-bottom: 20px;
+    margin-bottom: 0;
+}
+
+/** job-detail */
+
+.jobs div.job-detail {
+    position: absolute;
+    width: 940px;
+    height: 100px;
+    overflow: hidden;
+    z-index: 2;
+    bottom: 0;
+}
+
+.jobs div.job-detail > ul {
+    position: absolute;
+    top: 0;
+    left: -10px;
+    white-space: nowrap;
+}
+
+.jobs div.job-detail > ul > li {
+    display: inline-block;
+    margin-left: 10px;
+    padding: 10px;
+    /*background-color: #ffffee;*/
+    color: #21b6ce;
+    text-align: center;
+    vertical-align: top;
+    white-space: normal;
+}
+
+.jobs div.job-detail > ul > li > div {
+    width: 160px;
+    height: 80px;
+}
+
+/* The source/destination detail rows */
+
+.jobs div.job-detail > ul.job-services > li > div {
+    width: auto;
+}
+
+.jobs ul.job-services .service {
+    background-color: #ffeeff;
+    position: relative;
+    overflow: hidden;
+    transition: all linear 0.25s;
+    width: 160px;
+    height: 80px;
+}
+
+.jobs .job-services .service.active {
+    width: 730px;
+}
+
+.jobs .job-services .service .btn-holder {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 160px;
+    height: 80px;
+    background-color: #ffffff;
+    z-index: 2;
+}
+
+.jobs .job-services .service .job-auth {
+    position: absolute;
+    right: 0;
+    top: 24px;
+}
+
+.jobs .job-services .job-auth form {
+    white-space: nowrap;
+    margin: 0;
+}
+
+.jobs .job-services .job-auth form input[type="email"],
+.jobs .job-services .job-auth form input[type="text"],
+.jobs .job-services .job-auth form input[type="password"] {
+    width: 180px;
+}
+
+
+/* The content detail row */
+
+.jobs .job-content li:first-child:after {
+    content: url("/img/content/angled_separator.png");
+    position: absolute;
+    left: 190px;
+    top: 20px;
+}
+
+.jobs .job-content div.static {
+    text-align: left;
+}
+
+.jobs .job-content div.static a {
+    font-size: 80%;
+}
+
+.jobs .job-content li.wide4 > div {
+    width: 728px;
+}
+
+.jobs .job-content li.wide4 .btn {
+    vertical-align: baseline;
+    margin: 1em 5px;
+    padding: 10px 12px;
+    font-size: 16px;
+}
+
+.jobs .job-content li.wide4 .btn i {
+    font-size: 18px;
+}
+
+.jobs .job-content p.info {
+    font-size: 90%;
+    color: #999999;
+    transition: opacity linear 0.125s;
+}
+
+.jobs .job-content a.disabled:hover ~ p.info {
+    transition-delay: 0.2s;
+    -webkit-transition-delay: 0.2s;
+    opacity: 1;
+}
+
+.jobs .job-content a.disabled ~ p.info {
+    transition-delay: 0.2s;
+    -webkit-transition-delay: 0.2s;
+    opacity: 0;
+}
+
