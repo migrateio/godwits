@@ -16,7 +16,7 @@
                         <p>\
                             Build: {{buildNumber}}\
                             <span><a href="#" eat-click ng-click="clearTemplateCache()" class="btn btn-mini">Clear Partials</a></span>\
-                            <div oauth-link></div>\
+                            <div oauth-link="google"></div>\
                         </p> \
                         <div alert ng-repeat="alert in _alerts" type="alert.type" close="closeAlert($index)">\
                             <span ng-bind-html-unsafe="alert.msg"></span>\
