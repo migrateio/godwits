@@ -145,8 +145,7 @@ var oauthClient = (function () {
     return new OAuthClient( clientData );
 })();
 
-var redirectUrl = 'http://cpe-71-67-162-170.insight.res.rr.com:8080/mio/api/oauth/callback/';
-//var redirectUrl = 'http://cpe-71-67-162-170.insight.res.rr.com:8080/migrate/api/oauth/callback/';
+var redirectUrl = 'http://cpe-71-67-162-170.insight.res.rr.com:8080/api/oauth/callback/';
 
 
 /**
@@ -154,41 +153,9 @@ var redirectUrl = 'http://cpe-71-67-162-170.insight.res.rr.com:8080/mio/api/oaut
  */
 app.get( '/:uid/:service', generateDialogUrl );
 
-app.get( '/users/:uid', function ( req, uid ) {
-    for ( var i = 0; i < users[uid].oauth.length; i++ ) {
-        if ( typeof users[uid].oauth[i].params.state === 'string' ) {
-            users[uid].oauth[i].params.state = JSON.parse( users[uid].oauth[i].params.state );
-        }
-    }
-    return html( "<pre>" + JSON.stringify( users[uid], null, 4 ) + "</pre>" );
-} );
-
-app.get( '/refreshToken/:uid', function ( req, uid ) {
-
-    for ( var i = 0; i < users[uid].oauth.length; i++ ) {
-        if ( typeof users[uid].oauth[i].params.state === 'string' ) {
-            users[uid].oauth[i].params.state = JSON.parse( users[uid].oauth[i].params.state );
-        }
-    }
-
-    var user = users[uid];
-
-    var refreshToken = user.oauth[0].access.refresh_token;
-
-    var access = oauthClient.refreshAccessToken( 'google', refreshToken );
-
-    user.oauth[0].access.access_token = access.access_token;
-
-    return json( access );
-} );
-
 app.get( '/callback', handleOAuthCallback );
+
 app.post( '/callback', handleOAuthCallback );
-
-
-var users = module.singleton( 'mio_users', function () {
-    return [];
-} );
 
 /**
  * Get the state from the request. For most services this comes back as
@@ -206,27 +173,51 @@ function handleOAuthCallback( req ) {
     var authCode = req.params.code;
     var state = JSON.parse( req.params.state || '{}' );
 
+    log.info('params: {}', JSON.stringify(req.param, null, 4) );
+
     var access = oauthClient.getAccessToken( state.service, authCode, redirectUrl );
 
     log.info( 'handleOAuthCallback::Access token: {}', JSON.stringify( access, null, 4 ) );
 
-    var data = {params : req.params, access : access};
+    var exchange = httpClient.request({
+        url: getUrlByService(state.service),
+        headers: {
+            Authorization: access.token_type + ' ' + access.access_token
+        }
+    });
 
-    Array.isArray( users[state.uid].oauth ) ? users[state.uid].oauth.push( data ) : users[state.uid].oauth = [data];
+    var userinfo = JSON.parse(exchange.content);
 
-    return redirect( 'http://cpe-71-67-162-170.insight.res.rr.com:8080/mio/#/' + state.uid );
+    function getUrlByService( service ) {
+        var url;
+
+        switch ( service ) {
+            case 'google':
+                url = 'https://www.googleapis.com/oauth2/v3/userinfo';
+                break;
+        }
+
+        return url;
+    }
+
+    var data = JSON.stringify({params : {state: state, code: authCode, userinfo: userinfo}, access : access});
+
+    return html( '<html>\
+            <body>\
+            <script type="text/javascript">\
+                window.onload = function () {\
+                    window.opener.callback(\''+data+'\');\
+                    self.close();\
+                }\
+            </script>\
+            </body>\
+        </html>' );
+//    return json( data );
 }
 
 function generateDialogUrl( req, uid, service ) {
     log.info( '5generateDialogUrl::uid: {}, service: {}', uid, service );
-    var scope = 'calendar-r, docs-rw, media-rw, contacts-rw';
-
-    if ( !users[uid] ) {
-        users[uid] = {
-            uid : uid,
-            email : ''
-        };
-    }
+    var scope = 'calendar-r, docs-rw, media-rw, contacts-rw, profile-r';
 
     var state = JSON.stringify( {service : service, uid : uid} );
     var url = oauthClient.getDialogUrl( service, state, scope, redirectUrl, true );
@@ -541,7 +532,7 @@ function OAuthClient( clientData ) {
 
         var url = serviceDef.requestTokenUrl + '?' + params.join( '&' );
 
-        var aopts = {
+        var opts = {
             url : url,
             method : 'GET'
         };
@@ -734,7 +725,8 @@ OAuthClient.prototype.services = {
             'mail-r' : 'http://mail.google.com/mail/feed/atom/',
             'mail-rw' : 'http://mail.google.com/mail/feed/atom/',
             'media-r' : 'http://picasaweb.google.com/data/',
-            'media-rw' : 'http://picasaweb.google.com/data/'
+            'media-rw' : 'http://picasaweb.google.com/data/',
+            'profile-r': 'email'
         }
     },
     instagram : {

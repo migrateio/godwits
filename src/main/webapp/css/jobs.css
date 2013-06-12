@@ -60,37 +60,38 @@
     color: #21b6ce;
     text-align: center;
     vertical-align: top;
+    transition-delay: 0.100s;
+    -webkit-transition-delay: 0.100s;
 }
 
+/* A delayed transition takes care of show/hide on the bottom of the tab row */
+
+.jobs .job-stack.source div.job-tabs li.source,
+.jobs .job-stack.destination div.job-tabs li.destination,
+.jobs .job-stack.content div.job-tabs li.content,
+.jobs .job-stack.action div.job-tabs li.action,
+.jobs .job-stack.status div.job-tabs li.status
+{
+    transition-delay: 0.01s;
+    -webkit-transition-delay: 0.01s;
+    padding-bottom: 20px;
+    margin-bottom: 0;
+}
+
+
 .jobs div.job-tabs > ul > li > div {
+    position: relative;
     width: 160px;
     height: 80px;
 }
 
 /* Job tab buttons */
 
-.jobs div.job-tabs > ul > li .btn {
+.jobs div.job-tabs > ul > li.action .btn {
     width: 132px;
     text-align: left;
     font-size: 13px;
     line-height: 16px;
-}
-
-.jobs div.job-tabs > ul > li.source .btn {
-    color: #fcc769;
-}
-
-.jobs div.job-tabs > ul > li.destination .btn {
-    color: #1da3b8;
-}
-
-.jobs div.job-tabs > ul > li.content .btn {
-    color: #4a8b5c;
-    font-size: 16px;
-}
-
-.jobs div.job-tabs > ul > li.content .btn i {
-    font-size: 20px;
 }
 
 .jobs div.job-tabs > ul > li.action .btn {
@@ -100,6 +101,9 @@
     width: auto;
     padding: 11px 19px;
 }
+
+
+
 
 /* There are several different button layouts for the tabs.
    .icons-button   - contains one or two icons and one or two rows of text; both of
@@ -122,7 +126,7 @@
 .icons-button {
     display: table;
     width: 132px;
-    height: 60px;
+    height: 55px;
 }
 
 .icons-button span {
@@ -151,42 +155,23 @@
 }
 
 
-/* A delayed transition takes care of show/hide on the bottom of the tab row */
-
-.jobs div.job-tabs > ul > li {
-    transition-delay: 0.100s;
-    -webkit-transition-delay: 0.100s;
-    padding-bottom: 10px;
-    margin-bottom: 10px;
-}
-
-.jobs .job-stack.source div.job-tabs li.source,
-.jobs .job-stack.destination div.job-tabs li.destination,
-.jobs .job-stack.content div.job-tabs li.content,
-.jobs .job-stack.action div.job-tabs li.action,
-.jobs .job-stack.status div.job-tabs li.status
-{
-    transition-delay: 0.01s;
-    -webkit-transition-delay: 0.01s;
-    padding-bottom: 20px;
-    margin-bottom: 0;
-}
-
 /** job-detail */
 
 .jobs div.job-detail {
     position: absolute;
-    width: 940px;
+    width: 960px;
     height: 100px;
     overflow: hidden;
     z-index: 2;
+    left: -10px;
     bottom: 0;
 }
 
 .jobs div.job-detail > ul {
     position: absolute;
     top: 0;
-    left: -10px;
+    transition: left linear 0.125s;
+    left: 0;
     white-space: nowrap;
 }
 
@@ -212,6 +197,8 @@
     width: auto;
 }
 
+
+
 .jobs ul.job-services .service {
     background-color: #ffeeff;
     position: relative;
@@ -222,6 +209,18 @@
 }
 
 .jobs .job-services .service.active {
+    /*width: 730px;*/
+}
+
+.jobs .job-services .service.active.block2 {
+    width: 350px;
+}
+
+.jobs .job-services .service.active.block3 {
+    width: 540px;
+}
+
+.jobs .job-services .service.active.block4 {
     width: 730px;
 }
 
@@ -241,6 +240,13 @@
     top: 24px;
 }
 
+.jobs .job-services .job-auth p.error {
+    font-size: 90%;
+    color: #990000;
+    margin: 4px 8px 0 0;
+    text-align: right;
+}
+
 .jobs .job-services .job-auth form {
     white-space: nowrap;
     margin: 0;
@@ -250,6 +256,44 @@
 .jobs .job-services .job-auth form input[type="text"],
 .jobs .job-services .job-auth form input[type="password"] {
     width: 180px;
+}
+
+
+/* The scroll buttons */
+
+.jobs .job-stack .job-detail > div {
+    position: absolute;
+    top: 0;
+    background-color: #ddeeee;
+    width: 10px;
+    height: 100px;
+    z-index: 5;
+    line-height: 100px;
+    font-size: 14px;
+    color: #b8c7c8;
+    transition: all linear 0.125s;
+    cursor: pointer;
+    text-align: center;
+}
+
+.jobs .job-stack .job-detail > div.left {
+    left: 0;
+    margin-left: -1px;
+}
+
+.jobs .job-stack .job-detail > div.right {
+    right: 0;
+}
+
+.jobs .job-stack .job-detail > div:hover {
+    background-color: #ccdddd;
+    width: 30px;
+    font-size: 20px;
+    color: #f1feff;
+}
+
+.jobs .job-stack .job-detail > div.left:hover {
+    margin-left: -5px;
 }
 
 
@@ -302,4 +346,124 @@
     -webkit-transition-delay: 0.2s;
     opacity: 0;
 }
+
+
+
+
+/* Tab Button for Source and Destination accounts. Accompanies
+   the mio-tab-btn-account directive.
+*/
+
+.mio-tab-btn-account {
+    display: block;
+    position: relative;
+    width: 160px;
+    height: 80px;
+    overflow: hidden;
+}
+
+.mio-tab-btn-account p {
+    margin: 0.25em 0 0 0;
+    text-align: center;
+    font-size: 12px;
+}
+
+.mio-tab-btn-account p.lbl {
+    margin: 0;
+    text-align: left;
+    font-size: 13px;
+}
+
+.mio-tab-btn-account.source .btn-trans td,
+.mio-tab-btn-account.source p {
+    color: #fcc769;
+}
+
+.mio-tab-btn-account.destination .btn-trans td {
+    color: #1da3b8;
+}
+
+.mio-tab-btn-account .btn i {
+    margin: 0 0.25em 0 0;
+    font-size: 26px;
+}
+
+.mio-tab-btn-account table {
+    width: 100%;
+    height: 60px;
+}
+
+.mio-tab-btn-account td {
+    vertical-align: middle;
+    line-height: 16px;
+    text-align: center;
+}
+
+.mio-tab-btn-account .pane {
+    position: absolute;
+    width: 160px;
+    height: 80px;
+}
+
+.mio-tab-btn-account  div.remove {
+    position: absolute;
+    font-size: 20px;
+    transition: all linear 0.05s;
+    color: #990000;
+    opacity: 0;
+    top: 5px;
+    right: 5px;
+    cursor: pointer;
+}
+
+.mio-tab-btn-account .btn:hover ~ div.remove {
+    opacity: 0.3;
+}
+
+.mio-tab-btn-account div.remove:hover {
+    font-size: 30px;
+    opacity: 1;
+    top: 0;
+    right: 0;
+}
+
+.mio-tab-btn-account .slider-hide,
+.mio-tab-btn-account .slider-show {
+    transition: all linear 0.125s;
+}
+
+.mio-tab-btn-account .slider-show {
+    left: -100%;
+}
+
+.mio-tab-btn-account .slider-show.slider-show-active {
+    left: 0;
+}
+
+.mio-tab-btn-account .slider-hide {
+    left: 0;
+}
+
+.mio-tab-btn-account .slider-hide.slider-hide-active {
+    left: 100%;
+}
+
+
+/* Content button in the job's tab bar */
+
+.mio-tab-btn-content table {
+    width: 100%;
+    height: 60px;
+    color: #4a8b5c;
+    font-size: 13px;
+    line-height: 16px;
+    text-align: left;
+}
+
+.mio-tab-btn-content table td i {
+    margin-right: 0.25em;
+    font-size: 26px;
+}
+
+
 

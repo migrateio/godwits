@@ -1,21 +1,22 @@
-<div class="job-stack" data-ng-switch="detailName"
-     data-ng-class="{ open: ui.open }">
+<div class="job-stack" data-ng-class="{ open: ui.open }">
 
     <div class="job-tabs" data-mio-job-tabs="job"></div>
 
-    <div data-ng-switch-when="source">
-        <div class="job-detail" data-mio-job-services="source" data-mio-job-services-ref="job"></div>
+    <div data-ng-show="detailName == 'source'">
+        <div class="job-detail ng-cloak" data-ng-cloak=""
+             data-mio-job-services="source" data-mio-job-ref="job"></div>
     </div>
-    <div data-ng-switch-when="destination">
-        <div class="job-detail" data-mio-job-services="destination"></div>
+    <div data-ng-show="detailName == 'destination'">
+        <div class="job-detail ng-cloak" data-ng-cloak=""
+             data-mio-job-services="destination" data-mio-job-ref="job"></div>
     </div>
-    <div data-ng-switch-when="content">
-        <div class="job-detail" data-mio-job-content="job.content"></div>
+    <div data-ng-show="detailName == 'content'">
+        <div class="job-detail" data-mio-job-content="job.content" data-mio-job-ref="job"></div>
     </div>
-    <div data-ng-switch-when="action">
+    <div data-ng-show="detailName == 'action'">
         <div class="job-detail" data-mio-job-action="job.action"></div>
     </div>
-    <div data-ng-switch-when="status">
+    <div data-ng-show="detailName == 'status'">
         <div class="job-detail" data-mio-job-status="job.status"></div>
     </div>
 </div>

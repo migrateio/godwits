@@ -1,24 +1,12 @@
 <ul>
-    <li data-mio-job-tab="job.source" data-mio-detail-name="source">
-        <div data-vertical-center>
-            <a data-ng-click="select()" class="btn btn-trans">
-                <div mio-job-btn-service="tab" data-tab-type="source"></div>
-            </a>
-        </div>
+    <li class="source">
+        <div class="mio-tab-btn-account" mio-account="job.source" mio-account-type="source"/>
     </li>
-    <li data-mio-job-tab="job.destination" data-mio-detail-name="destination">
-        <div data-vertical-center>
-            <a data-ng-click="select()" class="btn btn-trans">
-                <div mio-job-btn-service="tab" data-tab-type="destination"></div>
-            </a>
-        </div>
+    <li class="destination">
+        <div class="mio-tab-btn-account" mio-account="job.destination" mio-account-type="destination"/>
     </li>
-    <li data-mio-job-tab="job.content" data-mio-detail-name="content">
-        <div data-vertical-center>
-            <a data-ng-click="select()" class="btn btn-trans">
-                <div data-mio-job-btn-content="tab"></div>
-            </a>
-        </div>
+    <li class="content">
+        <div class="mio-tab-btn-content" data-mio-data="job.content"></div>
     </li>
     <li data-mio-job-tab="job.action" data-mio-detail-name="action">
         <div data-vertical-center>

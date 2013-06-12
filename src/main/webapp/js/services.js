@@ -3,6 +3,7 @@
     var services = [
         {
             name : 'aol',
+            fullname: 'AOL',
             auth : 'password',
             format : {
                 username : {
@@ -26,61 +27,73 @@
         },
         {
             name : 'flickr',
+            fullname: 'Flickr',
             auth : 'oauth',
             content : ['media']
         },
         {
             name : 'picasa',
+            fullname: 'Picasa',
             auth : 'oauth',
             content : ['media']
         },
         {
             name : 'comcast',
+            fullname: 'Comcast',
             auth : 'password',
             content : ['mails']
         },
         {
             name : 'exchange',
+            fullname: 'Microsoft Exchange',
             auth : 'exchange',
             content : ['mails']
         },
         {
             name : 'google',
+            fullname: 'Google',
             auth : 'oauth',
             content : ['mails', 'calendars', 'contacts', 'documents', 'media']
         },
         {
             name : 'hotmail',
+            fullname: 'Hotmail',
             auth : 'password',
             content : ['mails', 'calendars', 'contacts']
         },
         {
             name : 'imap',
+            fullname: 'IMAP',
             auth : 'password',
             content : ['mails']
         },
         {
             name : 'outlook',
+            fullname: 'MS Outlook',
             auth : 'oauth',
             content : ['mails', 'calendars', 'contacts']
         },
         {
             name : 'outlookpst',
+            fullname: 'Outlook PST',
             auth : 'file',
             content : ['mails', 'calendars', 'contacts']
         },
         {
             name : 'skydrive',
+            fullname: 'SkyDrive',
             auth : 'oauth',
             content : ['documents', 'media']
         },
         {
             name : 'twc',
+            fullname: 'TWC/RoadRunner',
             auth : 'password',
             content : ['mails']
         },
         {
             name : 'yahoo',
+            fullname: 'Yahoo!',
             auth : 'oauth',
             content : ['mails', 'contacts']
         }
@@ -97,9 +110,9 @@
     }
 
     function getServiceByName( name ) {
-        ng.forEach( services, function ( service ) {
-            if ( service.name === name ) return service;
-        } );
+        for (var i = 0, c = services.length; i < c; i++) {
+            if ( services[i].name === name ) return services[i];
+        }
         return null;
     }
 
@@ -114,8 +127,8 @@
 
     var mod = ng.module( 'migrate-services', [] );
 
-    mod.factory( 'mioServices', [ '$log', '$http', '$timeout',
-        function ( $log, $http, $timeout ) {
+    mod.factory( 'mioServices', [ '$log', '$http', '$timeout', '$q',
+        function ( $log, $http, $timeout, $q ) {
             /**
              * Attempts an authentication against the specified service. Returns a
              * promise indicating success or failure.
@@ -139,8 +152,11 @@
             function authenticate( service, options ) {
                 var deferred = $q.defer();
                 $timeout( function () {
-                    deferred.resolve();
-                }, 4000 );
+                    if (options && options.password === 'secret')
+                        deferred.resolve();
+                    else
+                        deferred.reject();
+                }, 2000 );
                 return deferred.promise;
             }
 
@@ -170,15 +186,26 @@
              *
              * @param {String} serviceTarget Name of the service type 'source' or
              * 'destination'
-             * @param {String} otherService Name of the service selected already;
+             * @param {String} [otherService] Name of the service selected already;
              * ie 'google', 'flickr'
              */
             function getServices( serviceTarget, otherService ) {
-                var service = getServiceByName( otherService ) || {};
-                var otherContent = service.content || [];
-
                 var targetService = serviceTarget === 'source'
                     ? sourceServices : destServices;
+
+                // Build the array to return
+                var result = [].concat(targetService);
+                ng.forEach(result, function(item) {
+                    item.valid = true;
+                });
+
+                // If there is no reciprocal account yet, all services are valid
+                if (!otherService) return result;
+
+                // Otherwise, we will get the content types that are in play by the
+                // selection of the other account and set the valid flag accordingly
+                var service = getServiceByName( otherService ) || {};
+                var otherContent = service.content || [];
 
                 var result = [];
                 ng.forEach( targetService, function ( service ) {
