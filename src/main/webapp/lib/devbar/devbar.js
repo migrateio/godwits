@@ -15,8 +15,10 @@
                     <div class="devbar"> \
                         <p>\
                             Build: {{buildNumber}}\
-                            <span><a href="#" eat-click ng-click="clearTemplateCache()" class="btn btn-mini">Clear Partials</a></span>\
-                            <div oauth-link="google"></div>\
+                            <span><a href="#" eat-click ng-click="clearTemplateCache()" class="btn btn-mini">Clear Partials</a>\
+                            Google: <div oauth-link="google"></div>\
+                            Yahoo: <div oauth-link="yahoo"></div>\
+                            </span>\
                         </p> \
                         <div alert ng-repeat="alert in _alerts" type="alert.type" close="closeAlert($index)">\
                             <span ng-bind-html-unsafe="alert.msg"></span>\

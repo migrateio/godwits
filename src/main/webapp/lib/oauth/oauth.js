@@ -5,9 +5,9 @@
         ["$templateCache",
             function ( $templateCache ) {
                 $templateCache.put( "template/oauth.html", ' \
-                <button class="btn btn-primary" ng-click="link(job_id, service)"> \
-                    Link \
-                </button>' );
+                <a class="btn btn-primary" ng-click="link(job_id, service)"> \
+                    Link to {{service}}\
+                </a>' );
             }
         ]
     );
@@ -20,6 +20,7 @@
             templateUrl : 'template/oauth.html',
             transclude : true,
             controller : 'oauthCtrl',
+            scope: {},
             link : function link( scope, element, attrs ) {
                 scope.service = attrs.oauthLink;
                 scope.job_id = 'test';

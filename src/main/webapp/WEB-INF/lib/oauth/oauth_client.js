@@ -173,6 +173,8 @@ function handleOAuthCallback( req ) {
     var authCode = req.params.code;
     var state = JSON.parse( req.params.state || '{}' );
 
+    log.info('params: {}', JSON.stringify(req.param, null, 4) );
+
     var access = oauthClient.getAccessToken( state.service, authCode, redirectUrl );
 
     log.info( 'handleOAuthCallback::Access token: {}', JSON.stringify( access, null, 4 ) );
@@ -530,7 +532,7 @@ function OAuthClient( clientData ) {
 
         var url = serviceDef.requestTokenUrl + '?' + params.join( '&' );
 
-        var aopts = {
+        var opts = {
             url : url,
             method : 'GET'
         };
