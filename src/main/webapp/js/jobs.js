@@ -291,7 +291,7 @@
                 },
                 templateUrl : '/partials/job/job-service.html',
                 link : function ( scope, element, attrs, jobCtrl ) {
-//                    $log.info( 'mioJobService', scope );
+                    $log.info( 'mioJobService', scope );
                     // We will show the authenticated user's username if this is the
                     // service with which they authenticated
                     scope.username = scope.serviceDef.name === scope.serviceObj.service

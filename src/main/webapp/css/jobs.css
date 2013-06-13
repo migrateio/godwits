@@ -200,7 +200,7 @@
 
 
 .jobs ul.job-services .service {
-    background-color: #ffeeff;
+    /*background-color: #ffeeff;*/
     position: relative;
     overflow: hidden;
     transition: all linear 0.25s;
