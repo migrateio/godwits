@@ -11,18 +11,6 @@
                     msg : 'Enter your AOL Screen Name with or without "@aol.com"'
                 }
             },
-            protocol : {
-                imap : {
-                    host : 'imap.aol.com',
-                    port : 993,
-                    ssl : true
-                },
-                smtp : {
-                    host : 'smtp.aol.com',
-                    port : 587,
-                    ssl : true
-                }
-            },
             content : ['mails', 'calendars', 'contacts']
         },
         {
@@ -207,16 +195,10 @@
                 var service = getServiceByName( otherService ) || {};
                 var otherContent = service.content || [];
 
-                var result = [];
-                ng.forEach( targetService, function ( service ) {
-                    result.push( {
-                        name : service.name,
-                        content : service.content,
-                        auth : service.auth,
-                        valid : otherContent.length > 0
-                            ? intersect( service.content, otherContent ).length > 0
-                            : true
-                    } );
+                ng.forEach( result, function ( service ) {
+                    result.valid = otherContent.length > 0
+                        ? intersect( service.content, otherContent ).length > 0
+                        : true
                 } );
                 return result;
             }

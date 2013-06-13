@@ -400,3 +400,42 @@ form .add-on a, form .add-on a:hover {
 }
 
 
+
+
+
+
+
+
+
+
+
+
+
+.mio-scroller {
+    position: relative;
+    left: 50px;
+    top: 50px;
+    width: 960px;
+    height: 100px;
+    background-color: #ccccff;
+}
+
+.mio-scrollee {
+    /* do not fix width, it is fluid */
+    height: 80px;
+    margin: 10px 10px 10px 0;
+    line-height: 80px;
+    text-align: center;
+    font-size: 60px;
+    background-color: #ffffee;
+    cursor: pointer;
+}
+
+.mio-scrollee:first-child {
+    margin-left: 10px;
+}
+
+.mio-scrollee .expando {
+    transition: width linear 0.25s;
+    font-size: 32px;
+}

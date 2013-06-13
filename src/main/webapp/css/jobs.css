@@ -200,7 +200,7 @@
 
 
 .jobs ul.job-services .service {
-    background-color: #ffeeff;
+    /*background-color: #ffeeff;*/
     position: relative;
     overflow: hidden;
     transition: all linear 0.25s;
@@ -224,6 +224,18 @@
     width: 730px;
 }
 
+.jobs .job-services .service.active.block2 div.job-auth {
+    width: 190px;
+}
+
+.jobs .job-services .service.active.block3 div.job-auth {
+    width: 380px;
+}
+
+.jobs .job-services .service.active.block4 div.job-auth {
+    width: 570px;
+}
+
 .jobs .job-services .service .btn-holder {
     position: absolute;
     left: 0;
@@ -237,7 +249,12 @@
 .jobs .job-services .service .job-auth {
     position: absolute;
     right: 0;
-    top: 24px;
+}
+
+.jobs .job-services .job-auth p {
+    font-size: 90%;
+    margin: 0;
+    text-align: center;
 }
 
 .jobs .job-services .job-auth p.error {
@@ -465,5 +482,11 @@
     font-size: 26px;
 }
 
+
+/* The action button in the job's tab bar */
+
+.mio-tab-btn-action {
+    line-height: 80px;
+}
 
 

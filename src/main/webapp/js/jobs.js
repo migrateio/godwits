@@ -42,6 +42,20 @@
         ['$log', '$scope', '$timeout', '$element', 'mioServices',
             function ( $log, $scope, $timeout, $element, mioServices ) {
 
+                // Watch the job to see when the job is ready to be submitted
+                $scope.$watch(
+                    function() {
+                        return $scope.job.source && $scope.job.source.service
+                            && $scope.job.destination && $scope.job.destination.service
+                            && $scope.job.content && $scope.job.content.length > 0;
+                    },
+                    function(newValue) {
+                        if (!$scope.job.status) $scope.job.status = {};
+                        $scope.job.status.state = newValue ? 'pending' : '';
+                        $log.info( 'Watching for state', newValue, $scope.job );
+                    }
+                );
+
                 function intersect( a, b ) {
                     a = ng.copy( a );
                     for ( var i = a.length - 1; i >= 0; i-- ) {
@@ -402,21 +416,51 @@
 
                     scope.oauthLink = function () {
                         $log.info( 'oauthLink', scope );
-                        mioServices.oauthLink( scope.serviceDef.name ).then(
-                            function success( data ) {
-                                scope.serviceObj.service = scope.serviceDef.name;
-                                scope.serviceObj.auth = {
-                                    username : data.params.userinfo.email,
-                                    accessToken: data.access.access_token,
-                                    refreshToken: data.access.refresh_token
-                                };
-                                scope.toggle();
-                                jobCtrl.broadcast( JOB_DRAWER_TOGGLE );
-                            },
-                            function failure() {
-                                scope.errorMsg = 'Failed to authenticate with service.';
-                            }
-                        );
+
+                        var success = function ( data ) {
+                            scope.serviceObj.service = scope.serviceDef.name;
+                            scope.serviceObj.auth = {
+                                username : data.params.userinfo.email,
+                                accessToken: data.access.access_token,
+                                refreshToken: data.access.refresh_token
+                            };
+                            scope.toggle();
+                            jobCtrl.broadcast( JOB_DRAWER_TOGGLE );
+                        };
+
+                        var failure = function () {
+                            scope.errorMsg = 'Failed to authenticate with service.';
+                        };
+
+/*
+                        $timeout(function() {
+                            success( {
+                                params: {
+                                    userinfo: {
+                                        email: 'jcook@gmail.com'
+                                    }
+                                },
+                                access: {
+                                    access_token : 'access_jsd8as32h373fhasa8',
+                                    refresh_token : 'refresh_is812nms0an38dbcuz73'
+                                }
+                            } );
+                        }, 1500);
+*/
+
+                        mioServices.oauthLink( scope.serviceDef.name )
+                            .then( success, failure );
+                    };
+
+                    scope.oauthUnlink = function () {
+                        $log.info( 'oauthUnlink', scope );
+
+//                        mioServices.oauthUnlink(
+//                          scope.serviceDef.name, scope.serviceObj.auth.refreshToken
+//                        );
+                        scope.serviceObj = {};
+                        scope.toggle();
+                        jobCtrl.broadcast( JOB_DRAWER_TOGGLE );
                     };
 
                     scope.submit = function () {
@@ -789,6 +833,51 @@
                     scope.select = function () {
                         jobCtrl.broadcast( JOB_DRAWER_TOGGLE, scope.label );
                     };
+                }
+            }
+        }]
+    );
+
+    /**
+     * ```html
+     * <div class="mio-tab-btn-action" data-mio-data="job.status"></div>
+     * ```
+     */
+    mod.directive( 'mioTabBtnAction', ['$log',
+        function ( $log ) {
+            return {
+                require : '^mioJob',
+                restrict : 'ACE',
+                scope : {
+                    status : '=mioData'
+                },
+                template : '\
+                    <div>\
+                        <a class="btn btn-success" data-ng-click="select()" \
+                            data-ng-class=" { disabled : !status.state } " >\
+                            {{label}}\
+                        </a>\
+                    </div>\
+                ',
+                link : function ( scope, element, attrs, jobCtrl ) {
+                    // The text which is on the button will depend on the particular
+                    // state of the job.
+                    switch (scope.status.state || 'pending') {
+                        case 'pending':
+                            scope.label = 'Migrate';
+                            break;
+                        case 'active':
+                            scope.label = 'Cancel';
+                            break;
+                        case 'error':
+                            scope.label = 'Migrate';
+                            break;
+                        case 'complete':
+                            scope.label = 'Run Again';
+                            break;
+                        default:
+                            scope.label = 'Migrate';
+                    }
                 }
             }
         }]
