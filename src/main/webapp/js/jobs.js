@@ -432,6 +432,7 @@
                             scope.errorMsg = 'Failed to authenticate with service.';
                         };
 
+/*
                         $timeout(function() {
                             success( {
                                 params: {
@@ -445,9 +446,10 @@
                                 }
                             } );
                         }, 1500);
+*/
 
-//                        mioServices.oauthLink( scope.serviceDef.name )
-//                            .then( success, failure );
+                        mioServices.oauthLink( scope.serviceDef.name )
+                            .then( success, failure );
                     };
 
                     scope.oauthUnlink = function () {
