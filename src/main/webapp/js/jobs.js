@@ -402,21 +402,49 @@
 
                     scope.oauthLink = function () {
                         $log.info( 'oauthLink', scope );
-                        mioServices.oauthLink( scope.serviceDef.name ).then(
-                            function success( data ) {
-                                scope.serviceObj.service = scope.serviceDef.name;
-                                scope.serviceObj.auth = {
-                                    username : data.params.userinfo.email,
-                                    accessToken: data.access.access_token,
-                                    refreshToken: data.access.refresh_token
-                                };
-                                scope.toggle();
-                                jobCtrl.broadcast( JOB_DRAWER_TOGGLE );
-                            },
-                            function failure() {
-                                scope.errorMsg = 'Failed to authenticate with service.';
-                            }
-                        );
+
+                        var success = function ( data ) {
+                            scope.serviceObj.service = scope.serviceDef.name;
+                            scope.serviceObj.auth = {
+                                username : data.params.userinfo.email,
+                                accessToken: data.access.access_token,
+                                refreshToken: data.access.refresh_token
+                            };
+                            scope.toggle();
+                            jobCtrl.broadcast( JOB_DRAWER_TOGGLE );
+                        };
+
+                        var failure = function () {
+                            scope.errorMsg = 'Failed to authenticate with service.';
+                        };
+
+                        $timeout(function() {
+                            success( {
+                                params: {
+                                    userinfo: {
+                                        email: 'jcook@gmail.com'
+                                    }
+                                },
+                                access: {
+                                    access_token : 'access_jsd8as32h373fhasa8',
+                                    refresh_token : 'refresh_is812nms0an38dbcuz73'
+                                }
+                            } );
+                        }, 1500);
+
+//                        mioServices.oauthLink( scope.serviceDef.name )
+//                            .then( success, failure );
+                    };
+
+                    scope.oauthUnlink = function () {
+                        $log.info( 'oauthUnlink', scope );
+
+//                        mioServices.oauthUnlink(
+//                          scope.serviceDef.name, scope.serviceObj.auth.refreshToken
+//                        );
+                        scope.serviceObj = {};
+                        scope.toggle();
+                        jobCtrl.broadcast( JOB_DRAWER_TOGGLE );
                     };
 
                     scope.submit = function () {

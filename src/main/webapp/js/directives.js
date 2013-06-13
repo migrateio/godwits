@@ -44,7 +44,7 @@ mod.directive( 'validtip', [ '$log', '$timeout', '$position',
             restrict : 'EA',
             templateUrl : 'template/valid/tooltip.html',
             replace : true,
-            scope: false,
+            scope : false,
             transclude : true,
             priority : 10,
             link : function link( scope, element, attrs ) {
@@ -57,27 +57,27 @@ mod.directive( 'validtip', [ '$log', '$timeout', '$position',
                     'the input field with which it is associated';
 
                 // Get the input field referenced by the 'input-target' attribute
-                var inputField = $( 'input[name="' + target + '"]', $element.parents('form') );
-                if ( !inputField || inputField.length != 1) throw 'Directive [validtip] references a form input ' +
+                var inputField = $( 'input[name="' + target + '"]', $element.parents( 'form' ) );
+                if ( !inputField || inputField.length != 1 ) throw 'Directive [validtip] references a form input ' +
                     'field with a value of [' + target + '] but reference not found.';
 
-                var showIfInvalid = function(ifUnfocused) {
-                    var isDirty = inputField.hasClass('ng-dirty');
-                    var isInvalid = inputField.hasClass('ng-invalid');
-                    var isFocus = !ifUnfocused && inputField.is(':focus');
+                var showIfInvalid = function ( ifUnfocused ) {
+                    var isDirty = inputField.hasClass( 'ng-dirty' );
+                    var isInvalid = inputField.hasClass( 'ng-invalid' );
+                    var isFocus = !ifUnfocused && inputField.is( ':focus' );
 //                    $log.info( isDirty, isInvalid, isFocus, !ifUnfocused );
-                    if (isDirty && isInvalid && isFocus) $element.fadeIn( 'fast' );
+                    if ( isDirty && isInvalid && isFocus ) $element.fadeIn( 'fast' );
                     else $element.hide();
                 };
 
                 // Watch for changes to the model
-                inputField.on('propertychange keyup input paste', function (e) {
+                inputField.on( 'propertychange keyup input paste', function ( e ) {
                     showIfInvalid();
-                });
+                } );
 
-                inputField.blur(function() {
+                inputField.blur( function () {
                     showIfInvalid();
-                });
+                } );
 
                 var placement = function () {
                     // Get the position of the input field. Note: $position will throw an
@@ -215,48 +215,194 @@ mod.directive( 'passXray',
         }
     ] );
 
-mod.directive('myTransclude', function() {
+mod.directive( 'myTransclude', function () {
     return {
-        compile: function(tElement, tAttrs, transclude) {
-            return function(scope, iElement, iAttrs) {
-                transclude(scope.$new(), function(clone) {
-                    iElement.append(clone);
-                });
+        compile : function ( tElement, tAttrs, transclude ) {
+            return function ( scope, iElement, iAttrs ) {
+                transclude( scope.$new(), function ( clone ) {
+                    iElement.append( clone );
+                } );
             };
         }
     };
-});
+} );
 
 /**
  * Works by using Method 3 for vertical centering as found on:
  * http://blog.themeforest.net/tutorials/vertical-centering-with-css/
  *
  * Needs accompanying css:
- *   .va-floater	{float:left; height:50%; margin-bottom:-120px;}
- *   .va-content	{clear:both; height:240px; position:relative;}
+ *   .va-floater    {float:left; height:50%; margin-bottom:-120px;}
+ *   .va-content    {clear:both; height:240px; position:relative;}
  *
  */
 mod.directive( 'verticalCenter', function () {
     return {
         restrict : 'AC',
-/*
+        /*
          replace: true,
          template : ' \
-            <div> \
-              <div style="display:inline-block; vertical-align:middle; height:100%;"></div> \
-              <div style="display:inline-block; vertical-align:middle; white-space:normal;" ng-transclude></div> \
-            </div>',
-*/
+         <div> \
+         <div style="display:inline-block; vertical-align:middle; height:100%;"></div> \
+         <div style="display:inline-block; vertical-align:middle; white-space:normal;" ng-transclude></div> \
+         </div>',
+         */
         template : ' \
             <div style="display: table; width: 100%; height: 100%"> \
                 <div style="display: table-cell; vertical-align:middle;" my-transclude> \
                 </div>\
             </div>',
         transclude : true,
-        scope: false
+        scope : false
     }
-});
+} );
 
+
+mod.controller( 'mio-scroller-controller',
+    ['$log', '$scope', '$timeout', '$element',
+        function ( $log, $scope, $timeout, $element ) {
+            $scope.items = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
+
+
+        }
+    ]
+);
+
+/**
+ * ## Directive mio-scroller
+ *
+ * A fixed width slotted scroller will contain any number of mio-scrollee elements. The
+ * scroller will allow the scrollee's to be paged horizontally and the user may scroll
+ * them left or right.
+ *
+ * The scroller is considered a "slotted scroller" because it is broken up into a number
+ * of fixed-width slots which are specified as a property on the component. The scroller
+ * will provide events for paging, but also the ability to align a particular scrollee
+ * on a specific slot number. The supported events are:
+ *
+ * * `'mio-scroller.position', 'scrollee selector', slot number`<br/>
+ *   Immediately positions the indicated scrollee at the indicated slot number.
+ * * `'mio-scroller.move', 'scrollee selector', slot number`<br/>
+ *   Animates ('slides') the indicated scrollee to the indicated slot number.
+ * * `'mio-scroller.page', 'left' || 'right'`<br/>
+ *   Animates the page of scrollees to the right or left as indicated.
+ * * `'mio-scroller.expand', 'scrollee selector', [slot number]`<br/>
+ *   Expands the selected scrollee while maintaining the scrollee in view. If a slot
+ *   number is provided, the scrollee will end up left-justified into that slot.
+ *
+ * The complication to this component is that the scrollee's can change width. When a
+ * scrollee expands, the scroller will ensure that the entire scrollee remains in view.
+ * A contraction may require the scroller to shift the scrollees accordingly.
+ *
+ */
+mod.directive( 'mioScroller',
+    [ '$compile', '$timeout', '$parse', '$position', '$log',
+        function ( $compile, $timeout, $parse, $position, $log ) {
+            return {
+                restrict : 'ACE',
+                scope : {
+                    slots : '@mioScrollerSlots'
+                },
+                replace : false,
+                controller : 'mio-scroller-controller',
+                link : function ( scope, element, attrs ) {
+                    // Our scroller element is our rock. It stays put where it is.
+                    var rock = element.css( {
+                        position : 'relative',
+                        overflow : 'hidden'
+                    } );
+
+                    // The scroller element which will be absolutely positioned and
+                    // will be positioned left and right. Inline block with no wrap will
+                    // allow the scroller to keep all scrolllees in one line and
+                    // expand/collapse as the scrollees do.
+                    var scroller = $( '<div/>' ).css( {
+                        position : 'absolute',
+                        display : 'inline-block',
+                        whiteSpace : 'nowrap'
+                    } );
+                    element.wrapInner( scroller )
+
+                    // Remove whitespace between scrollee elements (inline-block effect)
+                    scroller.contents().filter(function () {
+                        return (this.nodeType == 3 && !/\S/.test( this.nodeValue ));
+                    } ).remove();
+
+                    // The number of slots coupled with the width of the element will
+                    // give us the left positions of each scrollee
+                    var slots = parseInt( scope.slots );
+                }
+            }
+        }
+    ]
+);
+
+mod.directive( 'mioScrollee',
+    [ '$compile', '$timeout', '$parse', '$position', '$log',
+        function ( $compile, $timeout, $parse, $position, $log ) {
+            return {
+                require : '^mioScroller',
+                restrict : 'ACE',
+                scope : {
+                    slotNum : '@mioSlotNum',
+                    slotWidth : '@mioSlotWidth',
+                    slotHeight : '@mioSlotHeight'
+                },
+                link : function ( scope, element, attrs ) {
+                    var slot = {
+                        num : parseInt( scope.slotNum ),
+                        width : parseInt( scope.slotWidth ),
+                        height : parseInt( scope.slotHeight )
+                    };
+
+                    element.css( {
+                        display : 'inline-block'
+                    } );
+
+                    // Remove whitespace between scrollee elements (inline-block effect)
+                    element.contents().filter(function () {
+                        return (this.nodeType == 3 && !/\S/.test( this.nodeValue ));
+                    } ).remove();
+
+                    // Inside of the scrollee are two divs. The first is fixed and
+                    // visible, while the second will expand when requested and start
+                    // life compacted.
+                    var content = element.children().first().css( {
+                        display : 'inline-block',
+                        whiteSpace : 'nowrap',
+                        width : '180px',
+                        height : '80px'
+                    } );
+                    var expando = element.children().last().css( {
+                        display : 'inline-block',
+                        overflow : 'hidden',
+                        textAlign : 'right'
+                    } );
+
+                    var expansionWidth =
+                        (Math.floor(expando.width() / slot.width) + 1 ) * slot.width;
+                    expando.width( 0 );
+
+                    function expand() {
+                        expando.css( {
+                            width: expansionWidth + 'px'
+                        } );
+                    }
+
+                    function contract() {
+                        expando.css( {
+                            width: '0'
+                        } );
+                    }
+
+                    scope.toggle = function() {
+                        if (expando.width() > 0) contract(); else expand();
+                    };
+                }
+            }
+        }
+    ]
+);
 
 
 // http://stackoverflow.com/questions/14859266/input-autofocus-attribute/14859639#14859639

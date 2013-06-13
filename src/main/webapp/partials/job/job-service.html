@@ -14,10 +14,27 @@
 
         <div data-ng-switch="serviceDef.auth" class="job-auth">
             <div ng-switch-when="oauth">
-                <div>
-                    <a class="btn btn-trans" data-ng-click="oauthLink()">
-                        Link to {{serviceDef.fullname}}
-                    </a>
+                <div data-ng-if="serviceObj.username">
+                    <div>
+                        <p>
+                            Our access to your account will be removed
+                            after 30 days, or you can unlink manually at any time.
+                        </p>
+                        <a class="btn btn-trans" data-ng-click="oauthUnlink()">
+                            Unlink from {{serviceDef.fullname}}
+                        </a>
+                    </div>
+                </div>
+                <div data-ng-if="!serviceObj.username">
+                    <div>
+                        <p>
+                            We request access to all content, however only the content
+                            you select to migrate is used.
+                        </p>
+                        <a class="btn btn-trans" data-ng-click="oauthLink()">
+                            Link to {{serviceDef.fullname}}
+                        </a>
+                    </div>
                 </div>
             </div>
             <div ng-switch-when="password">
