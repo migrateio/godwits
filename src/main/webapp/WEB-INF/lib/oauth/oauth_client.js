@@ -151,7 +151,7 @@ var redirectUrl = 'http://cpe-71-67-162-170.insight.res.rr.com:8080/api/oauth/ca
 /**
  * Request to authorize access to the given service for the current user.
  */
-app.get( '/:uid/:service', generateDialogUrl );
+app.get( '/:service', generateDialogUrl );
 
 app.get( '/callback', handleOAuthCallback );
 
@@ -215,11 +215,11 @@ function handleOAuthCallback( req ) {
 //    return json( data );
 }
 
-function generateDialogUrl( req, uid, service ) {
-    log.info( '5generateDialogUrl::uid: {}, service: {}', uid, service );
+function generateDialogUrl( req, service ) {
+    log.info( '5generateDialogUrl::service: {}', service );
     var scope = 'calendar-r, docs-rw, media-rw, contacts-rw, profile-r';
 
-    var state = JSON.stringify( {service : service, uid : uid} );
+    var state = JSON.stringify( {service : service, uid : '123'} );
     var url = oauthClient.getDialogUrl( service, state, scope, redirectUrl, true );
 
     return json( {

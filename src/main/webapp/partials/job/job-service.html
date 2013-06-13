@@ -15,8 +15,7 @@
         <div data-ng-switch="serviceDef.auth" class="job-auth">
             <div ng-switch-when="oauth">
                 <div>
-                    <a class="btn btn-trans" data-ng-click="toggle()"
-                       data-ng-class="{ disabled: valid( {{serviceDef.name}} ) }">
+                    <a class="btn btn-trans" data-ng-click="oauthLink()">
                         Link to {{serviceDef.fullname}}
                     </a>
                 </div>

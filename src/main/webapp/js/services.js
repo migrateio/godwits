@@ -3,7 +3,7 @@
     var services = [
         {
             name : 'aol',
-            fullname: 'AOL',
+            fullname : 'AOL',
             auth : 'password',
             format : {
                 username : {
@@ -27,73 +27,73 @@
         },
         {
             name : 'flickr',
-            fullname: 'Flickr',
+            fullname : 'Flickr',
             auth : 'oauth',
             content : ['media']
         },
         {
             name : 'picasa',
-            fullname: 'Picasa',
+            fullname : 'Picasa',
             auth : 'oauth',
             content : ['media']
         },
         {
             name : 'comcast',
-            fullname: 'Comcast',
+            fullname : 'Comcast',
             auth : 'password',
             content : ['mails']
         },
         {
             name : 'exchange',
-            fullname: 'Microsoft Exchange',
+            fullname : 'Microsoft Exchange',
             auth : 'exchange',
             content : ['mails']
         },
         {
             name : 'google',
-            fullname: 'Google',
+            fullname : 'Google',
             auth : 'oauth',
             content : ['mails', 'calendars', 'contacts', 'documents', 'media']
         },
         {
             name : 'hotmail',
-            fullname: 'Hotmail',
+            fullname : 'Hotmail',
             auth : 'password',
             content : ['mails', 'calendars', 'contacts']
         },
         {
             name : 'imap',
-            fullname: 'IMAP',
+            fullname : 'IMAP',
             auth : 'password',
             content : ['mails']
         },
         {
             name : 'outlook',
-            fullname: 'MS Outlook',
+            fullname : 'MS Outlook',
             auth : 'oauth',
             content : ['mails', 'calendars', 'contacts']
         },
         {
             name : 'outlookpst',
-            fullname: 'Outlook PST',
+            fullname : 'Outlook PST',
             auth : 'file',
             content : ['mails', 'calendars', 'contacts']
         },
         {
             name : 'skydrive',
-            fullname: 'SkyDrive',
+            fullname : 'SkyDrive',
             auth : 'oauth',
             content : ['documents', 'media']
         },
         {
             name : 'twc',
-            fullname: 'TWC/RoadRunner',
+            fullname : 'TWC/RoadRunner',
             auth : 'password',
             content : ['mails']
         },
         {
             name : 'yahoo',
-            fullname: 'Yahoo!',
+            fullname : 'Yahoo!',
             auth : 'oauth',
             content : ['mails', 'contacts']
         }
@@ -110,7 +110,7 @@
     }
 
     function getServiceByName( name ) {
-        for (var i = 0, c = services.length; i < c; i++) {
+        for ( var i = 0, c = services.length; i < c; i++ ) {
             if ( services[i].name === name ) return services[i];
         }
         return null;
@@ -127,8 +127,8 @@
 
     var mod = ng.module( 'migrate-services', [] );
 
-    mod.factory( 'mioServices', [ '$log', '$http', '$timeout', '$q',
-        function ( $log, $http, $timeout, $q ) {
+    mod.factory( 'mioServices', [ '$log', '$http', '$timeout', '$q', '$window',
+        function ( $log, $http, $timeout, $q, $window ) {
             /**
              * Attempts an authentication against the specified service. Returns a
              * promise indicating success or failure.
@@ -152,7 +152,7 @@
             function authenticate( service, options ) {
                 var deferred = $q.defer();
                 $timeout( function () {
-                    if (options && options.password === 'secret')
+                    if ( options && options.password === 'secret' )
                         deferred.resolve();
                     else
                         deferred.reject();
@@ -194,13 +194,13 @@
                     ? sourceServices : destServices;
 
                 // Build the array to return
-                var result = [].concat(targetService);
-                ng.forEach(result, function(item) {
+                var result = [].concat( targetService );
+                ng.forEach( result, function ( item ) {
                     item.valid = true;
-                });
+                } );
 
                 // If there is no reciprocal account yet, all services are valid
-                if (!otherService) return result;
+                if ( !otherService ) return result;
 
                 // Otherwise, we will get the content types that are in play by the
                 // selection of the other account and set the valid flag accordingly
@@ -221,9 +221,43 @@
                 return result;
             }
 
+            function oauthLink( service ) {
+                var deferred = $q.defer();
+                var url = ['.', 'api', 'oauth', service].join( '/' );
+
+                $.ajax({
+                    url:      url,
+                    async:    false,
+                    dataType: "json",
+                    success:  function(data) {
+                        $window.open( data.url, '_blank', 'height=650,width=480' );
+                    },
+                    error: function() {
+                        deferred.reject( {
+                            status : 500,
+                            message : 'Failed to obtain URL for service oauth.'
+                        } );
+                    }
+                });
+
+//                todo: Track window popup close and send reject()
+                window.callback = function ( data ) {
+                    // todo: Define a result for error condition
+//                    if ( data.status !== 200 ) deferred.reject( {
+//                        status : data.status,
+//                        message : ''
+//                    } );
+                    $log.info( 'callback firing with params ' + data );
+                    deferred.resolve( data );
+                };
+
+                return deferred.promise;
+            }
+
 
             // Functions exposed by mioServices
             return {
+                oauthLink : oauthLink,
                 contentIntersection : contentIntersection,
                 getServices : getServices,
                 authenticate : authenticate

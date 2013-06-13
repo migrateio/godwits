@@ -68,7 +68,7 @@
 
                     // Now that we know what content options are available, we need to
                     // remove any content in the current job that is no longer available
-                    $scope.job.content = intersect($scope.job.content, result);
+                    $scope.job.content = intersect( $scope.job.content, result );
                     return result;
                 };
 
@@ -280,8 +280,8 @@
      *     2. Slides to the left-most position
      *
      */
-    mod.directive( 'mioJobService', ['$log', '$timeout',
-        function ( $log, $timeout ) {
+    mod.directive( 'mioJobService', ['$log', '$timeout', 'mioServices',
+        function ( $log, $timeout, mioServices ) {
             return {
                 require : '^mioJob',
                 restrict : 'MACE',
@@ -400,6 +400,25 @@
                     };
 
 
+                    scope.oauthLink = function () {
+                        $log.info( 'oauthLink', scope );
+                        mioServices.oauthLink( scope.serviceDef.name ).then(
+                            function success( data ) {
+                                scope.serviceObj.service = scope.serviceDef.name;
+                                scope.serviceObj.auth = {
+                                    username : data.params.userinfo.email,
+                                    accessToken: data.access.access_token,
+                                    refreshToken: data.access.refresh_token
+                                };
+                                scope.toggle();
+                                jobCtrl.broadcast( JOB_DRAWER_TOGGLE );
+                            },
+                            function failure() {
+                                scope.errorMsg = 'Failed to authenticate with service.';
+                            }
+                        );
+                    };
+
                     scope.submit = function () {
                         jobCtrl.authenticate( service.service.name, scope.auth ).then(
                             function () {
@@ -460,7 +479,7 @@
                 restrict : 'MACE',
                 scope : {
                     content : '=mioJobContent',
-                    job: '=mioJobRef'
+                    job : '=mioJobRef'
                 },
                 templateUrl : '/partials/job/job-content.html',
                 link : function ( scope, element, attrs, jobCtrl ) {
@@ -469,7 +488,7 @@
                     // source and destination accounts. This available content will have
                     // to be updated whenever the source and destination change.
                     var availableContent = [];
-                    scope.$watch( function() {
+                    scope.$watch( function () {
                             var source = scope.job.source && scope.job.source.service || '';
                             var dest = scope.job.destination && scope.job.destination.service || '';
                             return source + '/' + dest;
