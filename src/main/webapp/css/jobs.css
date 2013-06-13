@@ -483,4 +483,10 @@
 }
 
 
+/* The action button in the job's tab bar */
+
+.mio-tab-btn-action {
+    line-height: 80px;
+}
+
 
