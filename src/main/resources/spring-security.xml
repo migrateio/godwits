@@ -30,6 +30,12 @@
         <intercept-url method="POST" pattern="/api/users/" access="permitAll()" requires-channel="https"/>
         <intercept-url method="GET" pattern="/api/oauth/**" access="permitAll()" requires-channel="https"/>
 
+        <!-- Custom signup UI is presented when accessing this UI, so the function will
+             take care of notifying the client to authenticate without returning a 401
+             status which would notmally invoke the sign-in process.
+        -->
+        <intercept-url method="POST" pattern="/api/jobs/submit" access="permitAll()" requires-channel="https"/>
+
         <intercept-url pattern="/api/auth/" access="isAuthenticated() or isAnonymous()" requires-channel="https"/>
         <intercept-url pattern="/api/**" access="isAuthenticated()" requires-channel="https"/>
         <remember-me key="migrateiscool" use-secure-cookie="false"

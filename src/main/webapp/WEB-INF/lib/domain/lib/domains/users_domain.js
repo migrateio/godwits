@@ -2,8 +2,8 @@ var log = require( 'ringo/logging' ).getLogger( module.id );
 
 var store = require( 'hazelstore' );
 var {format} = java.lang.String;
-var {BaseDomain} = require('./base');
-var {makeToken, bcrypt} = require('./main');
+var {BaseDomain} = require('../base');
+var {makeToken, bcrypt} = require('../main');
 
 exports.Users = BaseDomain.subClass( {
 
@@ -11,10 +11,10 @@ exports.Users = BaseDomain.subClass( {
         var {schema} = require( 'domain/schema/users.js' );
         var map = store.getMap( environment + '-users' );
         var pk = function(user) {
-            return user.id;
+            return user.userId;
         };
         var query = function(key) {
-            return /^select /ig.test(key);
+            return /^(select|where) /ig.test(key);
         };
         this._super('Users', map, pk, query, schema);
     },
@@ -24,7 +24,7 @@ exports.Users = BaseDomain.subClass( {
         json.created = new Date().toISOString();
 
         // add an id if not provided
-        if (!json.id) json.id = this.generate(6);
+        if (!json.userId) json.userId = this.generate(6);
 
         // If the password is present, but is not BCrypt'd, let's take care of it
         // Is this going too far? Since BCrypt has known characteristics it seems like
@@ -38,7 +38,7 @@ exports.Users = BaseDomain.subClass( {
     },
 
     readByEmail: function( email ) {
-        var query = format( 'select * from `[mapname]` where `email.address` = "%s"', email );
+        var query = format( 'where `email.address` = "%s"', email );
         var hits = this.read( query );
 
         if (hits.length > 1) {
@@ -59,7 +59,7 @@ exports.Users = BaseDomain.subClass( {
 
             // Check to see if this token exists already
             var hits = this.read(
-                "select * from `[mapname]` where `id` = '" + result + "'"
+                "where `userId` = '" + result + "'"
             );
 
             // If there is an unlikely match (depending on the length), we will retry

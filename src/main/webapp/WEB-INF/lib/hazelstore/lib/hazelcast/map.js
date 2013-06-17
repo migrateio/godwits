@@ -165,14 +165,17 @@ function Map( hazelcast, mapName ) {
             message : 'map.put requires a parameter [key] of type string'
         };
 
-        if ( isNaN( ttl ) ) ttl = 0;
-        timeunit = typeof timeunit === 'string'
-            ? java.util.concurrent.TimeUnit.valueOf( timeunit ) : null;
+        if ( typeof timeunit === 'string' )
+            timeunit = java.util.concurrent.TimeUnit.valueOf( timeunit );
 
         var json = JSON.stringify( value );
-//        log.debug( ' Putting into map [{}], key: {}, json: {}, ttl: {}, timeunit: {}',
-//            mapName, key, json, ttl, timeunit );
-        return map.put( key, json, ttl, timeunit );
+        log.debug( ' Putting into map [{}], key: {}, json: {}, ttl: {}, timeunit: {}',
+            mapName, key, json, ttl, timeunit );
+
+        if (isNaN(ttl) || !timeunit)
+            return map.put( key, json );
+        else
+            return map.put( key, json, ttl, timeunit );
     };
 
     /**

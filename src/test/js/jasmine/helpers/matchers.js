@@ -35,13 +35,17 @@ beforeEach( function () {
                 result = new RegExp( expectedMessage ).test( actualString );
             }
 
-            var not = this.isNot ? "not " : "";
+            var not = this.isNot ? 'not ' : '';
             if ( this.isNot ) result = !result;
 
             this.message = function () {
-                return ["Expected function " + not + "to throw ",
+                if (!exception && !not) 
+                    return ['Expected function to throw ',
                     expectedMessage,
-                    ", but it threw", exception.message || exception].join( ' ' );
+                    ', but it did not throw exception.'].join( ' ' );
+                return ['Expected function ' + not + 'to throw ',
+                    expectedMessage,
+                    ', but it threw', exception.message || exception].join( ' ' );
             };
 
             return result;

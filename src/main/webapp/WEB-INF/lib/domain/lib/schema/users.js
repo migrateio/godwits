@@ -1,7 +1,7 @@
 exports.schema = {
     type: 'object',
     properties: {
-        id: {
+        userId: {
             type: 'string'
         },
         name: {
@@ -12,6 +12,15 @@ exports.schema = {
             type: 'string',
             strip: 'ROLE_USER',
             minLength : 1
+        },
+        payment: {
+            type: 'object',
+            properties: {
+                last4: {
+                    type: 'string'
+                }
+            },
+            additionalProperties: false
         },
         services: {
             type: 'object',
@@ -48,11 +57,12 @@ exports.schema = {
             strip: 'ROLE_USER',
             type: 'array',
             "items": {
-                "type": "string"
+                "type": "string",
+                "enum": ['ROLE_CANDIDATE', 'ROLE_USER', 'ROLE_ADMIN']
             },
             "minItems": 1,
             "uniqueItems": true,
-            'default': ['ROLE_USER']
+            'default': ['ROLE_CANDIDATE']
         },
         created: {
             type: 'string',
@@ -60,5 +70,5 @@ exports.schema = {
         }
     },
     additionalProperties: false,
-    required: ['id', 'email', 'name', 'roles']
+    required: ['userId', 'email', 'name', 'roles']
 };

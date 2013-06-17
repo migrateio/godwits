@@ -1,8 +1,8 @@
 var log = require( 'ringo/logging' ).getLogger( module.id );
 
 var store = require( 'hazelstore' );
-var {BaseDomain} = require('./base');
-var {makeToken} = require('./main');
+var {BaseDomain} = require('../base');
+var {makeToken} = require('../main');
 
 exports.Jobs = BaseDomain.subClass( {
 
@@ -10,12 +10,17 @@ exports.Jobs = BaseDomain.subClass( {
         var {schema} = require( 'domain/schema/jobs.js' );
         var map = store.getMap( environment + '-jobs' );
         var pk = function(obj) {
-            return obj.id;
+            return obj.jobId;
         };
         var query = function(key) {
-            return /^select /ig.test(key);
+            return /^(select|where) /ig.test(key);
         };
         this._super('Jobs', map, pk, query, schema);
+    },
+
+    create: function(json, ttl, timeunit) {
+        if ( typeof json === 'undefined' ) json = {};
+        return this._super( json, ttl, timeunit );
     },
 
     prevalidate: function(json) {
@@ -23,7 +28,7 @@ exports.Jobs = BaseDomain.subClass( {
         if (!json.created) json.created = new Date().toISOString();
 
         // add an id if not provided
-        if (!json.id) json.id = this.generate(6);
+        if (!json.jobId) json.jobId = this.generate(6);
     },
 
     /**
@@ -36,7 +41,7 @@ exports.Jobs = BaseDomain.subClass( {
 
             // Check to see if this token exists already
             var hits = this.read(
-                "select * from `[mapname]` where `id` = '" + result + "'"
+                "where `jobId` = '" + result + "'"
             );
 
             // If there is an unlikely match (depending on the length), we will retry

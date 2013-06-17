@@ -33,7 +33,11 @@ exports.SimpleDBStore = function ( mapName, options ) {
         // If we are dealing with the load of a query, forward that request to the
         // query function.
         if (/^__query/ig.test(key)) {
-            var select = key.substring( 8 );
+            var select = key.substring( 8 ).trim();
+            // If the query starts with just the where clause, add a standard select clause
+            if ( /^where /ig.test( select ) ) {
+                select = 'select _value from `[mapname]` ' + select;
+            }
             return query( select );
         }
 

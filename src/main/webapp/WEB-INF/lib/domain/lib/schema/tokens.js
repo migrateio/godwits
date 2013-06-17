@@ -1,7 +1,7 @@
 exports.schema = {
     type: 'object',
     properties: {
-        id: {
+        tokenId: {
             type: 'string'
         },
         user: {
@@ -13,5 +13,5 @@ exports.schema = {
         }
     },
     additionalProperties: false,
-    required: ['id', 'user', 'created']
+    required: ['tokenId', 'user', 'created']
 };
