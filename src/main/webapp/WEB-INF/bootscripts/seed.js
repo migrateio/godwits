@@ -13,7 +13,7 @@ var users = new domain.Users( props['environment'] );
  * Create the admin user account.
  */
 users.create( {
-    id : 'admin',
+    userId : 'admin',
     name : 'Admin',
     password : 'secret',
     email : {
@@ -26,7 +26,7 @@ users.create( {
 
 // Delete before production
 users.create( {
-    id : 'fred',
+    userId : 'fred',
     name : 'Fred',
     password : 'secret',
     email : {
