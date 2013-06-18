@@ -47,10 +47,9 @@ exports.BaseDomain = Object.subClass( {
     },
 
     validate: function( json ) {
-        log.debug( 'Domain object right before validation: ', JSON.stringify( json ) );
         var schema = this.validateSchema( json );
-        log.debug( 'Schema results: ', JSON.stringify( schema ) );
         if ( !schema.valid ) {
+            log.warn( 'Schema results: ', JSON.stringify( schema ), JSON.stringify( json ) );
             throw { status : 400, errors : schema.errors,
                 message : this.name + '::validation errors: ' + JSON.stringify( schema.errors )};
         }
@@ -68,6 +67,7 @@ exports.BaseDomain = Object.subClass( {
 
         // Flesh out the object with default/required values from the schema
         var newObj = this.generateDefaults( json );
+        log.debug( 'After generating defaults: {}', JSON.stringify( newObj ) );
 
         this.prevalidate( newObj );
 
@@ -103,21 +103,18 @@ exports.BaseDomain = Object.subClass( {
             message : this.name + '::update not found [' + pkey + ']'
         };
 
-        // Combine the existing object with the update json
+        // Combine the existing object with the update json and generate any defaults
         var newObj = merge( {}, obj, json );
-        log.info( 'Merging {} into object {}, resulting in {}',
-            JSON.stringify( json ), JSON.stringify( obj ), JSON.stringify( newObj ) );
+//        log.debug( 'Merging {} into object {}, resulting in {}',
+//            JSON.stringify( json ), JSON.stringify( obj ), JSON.stringify( newObj ) );
+        newObj = this.generateDefaults( newObj );
+        log.debug( 'After generating defaults: {}', JSON.stringify( newObj ) );
+
 
         this.prevalidate( newObj );
 
         // Validate the new object
-        var schema = this.validateSchema( newObj );
-
-        // If there are validation errors, we throw an exception with the errors
-        if ( !schema.valid ) {
-            throw { status : 400, errors : schema.errors,
-                message : this.name + '::validation errors: ' + JSON.stringify( schema.errors )};
-        }
+        var schema = this.validate( newObj );
 
         // Persist the object if validation succeeds
         if (typeof timeunit === 'string')
@@ -160,7 +157,7 @@ exports.BaseDomain = Object.subClass( {
                         return null;
                     }
                 });
-                log.info( 'Result in Map: {}', JSON.stringify( result, null, 4 ) );
+//                log.info( 'Result in Map: {}', JSON.stringify( result, null, 4 ) );
                 return result;
             }
         }

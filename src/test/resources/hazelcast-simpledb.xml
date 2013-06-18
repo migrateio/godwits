@@ -56,7 +56,7 @@
         <!-- Entities in the cache will live for a period of two minutes. After that time, they
              will be fetched from the persistence tier.
         -->
-        <time-to-live-seconds>120</time-to-live-seconds>
+        <!--<time-to-live-seconds>120</time-to-live-seconds>-->
 
         <!--
 

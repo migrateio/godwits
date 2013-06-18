@@ -28,23 +28,32 @@ describe( 'User Domain', function () {
         } ).toThrow( 'Users::create requires a json body' );
     } );
 
-    it( 'should fail if no id is included', function () {
-        expect(function () {
-            users.create( { email : { address: 'fred@bedrock.com' } } );
-        } ).toThrowMatch( 'Missing required property: id' );
+    it( 'will auto-generate id if not supplied', function () {
+        var result = users.create( { name: 'fred', email : { address: 'fred@bedrock.com' } } );
+        expect( result.userId ).toEqual( jasmine.any(String) );
     } );
 
     it( 'should fail if no email is included', function () {
         expect(function () {
-            users.create( { id : '123' } );
+            users.create( { userId : '123', name: 'fred' } );
         } ).toThrowMatch( 'Missing required property: address' );
     } );
 
     it( 'should default the email status', function () {
         var result = users.create( {
-            id : '123',
+            userId : '123',
+            name: 'fred',
             email : { address : 'fred@bedrock.com' } } );
         expect( result.email.status ).toEqual( 'candidate' );
+    } );
+
+    it( 'should default the user\'s role', function () {
+        var result = users.create( {
+            userId : '123',
+            name: 'fred',
+            email : { address : 'fred@bedrock.com' } } );
+        expect( result.roles ).toBeArray( );
+        expect( result.roles ).toEqual( ['ROLE_CANDIDATE'] );
     } );
 
     it( 'should be able to create a new user', function () {
@@ -55,7 +64,7 @@ describe( 'User Domain', function () {
     it( 'should be able to create a "robust" user', function () {
         var result = users.create( wilma );
         expect( result ).toBeDefined();
-        expect( result.id ).toEqual( wilma.id );
+        expect( result.userId ).toEqual( wilma.userId );
     } );
 
     it( 'should be able to read a new user', function () {
@@ -63,12 +72,12 @@ describe( 'User Domain', function () {
         expect( result ).toBeDefined();
 
         // Evict it so another read will occur
-        map.evict( fred.id );
+        map.evict( fred.userId );
 
-        result = users.read( fred.id );
+        result = users.read( fred.userId );
         // The original [fred] object should not be modified
         expect( result ).not.toEqual( fred );
-        expect( result.id ).toEqual( fred.id );
+        expect( result.userId ).toEqual( fred.userId );
         expect( result.email ).toEqual( fred.email );
         expect( result.created ).toBeDefined();
     } );
@@ -89,11 +98,11 @@ describe( 'User Domain', function () {
         var expected = {};
         delete results[0].created;
         delete results[1].created;
-        expected[results[0].id] = results[0];
-        expected[results[1].id] = results[1];
+        expected[results[0].userId] = results[0];
+        expected[results[1].userId] = results[1];
         var actual = {};
-        actual[barney.id] = barney;
-        actual[betty.id] = betty;
+        actual[barney.userId] = barney;
+        actual[betty.userId] = betty;
 
         expect( expected ).toEqual( actual );
 
@@ -111,42 +120,50 @@ describe( 'User Domain', function () {
 
 // User has signed up, but not yet verified their email.
 var fred = {
-    id: '123',
+    userId: '123',
+    name: 'fred',
     email : {
         address : 'fred@bedrock.com',
         status : 'candidate'
-    }
+    },
+    roles : [ 'ROLE_CANDIDATE' ]
 };
 
 // User is verified and selected a password and run a job.
 var wilma = {
-    id: '456',
+    userId: '456',
+    name: 'wilma',
     email : {
         address : 'wilma@bedrock.com',
         status : 'verified'
     },
-    password : '5baa61e4c9b93f3f0682250b6cf8331b7ee68fd8',
+    password : '$2a$10$TzHJ5IdWP9ooyXanLoT5uuDYFeCTVUiHLw5JUjY9e8Wr9Ob7STHWC',
     services : {
         stripe : 'stripe_4382648',
         xero : 'xero_9382716'
-    }
+    },
+    roles : [ 'ROLE_USER' ]
 };
 // User is verified and selected a password, but has not started a run yet.
 var betty = {
-    id: '789',
+    userId: '789',
+    name: 'betty',
     email : {
         address : 'betty@bedrock.com',
         status : 'verified'
     },
-    password : '5baa61e4c9b93f3f0682250b6cf8331b7ee68fd8'
+    password : '$2a$10$TzHJ5IdWP9ooyXanLoT5uuDYFeCTVUiHLw5JUjY9e8Wr9Ob7STHWC',
+    roles : [ 'ROLE_USER' ]
 };
 // Password is verified, but user has not selected a password yet.
 var barney = {
-    id: '987',
+    userId: '987',
+    name: 'barney',
     email : {
         address : 'barney@bedrock.com',
         status : 'verified'
-    }
+    },
+    roles : [ 'ROLE_CANDIDATE' ]
 };
 
 

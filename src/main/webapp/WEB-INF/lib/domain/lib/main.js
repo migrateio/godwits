@@ -98,9 +98,11 @@ exports.bcrypt = function (raw, salt) {
     };
 })();
 
-exports.Users = require( './users_domain' ).Users;
-exports.Tokens = require( './tokens_domain' ).Tokens;
-exports.Jobs = require( './jobs_domain' ).Jobs;
+exports.Users = require( './domains/users_domain' ).Users;
+exports.Tokens = require( './domains/tokens_domain' ).Tokens;
+exports.Jobs = require( './domains/jobs_domain' ).Jobs;
+exports.Invoices = require( './domains/invoices_domain' ).Invoices;
 
-
+exports.Job = require( './domains/job' ).Job;
+exports.Invoice = require( './domains/invoice' ).Invoice;
 

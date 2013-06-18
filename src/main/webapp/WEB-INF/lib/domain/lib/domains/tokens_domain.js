@@ -2,8 +2,8 @@ var log = require( 'ringo/logging' ).getLogger( module.id );
 
 var store = require( 'hazelstore' );
 var {format} = java.lang.String;
-var {BaseDomain} = require( './base' );
-var {makeToken} = require( './main' );
+var {BaseDomain} = require( '../base' );
+var {makeToken} = require( '../main' );
 
 // When the time-to-live expires on members of this map, we want to remove the
 // token from the map store. At this point, the map has already evicted the entry.
@@ -35,11 +35,11 @@ exports.Tokens = BaseDomain.subClass( {
         removeOnEvict( map );
 
         var pk = function ( token ) {
-            return token.id;
+            return token.tokenId;
         };
 
         var query = function ( key ) {
-            return /^select /ig.test( key );
+            return /^(select|where) /ig.test( key.trim() );
         };
 
         // Our tokens will live for 3 days, and then they will expire.
@@ -90,7 +90,7 @@ exports.Tokens = BaseDomain.subClass( {
     },
 
     readByEmail: function( email ) {
-        var query = format( 'select * from `[mapname]` where `email.address` = "%s"', email );
+        var query = format( 'where `email.address` = "%s"', email );
         return this.read( query );
     },
 
@@ -113,6 +113,6 @@ exports.Tokens = BaseDomain.subClass( {
      */
     prevalidate : function ( json ) {
         json.created = new Date().toISOString();
-        if ( !json.id ) json.id = makeToken( 6 );
+        if ( !json.tokenId ) json.tokenId = makeToken( 6 );
     }
 } );

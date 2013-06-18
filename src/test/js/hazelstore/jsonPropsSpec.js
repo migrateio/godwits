@@ -61,6 +61,34 @@ describe( 'Json to Props Conversion', function () {
     );
 
 
+    convertCheck( 'should be able to handle popping prefixes',
+        {
+            name : 'fred',
+            city : 'bedrock',
+            associate : {
+                name : 'barney',
+                rel : 'friend',
+                spouse : {
+                    name : 'betty',
+                    rel : 'wife'
+                },
+                age: 32
+            },
+            age: 36
+        },
+        {
+            name : 'fred',
+            city : 'bedrock',
+            age: 36,
+            'associate.name' : 'barney',
+            'associate.rel' : 'friend',
+            'associate.spouse.name' : 'betty',
+            'associate.spouse.rel' : 'wife',
+            'associate.age' : 32
+        }
+    );
+
+
     convertCheck( 'should be able to convert simple arrays',
         [
             'fred', 'barney', 'wilma'
