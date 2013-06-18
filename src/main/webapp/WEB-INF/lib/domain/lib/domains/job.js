@@ -7,11 +7,11 @@
  *
  * **json** The json representation of a job.
  */
-exports.Job = function(json) {
+exports.Job = function(job) {
 
 
     function isRunning() {
-        return json && json.status === 'active';
+        return job && job.status === 'active';
     }
 
     /**
@@ -19,12 +19,12 @@ exports.Job = function(json) {
      * types selected.
      */
     function isComplete() {
-        return json
-            && json.source && json.source.service
-            && json.source.auth && json.source.auth.username
-            && json.source && json.source.service
-            && json.source.auth && json.source.auth.username
-            && json.contents && json.contents.length > 0;
+        return job
+            && job.destination && job.destination.service
+            && job.destination.auth && job.destination.auth.username
+            && job.source && job.source.service
+            && job.source.auth && job.source.auth.username
+            && job.contents && job.contents.length > 0;
     }
 
     /**
@@ -48,20 +48,26 @@ exports.Job = function(json) {
      * sources).
      */
     function sourceOverlaps(source) {
-        var opts = {
-            sensitivity : 'base',
-            usage: 'search'
-        };
-        if (json.source && json.source.service && json.source.username) {
-            return json.source.service.localeCompare( source.service, null, opts ) === 0
-                && json.source.username.localeCompare( source.username, null, opts ) === 0
+        if (job.source && job.source.service
+            && job.source.auth && job.source.auth.username
+            && source && source.service
+            && source.auth && source.auth.username
+            ) {
+            return job.source.service.toLowerCase() === source.service.toLowerCase()
+                && job.source.auth.username.toLowerCase() === source.auth.username.toLowerCase();
         }
         return false;
     }
 
-    return {
+    var obj = {
         sourceOverlaps: sourceOverlaps,
         isRunning: isRunning,
         isComplete: isComplete
-    }
+    };
+
+    Object.keys( job ).forEach( function ( prop ) {
+        obj[prop] = job[prop];
+    } );
+
+    return obj;
 };

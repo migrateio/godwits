@@ -6,7 +6,7 @@ exports.schema = {
         },
         status: {
             type: 'string',
-            'enum': ['pending', 'active', 'stopped', 'complete'],
+            'enum': ['pending', 'active', 'stopped', 'completed'],
             'default': 'pending'
         },
         source: {
@@ -16,20 +16,25 @@ exports.schema = {
                     type: 'string',
                     'enum': ['google', 'yahoo', 'microsoft', 'imap']
                 },
-                accessToken: {
-                    type: 'string',
-                    strip: 'ROLE_USER'
-                },
-                refreshToken: {
-                    type: 'string',
-                    strip: 'ROLE_USER'
-                },
-                username: {
-                    type: 'string'
-                },
-                password: {
-                    type: 'string',
-                    strip: 'ROLE_USER'
+                auth: {
+                    type : 'object',
+                    properties : {
+                        username : {
+                            type : 'string'
+                        },
+                        password : {
+                            type: 'string',
+                            strip: 'ROLE_USER'
+                        },
+                        accessToken : {
+                            type: 'string',
+                            strip: 'ROLE_USER'
+                        },
+                        refreshToken : {
+                            type: 'string',
+                            strip: 'ROLE_USER'
+                        }
+                    }
                 }
             },
             required: ['service']
@@ -41,20 +46,25 @@ exports.schema = {
                     type: 'string',
                     'enum': ['google', 'yahoo', 'microsoft', 'imap']
                 },
-                accessToken: {
-                    type: 'string',
-                    strip: 'ROLE_USER'
-                },
-                refreshToken: {
-                    type: 'string',
-                    strip: 'ROLE_USER'
-                },
-                username: {
-                    type: 'string'
-                },
-                password: {
-                    type: 'string',
-                    strip: 'ROLE_USER'
+                auth: {
+                    type : 'object',
+                    properties : {
+                        username : {
+                            type : 'string'
+                        },
+                        password : {
+                            type: 'string',
+                            strip: 'ROLE_USER'
+                        },
+                        accessToken : {
+                            type: 'string',
+                            strip: 'ROLE_USER'
+                        },
+                        refreshToken : {
+                            type: 'string',
+                            strip: 'ROLE_USER'
+                        }
+                    }
                 }
             },
             required: ['service']

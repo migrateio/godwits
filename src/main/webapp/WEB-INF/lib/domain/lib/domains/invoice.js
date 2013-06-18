@@ -1,7 +1,11 @@
+var log = require( 'ringo/logging' ).getLogger( module.id );
+
+var {Job} = require( './job' );
+
 exports.Invoice = function ( invoice ) {
 
     function intersect( a, b ) {
-        a = ng.copy( a );
+        a = [].concat( a );
         for ( var i = a.length - 1; i >= 0; i-- ) {
             var index = b.indexOf( a[i] );
             if ( index < 0 ) a.splice( i, 1 );
@@ -28,7 +32,8 @@ exports.Invoice = function ( invoice ) {
     function overlappingJobs( checkJob ) {
         return [].concat( invoice.jobs ).filter( function ( job ) {
             var match = true;
-            match = match && job.isRunning() && job.sourceMatch( checkJob.source );
+            var jobObj = new Job( job );
+            match = match && jobObj.isRunning() && jobObj.sourceOverlaps( checkJob.source );
             return match && intersect( checkJob.content, job.content ).length > 0;
         } );
     }
@@ -55,11 +60,11 @@ exports.Invoice = function ( invoice ) {
      */
     function calculatePayment( job ) {
         var totalCharged = isNaN( invoice.totalCharged ) ? 0.00 : invoice.totalCharged;
-        var isEdu = job.source && job.source.hostname
-            && job.source.hostname.endsWith( '.edu' );
+        var isEdu = job.source && job.source.auth && job.source.auth.hostname
+            && /\.edu$/ig.test( job.source.auth.hostname );
         var due = isEdu ? 5.00 : 15.00;
         return {
-            due : Math.max( due - totalCharged, 0 ),
+            due : due + totalCharged > 15 ? 15 - totalCharged : due,
             charged : totalCharged
         }
     }
@@ -70,13 +75,38 @@ exports.Invoice = function ( invoice ) {
         return new Date( expires ).toISOString();
     }
 
+    function addComment( userId, message, date ) {
+        if ( !date ) date = new Date().toISOString();
+        if ( typeof date !== 'string' ) date = date.toISOString();
 
-    return {
+        if ( !invoice.comments ) invoice.comments = [];
+        invoice.comments.push( {
+            userId : userId,
+            message : message,
+            created : date
+        } );
+    }
+
+    function addJob( job ) {
+        if ( !invoice.jobs ) invoice.jobs = [];
+        invoice.jobs.push( job );
+    }
+
+    var obj = {
+        addComment : addComment,
+        addJob : addJob,
         calculatePayment : calculatePayment,
         getExpiration : getExpiration,
         isOpen : isOpen,
+        json : invoice,
         getTest : invoice.test,
         overlappingJobs : overlappingJobs
-    }
+    };
 
+    Object.keys( invoice ).forEach( function ( prop ) {
+//        log.info( 'Invoice, key:', prop, '=', JSON.stringify( invoice[prop] ) );
+        obj[prop] = invoice[prop];
+    } );
+
+    return obj;
 };

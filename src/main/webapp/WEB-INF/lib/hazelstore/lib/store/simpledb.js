@@ -35,7 +35,7 @@ exports.SimpleDBStore = function ( mapName, options ) {
         if (/^__query/ig.test(key)) {
             var select = key.substring( 8 ).trim();
             // If the query starts with just the where clause, add a standard select clause
-            if ( /^where /ig.test( select ) ) {
+            if ( /^where /ig.test( select.trim() ) ) {
                 select = 'select _value from `[mapname]` ' + select;
             }
             return query( select );
@@ -101,6 +101,7 @@ exports.SimpleDBStore = function ( mapName, options ) {
             .withSelectExpression( select );
 
         try {
+//            log.info( 'Making request: {}', request );
             var result = client.select( request );
 
 //            if (result.nextToken) response.next = result.nextToken;
@@ -268,11 +269,7 @@ exports.SimpleDBStore = function ( mapName, options ) {
         var request = new DomainMetadataRequest().withDomainName( tableName );
         try {
             client.domainMetadata( request );
-        } catch ( e if e
-    .
-        javaException instanceof NoSuchDomainException
-    )
-        {
+        } catch ( e if e.javaException instanceof NoSuchDomainException ) {
             return false;
         }
         return true;

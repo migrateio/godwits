@@ -14,7 +14,7 @@ exports.Users = BaseDomain.subClass( {
             return user.userId;
         };
         var query = function(key) {
-            return /^(select|where) /ig.test(key);
+            return /^(select|where) /ig.test( key.trim() );
         };
         this._super('Users', map, pk, query, schema);
     },

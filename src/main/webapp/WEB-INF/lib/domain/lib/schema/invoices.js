@@ -13,10 +13,11 @@ exports.schema = {
                     message : {
                         type : 'string'
                     },
-                    userid : {
+                    userId : {
                         type : 'string'
                     }
-                }
+                },
+                required: ['created', 'message', 'userId']
             }
         },
         destination : {
@@ -25,10 +26,28 @@ exports.schema = {
                 service : {
                     type : 'string'
                 },
-                username : {
-                    type : 'string'
+                auth: {
+                    type : 'object',
+                    properties : {
+                        username : {
+                            type : 'string'
+                        },
+                        password : {
+                            type: 'string',
+                            strip: 'ROLE_USER'
+                        },
+                        accessToken : {
+                            type: 'string',
+                            strip: 'ROLE_USER'
+                        },
+                        refreshToken : {
+                            type: 'string',
+                            strip: 'ROLE_USER'
+                        }
+                    }
                 }
-            }
+            },
+            required: ['service']
         },
         expires : {
             type : 'string',
@@ -45,31 +64,55 @@ exports.schema = {
             items : {
                 type : 'object',
                 properties : {
-                    content : {
-                        type : 'array',
-                        items : {
-                            type : 'string'
-                        }
+                    content: {
+                        type: 'array',
+                        items: {
+                            type: 'string',
+                            'enum': ['mails', 'calendars', 'contacts', 'media', 'documents']
+                        },
+                        "uniqueItems": true,
+                        additionalItems: false
                     },
                     jobId : {
                         type : 'string'
                     },
                     status : {
                         type : 'string',
-                        'enum': ['pending', 'active', 'stopped', 'complete']
+                        'enum': ['pending', 'active', 'stopped', 'completed'],
+                        'default': 'pending'
                     },
                     source : {
                         type : 'object',
                         properties : {
-                            service : {
-                                type : 'string'
+                            service: {
+                                type: 'string',
+                                'enum': ['google', 'yahoo', 'microsoft', 'imap']
                             },
-                            username : {
-                                type : 'string'
+                            auth: {
+                                type : 'object',
+                                properties : {
+                                    username : {
+                                        type : 'string'
+                                    },
+                                    password : {
+                                        type: 'string',
+                                        strip: 'ROLE_USER'
+                                    },
+                                    accessToken : {
+                                        type: 'string',
+                                        strip: 'ROLE_USER'
+                                    },
+                                    refreshToken : {
+                                        type: 'string',
+                                        strip: 'ROLE_USER'
+                                    }
+                                }
                             }
-                        }
+                        },
+                        required: ['service']
                     }
-                }
+                },
+                required: ['content', 'jobId', 'status', 'source']
             }
         },
         starts : {
@@ -86,10 +129,12 @@ exports.schema = {
                     type : 'string',
                     format : 'date-time'
                 }
-            }
+            },
+            required: ['jobId']
         },
         totalCharged : {
-            type : 'number'
+            type : 'number',
+            'default': 0
         },
         transactions : {
             type : 'array',
@@ -122,11 +167,19 @@ exports.schema = {
                     type : {
                         type : 'string'
                     }
-                }
+                },
+                required: [
+                    'amount', 'captureId', 'customerId', 'invoiceDate', 'invoiceNum',
+                    'service', 'type'
+                ]
             }
         },
         userId : {
             type : 'string'
         }
-    }
+    },
+    required: [
+        'destination', 'expires', 'invoiceId', 'invoiceNum', 'starts',
+        'totalCharged', 'userId'
+    ]
 };

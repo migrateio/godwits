@@ -6,7 +6,7 @@ var {BaseDomain} = require( '../base' );
 var {makeToken} = require( '../main' );
 var {format} = java.lang.String;
 
-exports.Destinations = BaseDomain.subClass( {
+exports.Invoices = BaseDomain.subClass( {
 
     init : function ( environment ) {
         var {schema} = require( 'domain/schema/invoices.js' );
@@ -15,14 +15,35 @@ exports.Destinations = BaseDomain.subClass( {
             return obj.invoiceId;
         };
         var query = function ( key ) {
-            return /^(select|where) /ig.test( key );
+            return /^(select|where) /ig.test( key.trim() );
         };
-        this._super( 'Destinations', map, pk, query, schema );
+        this._super( 'Invoices', map, pk, query, schema );
+    },
+
+    /**
+     * This is a bit hacky. Since we have created a domain object which may be
+     * wrapping the actual json we intend to persist, we will have to detect this
+     * wrapper and reference the enclosed json. The only way I could come up with
+     * to identify the wrapper from the json, is to look for a property that is not
+     * part of the json but is part of the wrapper.
+     *
+     * @param json
+     */
+    normalize: function( json ) {
+        return json.json ? json.json : json;
     },
 
     prevalidate : function ( json ) {
         // add an id if not provided
         if ( !json.invoiceId ) json.invoiceId = this.generate( 6 );
+
+        var now = Date.now();
+
+        if ( !json.starts )
+            json.starts = new Date(now).toISOString();
+
+        if ( !json.expires )
+            json.expires = new Date(now + 1000 * 60 * 60 * 24 * 30 ).toISOString();
     },
 
     /**
@@ -45,7 +66,7 @@ exports.Destinations = BaseDomain.subClass( {
     },
 
     create : function ( json, ttl, timeunit ) {
-        var result = this._super( json, ttl, timeunit );
+        var result = this._super( this.normalize( json ), ttl, timeunit );
         return new Invoice(result);
     },
 
@@ -57,24 +78,19 @@ exports.Destinations = BaseDomain.subClass( {
         });
     },
 
-    readByEmail: function( email ) {
-        var query = format( 'where `email.address` = "%s"', email );
-        return this.read( query );
-    },
-
     update : function ( json, ttl, timeunit ) {
-        var result = this._super( json, ttl, timeunit );
+        var result = this._super( this.normalize( json ), ttl, timeunit );
         return new Invoice(result);
     },
 
     readByJob : function ( userId, job ) {
         var query = format( '\
             where `destination.service` = "%s" \
-            and `destination.username` = "%s" \
-            and `userid` = "%s"',
+            and `destination.auth.username` = "%s" \
+            and `userId` = "%s"',
             job.destination.service, job.destination.auth.username, userId );
 
-        var destRecord = this.read( query );
+        return this.read( query );
     }
 
 } );

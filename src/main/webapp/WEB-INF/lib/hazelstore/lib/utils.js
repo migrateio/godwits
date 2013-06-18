@@ -25,42 +25,55 @@ exports.convertPropsToMap = function ( properties ) {
 };
 
 exports.jsonToProps = function ( json, delim ) {
-    var getKey = function ( key, prefix, isArray ) {
-        var k = prefix.length > 0 ? prefix.join( delim ) + delim : '';
-        return isArray ? k + '[' + key + ']' : k + key;
-    };
     var toProps = function ( result, prefix, js ) {
-        if ( typeof js === 'object' ) {
-            var isArray = Array.isArray( js );
-            var keys = Object.keys( js );
 
-//            // Take care of empty arrays
-            if ( isArray && keys.length === 0 )
-                result[getKey( '', prefix, isArray )] = '';
+        var pre = function() {
+            return prefix.join( delim );
+        };
 
-            keys.forEach( function ( key ) {
-                var value = js[key];
-                var type = typeof value === 'object' && toString.call( value ) === '[object Date]'
-                    ? 'date' : typeof value;
-                switch ( type ) {
-                    case 'number':
-                    case 'boolean':
-                    case 'string':
-                        result[getKey( key, prefix, isArray )] = value;
-                        break;
-                    case 'date':
-                        result[getKey( key, prefix, isArray )] = value.toISOString();
-                        break;
-                    case 'object':
-                        prefix.push( getKey( key, [], isArray ) );
+        // Identify what type of object is the incoming json parameter
+        var type = typeof js;
+        if (type === 'object' && toString.call( js ) === '[object Date]') type = 'date';
+        if (Array.isArray(js) ) type = 'array';
+
+        switch ( type ) {
+            case 'number':
+            case 'boolean':
+            case 'string':
+                result[pre()] = js;
+                break;
+            case 'date':
+                result[pre()] = js.toISOString();
+                break;
+
+            // If we are dealing with an array, iterating over its items will add to the
+            // prefix array as [n]
+            case 'array':
+                // An empty array poses a problem with this notation. For our purposes
+                // we are choosing to save them as elements with no index:
+                // ie. friends : []  ==>  friends.[] : ''
+                if (js.length === 0) {
+                    prefix.push('[]');
+                    toProps( result, prefix, '' );
+                    prefix.pop();
+                } else {
+                    js.forEach(function(value, index) {
+                        prefix.push('[' + index + ']');
                         toProps( result, prefix, value );
-                        if ( isArray ) prefix.pop();
-                        break;
+                        prefix.pop();
+                    });
                 }
-//                log.error('Result: {}, type: {}, prefix: {}, array: {}',
-//                    JSON.stringify( result ), type, JSON.stringify( prefix ), isArray);
-            } );
-            if ( isArray ) prefix.pop();
+                break;
+
+            // If it is an object, we will iterate over its keys and add them to the
+            // prefix array
+            case 'object':
+                Object.keys(js ).forEach(function(key) {
+                    prefix.push( key );
+                    toProps( result, prefix, js[key] );
+                    prefix.pop();
+                });
+                break;
         }
         return result;
     };

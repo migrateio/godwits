@@ -13,7 +13,7 @@ exports.Jobs = BaseDomain.subClass( {
             return obj.jobId;
         };
         var query = function(key) {
-            return /^(select|where) /ig.test(key);
+            return /^(select|where) /ig.test( key.trim() );
         };
         this._super('Jobs', map, pk, query, schema);
     },

@@ -39,7 +39,7 @@ exports.Tokens = BaseDomain.subClass( {
         };
 
         var query = function ( key ) {
-            return /^(select|where) /ig.test(key);
+            return /^(select|where) /ig.test( key.trim() );
         };
 
         // Our tokens will live for 3 days, and then they will expire.
