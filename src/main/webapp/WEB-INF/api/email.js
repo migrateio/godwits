@@ -54,7 +54,7 @@ function sendEmail( template, obj ) {
  * @param obj
  */
 exports.sendVerificationEmail = function ( token, user ) {
-    var confirm = props['server.web.url'] + '#/signin/verify/' + user.id + '/' + token;
+    var confirm = props['server.web.url'] + '#/signin/verify/' + user.userId + '/' + token;
     var opts = {
 //        to : 'success@simulator.amazonses.com',
 //        to : 'suppressionlist@simulator.amazonses.com',
@@ -86,7 +86,7 @@ exports.sendVerificationEmail = function ( token, user ) {
  * @param user
  */
 exports.sendResetPasswordEmail = function ( token, user ) {
-    var confirm = props['server.web.url'] + '#/signin/verify/' + user.id + '/' + token;
+    var confirm = props['server.web.url'] + '#/signin/verify/' + user.userId + '/' + token;
     var opts = {
 //        to : 'success@simulator.amazonses.com',
 //        to : 'suppressionlist@simulator.amazonses.com',

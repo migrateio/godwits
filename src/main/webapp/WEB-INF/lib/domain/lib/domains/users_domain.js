@@ -3,12 +3,13 @@ var log = require( 'ringo/logging' ).getLogger( module.id );
 var store = require( 'hazelstore' );
 var {format} = java.lang.String;
 var {BaseDomain} = require('../base');
+var {User} = require('./user');
 var {makeToken, bcrypt} = require('../main');
 
 exports.Users = BaseDomain.subClass( {
 
     init: function(environment) {
-        var {schema} = require( 'domain/schema/users.js' );
+        var {schema} = require( '../schema/users.js' );
         var map = store.getMap( environment + '-users' );
         var pk = function(user) {
             return user.userId;
@@ -17,6 +18,19 @@ exports.Users = BaseDomain.subClass( {
             return /^(select|where) /ig.test( key.trim() );
         };
         this._super('Users', map, pk, query, schema);
+    },
+
+    /**
+     * This is a bit hacky. Since we have created a domain object which may be
+     * wrapping the actual json we intend to persist, we will have to detect this
+     * wrapper and reference the enclosed json. The only way I could come up with
+     * to identify the wrapper from the json, is to look for a property that is not
+     * part of the json but is part of the wrapper.
+     *
+     * @param json
+     */
+    normalize: function( json ) {
+        return json.toJSON && json.toJSON() || json;
     },
 
     prevalidate: function(json) {
@@ -37,6 +51,27 @@ exports.Users = BaseDomain.subClass( {
         }
     },
 
+    create : function ( json, ttl, timeunit ) {
+        var result = this._super( this.normalize( json ), ttl, timeunit );
+        return new User(result);
+    },
+
+    read : function ( pkey ) {
+        var result = this._super( pkey );
+
+        if (Array.isArray(result)) return result.map(function(json) {
+            return new User( json );
+        });
+
+        return new User(result);
+    },
+
+    update : function ( json, ttl, timeunit ) {
+        var result = this._super( this.normalize( json ), ttl, timeunit );
+        return new User(result);
+    },
+
+
     readByEmail: function( email ) {
         var query = format( 'where `email.address` = "%s"', email );
         var hits = this.read( query );
@@ -46,7 +81,7 @@ exports.Users = BaseDomain.subClass( {
                 + email, JSON.stringify( hits ) );
         }
 
-        return hits.length === 0 ? null : hits[0];
+        return hits.length === 0 ? null : new User( hits[0] );
     },
 
     /**
@@ -67,6 +102,5 @@ exports.Users = BaseDomain.subClass( {
         }
         return result;
     }
-
 } );
 

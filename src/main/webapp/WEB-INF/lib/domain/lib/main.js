@@ -105,4 +105,5 @@ exports.Invoices = require( './domains/invoices_domain' ).Invoices;
 
 exports.Job = require( './domains/job' ).Job;
 exports.Invoice = require( './domains/invoice' ).Invoice;
+exports.User = require( './domains/user' ).User;
 

@@ -15,7 +15,10 @@ var {json} = require('ringo/jsgi/response');
  */
 app.get('/', function (req) {
     var result = {
-        isAuthenticated: req.isAuthenticated()
+        isAuthenticated: req.isAuthenticated(),
+        user: {
+            userId: req.getUsername()
+        }
     };
     log.info( 'Result of /api/auth/ is {}', JSON.stringify( result ) );
     return json(result);

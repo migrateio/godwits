@@ -75,8 +75,13 @@
             function passiveAuth() {
                 $log.info( 'Attempting passive authentication of the user' );
                 $http.get( '/api/auth/' ).success( function ( data ) {
-                    $log.info( 'Result of /api/auth/', JSON.stringify( data ) );
+                    $log.info( 'passiveAuth::result of /api/auth/', JSON.stringify( data ) );
                     $scope.authenticated = data.isAuthenticated;
+
+                    // Even a passive login check can result in an authenticated user
+                    if (data.isAuthenticated) {
+                        authService.loginConfirmed( data.user );
+                    }
                 } );
             }
 

@@ -1,8 +1,11 @@
 var log = require( 'ringo/logging' ).getLogger( module.id );
 
+var {makeToken} = require( '../main' );
 var {Job} = require( './job' );
+var {format} = java.lang.String;
 
 exports.Invoice = function ( invoice ) {
+    if (typeof invoice.toJSON === 'function') return invoice;
 
     function intersect( a, b ) {
         a = [].concat( a );
@@ -60,8 +63,7 @@ exports.Invoice = function ( invoice ) {
      */
     function calculatePayment( job ) {
         var totalCharged = isNaN( invoice.totalCharged ) ? 0.00 : invoice.totalCharged;
-        var isEdu = job.source && job.source.auth && job.source.auth.hostname
-            && /\.edu$/ig.test( job.source.auth.hostname );
+        var isEdu = getPromotionType( job ) === 'edu';
         var due = isEdu ? 5.00 : 15.00;
         return {
             due : due + totalCharged > 15 ? 15 - totalCharged : due,
@@ -92,14 +94,124 @@ exports.Invoice = function ( invoice ) {
         invoice.jobs.push( job );
     }
 
+    function getTest() {
+        return invoice.test;
+    }
+
+    function getPromotionType( job ) {
+        var isEdu = job.source && job.source.auth && job.source.auth.hostname
+            && /\.edu$/ig.test( job.source.auth.hostname );
+        return isEdu ? 'edu' : 'full'
+    }
+
+    function addCharge(charge) {
+        if (!invoice.transactions) invoice.transactions = [];
+
+        var num = invoice.invoiceNum + '/' + format('%0.3d', invoice.transactions.length + 1);
+
+        invoice.transactions.push( {
+            amount: charge.amount / 100,
+            chargeId : charge.id,
+            service: 'stripe',
+            customerId: charge.customer,
+            invoiceDate : new Date(charge.created * 1000 ).toISOString(),
+            invoiceNum : num
+        } );
+    }
+
+    /**
+     * Charges the credit card tied to the user's customer record. In addition to the
+     * payment charge, the user's record is updated with the transaction details and some
+     * amounts are updated.
+     *
+     * For transactional purposes, the user's record is locked during this process so no
+     * other process can modify the information simultaneously.
+     *
+     */
+    function capturePayment (amount) {
+        var deferred = new Deferred();
+
+        if (!amount || amount < 0.50) {
+            deferred.resolve({
+                status: 400,
+                message: 'Cannot create a charge for that amount: ' + amount
+            }, true);
+            return deferred.promise;
+        }
+
+        // Get the user record
+        var user = users.read( invoice.userId );
+
+        var isComplete = user && user.userId && user.isEmailVerified();
+        if ( !isComplete ) {
+            deferred.resolve( {
+                status : 400,
+                message : 'Cannot create a stripe charge without a verified email address.'
+            }, true );
+            return deferred.promise;
+        }
+
+        var customerId = user.getCustomerId( 'stripe' );
+        if ( !customerId ) {
+            deferred.resolve ({
+                status : 400,
+                message : 'This user is not yet a stripe customer.'
+            }, true );
+            return deferred.promise;
+        }
+
+        var charge = {
+            amount: amount * 100,
+            currency: 'usd',
+            customer: customerId,
+            description: user.email.address,
+            capture: true
+        };
+
+        stripe.charges.create( charge ).then(
+            function success(charge) {
+                log.info( 'Charge info:', JSON.stringify( charge, null, 4 ) );
+                deferred.resolve( {
+                    charge : charge
+                } );
+            },
+            function error(error) {
+                var result = {
+                    status : 500,
+                    charge : charge,
+                    message : 'Error occurred while creating charge.',
+                    detail : error.detail
+                };
+                deferred.resolve( result, true );
+            }
+        );
+        return deferred.promise;
+    }
+
+    // Ensure the invoice has the required properties
+    function reqCheck(prop) {
+        if (!invoice[prop]) throw {
+            status: 400,
+            message: 'Required property not present [' + prop + ']'
+        };
+    }
+    ['destination', 'expires', 'invoiceId', 'invoiceNum', 'starts',
+        'totalCharged', 'userId'].forEach(reqCheck);
+
+    // Create an invoice number
+    invoice.invoiceNum = makeToken(6);
+
     var obj = {
         addComment : addComment,
         addJob : addJob,
         calculatePayment : calculatePayment,
         getExpiration : getExpiration,
+        getPromotionType: getPromotionType,
+        getTest : getTest,
         isOpen : isOpen,
-        json : invoice,
-        getTest : invoice.test,
+        toJSON : function toJSON() {
+            return invoice;
+        },
         overlappingJobs : overlappingJobs
     };
 

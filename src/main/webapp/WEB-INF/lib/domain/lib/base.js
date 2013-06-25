@@ -165,6 +165,23 @@ exports.BaseDomain = Object.subClass( {
         return obj;
     },
 
+    readLock : function ( pkey, ttl, timeunit ) {
+        // Verify that the parameter is correct
+        if ( !pkey ) throw {
+            status : 400,
+            message : this.name + '::readLock requires a primary key value'
+        };
+
+        // Get the current object from the map
+        var obj = this.map.lock( pkey, ttl, timeunit );
+        if ( !obj ) throw {
+            status : 404,
+            message : this.name + '::readLock not found [' + pkey + ']'
+        };
+
+        return obj;
+    },
+
     del : function del( pkey ) {
         // Verify that the parameter is correct
         if ( !pkey ) throw {

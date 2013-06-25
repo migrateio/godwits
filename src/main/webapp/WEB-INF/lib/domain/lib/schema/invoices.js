@@ -160,7 +160,7 @@ exports.schema = {
                     invoiceNum : {
                         type : 'string'
                     },
-                    service : {
+                    service : {                                                                                           v
                         type : 'string',
                         'enum' : ['google', 'yahoo', 'microsoft', 'imap']
                     },

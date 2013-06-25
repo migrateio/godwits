@@ -21,37 +21,40 @@ describe( 'Invoice Domain', function () {
         map.clear();
     } );
 
-    it( 'should fail if we exclude the many required fields', function () {
-        expect(function () {
-            invoices.create( {} )
-        } ).toThrowMatch( 'Missing required property: destination' );
+    describe( 'testing object instantiation', function () {
+        it( 'should fail if we exclude the many required fields', function () {
+            expect(function () {
+                invoices.create( {} )
+            } ).toThrowMatch( 'Missing required property: destination' );
 
-        expect(function () {
-            invoices.create( {
-                destination : {
-                    service : 'google'
-                }
-            } )
-        } ).toThrowMatch( 'Missing required property' );
+            expect(function () {
+                invoices.create( {
+                    destination : {
+                        service : 'google'
+                    }
+                } )
+            } ).toThrowMatch( 'Missing required property' );
 
-        expect(function () {
-            invoices.create( {
+            expect(function () {
+                invoices.create( {
+                    destination : {
+                        service : 'google'
+                    },
+                    invoiceNum : '12345'
+                } )
+            } ).toThrowMatch( 'Missing required property' );
+
+            var result = invoices.create( {
                 destination : {
                     service : 'google'
                 },
-                invoiceNum : '12345'
-            } )
-        } ).toThrowMatch( 'Missing required property' );
+                invoiceNum : '12345',
+                userId : 'abcdef'
+            } );
 
-        var result = invoices.create( {
-            destination : {
-                service : 'google'
-            },
-            invoiceNum : '12345',
-            userId : 'abcdef'
+            expect( invoices ).toBeDefined();
         } );
 
-        expect( invoices ).toBeDefined();
     } );
 
     describe( 'Testing the crud functionality', function () {
@@ -190,6 +193,46 @@ describe( 'Invoice Domain', function () {
 
     } );
 
+    describe( 'Testing the invoices preauthorization function', function () {
+
+        it( 'should detect incomplete jobs', function () {
+            expect(function () {
+                invoices.preauthorize( 'user1', new domain.Job( {
+                    source : {
+                        service : 'microsoft',
+                        auth : {
+                        }
+                    },
+                    content : ['contacts', 'mails', 'media']
+                } ) );
+            } ).toThrowMatch( 'Job is not complete' );
+
+            expect(function () {
+                invoices.preauthorize( 'user1', new domain.Job( {
+                    source : {
+                        auth : {
+                            username : 'fred@live.com'
+                        }
+                    },
+                    content : ['contacts', 'mails', 'media']
+                } ) );
+            } ).toThrowMatch( 'Job is not complete' );
+
+            expect(function () {
+                invoices.preauthorize( 'user1', domain.Job( {
+                    source : {
+                        service : 'microsoft',
+                        auth : {
+                            username : 'fred@live.com'
+                        }
+                    },
+                    content : []
+                } ) );
+            } ).toThrowMatch( 'Job is not complete' );
+        } );
+
+    } );
+
     describe( 'Testing the preauth support functions', function () {
 
         var invoice;
@@ -267,110 +310,217 @@ describe( 'Invoice Domain', function () {
     describe( 'Testing the payment calculation support functions', function () {
 
         it( 'should report non-imap job as $15', function () {
-            var invoice = new domain.Invoice({
-                totalCharged: 0
-            });
-            var result = invoice.calculatePayment({
-                source: {
-                    auth: {
-                        username: 'jcook@gmail.com'
+            var invoice = new domain.Invoice( {
+                totalCharged : 0
+            } );
+            var result = invoice.calculatePayment( {
+                source : {
+                    auth : {
+                        username : 'jcook@gmail.com'
                     }
                 }
-            });
+            } );
             expect( result.charged ).toEqual( 0 );
             expect( result.due ).toEqual( 15 );
         } );
 
         it( 'should report imap jobs to non-edu host as $15', function () {
-            var invoice = new domain.Invoice({
-                totalCharged: 0
-            });
-            var result = invoice.calculatePayment({
-                source: {
-                    auth: {
-                        hostname: 'imap.aol.com'
+            var invoice = new domain.Invoice( {
+                totalCharged : 0
+            } );
+            var result = invoice.calculatePayment( {
+                source : {
+                    auth : {
+                        hostname : 'imap.aol.com'
                     }
                 }
-            });
+            } );
             expect( result.charged ).toEqual( 0 );
             expect( result.due ).toEqual( 15 );
         } );
 
         it( 'should report imap jobs to non-edu host as $5', function () {
-            var invoice = new domain.Invoice({
-                totalCharged: 0
-            });
-            var result = invoice.calculatePayment({
-                source: {
-                    auth: {
-                        hostname: 'imap.osu.edu'
+            var invoice = new domain.Invoice( {
+                totalCharged : 0
+            } );
+            var result = invoice.calculatePayment( {
+                source : {
+                    auth : {
+                        hostname : 'imap.osu.edu'
                     }
                 }
-            });
+            } );
             expect( result.charged ).toEqual( 0 );
             expect( result.due ).toEqual( 5 );
         } );
 
         it( 'should report non-imap job as max $15', function () {
-            var invoice = new domain.Invoice({
-                totalCharged: 5
-            });
-            var result = invoice.calculatePayment({
-                source: {
-                    auth: {
-                        username: 'jcook@gmail.com'
+            var invoice = new domain.Invoice( {
+                totalCharged : 5
+            } );
+            var result = invoice.calculatePayment( {
+                source : {
+                    auth : {
+                        username : 'jcook@gmail.com'
                     }
                 }
-            });
+            } );
             expect( result.charged ).toEqual( 5 );
             expect( result.due ).toEqual( 10 );
         } );
 
         it( 'should report imap jobs to non-edu host as max $15', function () {
-            var invoice = new domain.Invoice({
-                totalCharged: 15
-            });
-            var result = invoice.calculatePayment({
-                source: {
-                    auth: {
-                        hostname: 'imap.aol.com'
+            var invoice = new domain.Invoice( {
+                totalCharged : 15
+            } );
+            var result = invoice.calculatePayment( {
+                source : {
+                    auth : {
+                        hostname : 'imap.aol.com'
                     }
                 }
-            });
+            } );
             expect( result.charged ).toEqual( 15 );
             expect( result.due ).toEqual( 0 );
         } );
 
         it( 'should report imap jobs to non-edu host as max $5', function () {
-            var invoice = new domain.Invoice({
-                totalCharged: 5
-            });
-            var result = invoice.calculatePayment({
-                source: {
-                    auth: {
-                        hostname: 'imap.osu.edu'
+            var invoice = new domain.Invoice( {
+                totalCharged : 5
+            } );
+            var result = invoice.calculatePayment( {
+                source : {
+                    auth : {
+                        hostname : 'imap.osu.edu'
                     }
                 }
-            });
+            } );
             expect( result.charged ).toEqual( 5 );
             expect( result.due ).toEqual( 5 );
         } );
 
         it( 'should report no charges when charged = $15', function () {
-            var invoice = new domain.Invoice({
-                totalCharged: 15
-            });
-            var result = invoice.calculatePayment({
-                source: {
-                    auth: {
-                        hostname: 'imap.osu.edu'
+            var invoice = new domain.Invoice( {
+                totalCharged : 15
+            } );
+            var result = invoice.calculatePayment( {
+                source : {
+                    auth : {
+                        hostname : 'imap.osu.edu'
                     }
                 }
-            });
+            } );
             expect( result.charged ).toEqual( 15 );
             expect( result.due ).toEqual( 0 );
         } );
 
     } );
+
+    var inv_open_jobs2_active1 = {
+        destination : {
+            service : 'google',
+            auth : {
+                username : 'jcook@migrate.io'
+            }
+        },
+        jobs : [
+            {
+                jobId : 'job_1',
+                content : ['mails', 'contacts'],
+                status : 'completed',
+                source : {
+                    service : 'yahoo',
+                    auth : {
+                        username : 'fred@yahoo.com'
+                    }
+                }
+            },
+            {
+                jobId : 'job_2',
+                content : ['documents', 'media'],
+                status : 'active',
+                source : {
+                    service : 'microsoft',
+                    auth : {
+                        username : 'fred@live.com'
+                    }
+                }
+            }
+        ],
+        invoiceNum : '12345',
+        userId : 'user1'
+    };
+
+    var inv_open_jobs2_active0 = {
+        destination : {
+            service : 'google',
+            auth : {
+                username : 'jcook@migrate.io'
+            }
+        },
+        jobs : [
+            {
+                jobId : 'job_1',
+                content : ['mails', 'contacts'],
+                status : 'completed',
+                source : {
+                    service : 'yahoo',
+                    auth : {
+                        username : 'fred@yahoo.com'
+                    }
+                }
+            },
+            {
+                jobId : 'job_2',
+                content : ['documents', 'media'],
+                status : 'pending',
+                source : {
+                    service : 'microsoft',
+                    auth : {
+                        username : 'fred@live.com'
+                    }
+                }
+            }
+        ],
+        invoiceNum : '12345',
+        userId : 'user2'
+    };
+
+    var inv_closed_jobs2_active0 = {
+        destination : {
+            service : 'google',
+            auth : {
+                username : 'jcook@migrate.io'
+            }
+        },
+        starts : '2012-05-19T16:20:00.000Z',
+        expires : '2012-06-19T16:20:00.000Z',
+        jobs : [
+            {
+                jobId : 'job_1',
+                content : ['mails', 'contacts'],
+                status : 'completed',
+                source : {
+                    service : 'yahoo',
+                    auth : {
+                        username : 'fred@yahoo.com'
+                    }
+                }
+            },
+            {
+                jobId : 'job_2',
+                content : ['documents', 'media'],
+                status : 'pending',
+                source : {
+                    service : 'microsoft',
+                    auth : {
+                        username : 'fred@live.com'
+                    }
+                }
+            }
+        ],
+        invoiceNum : '12345',
+        userId : 'user2'
+    };
 
 } );

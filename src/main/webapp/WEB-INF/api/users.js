@@ -3,8 +3,10 @@ var log = require( 'ringo/logging' ).getLogger( module.id );
 var {format} = java.lang.String;
 var domain = require( 'domain' );
 var emailService = require( 'email' );
+var {props} = require( 'utility' );
 
 var users = new domain.Users( props['environment'] );
+var invoices = new domain.Invoices( props['environment'] );
 var tokens = new domain.Tokens( props['environment'] );
 
 var {Application} = require( 'stick' );
@@ -41,12 +43,12 @@ app.get( '/me', function ( req ) {
     return response.json( user )
 } );
 
-app.get( '/:id', function ( req, id ) {
+app.get( '/:userId', function ( req, userId ) {
     req.allow(
-        req.hasRole( 'ROLE_ADMIN' ) || req.hasRole( 'ROLE_USER' ) && req.isUser( id )
+        req.hasRole( 'ROLE_ADMIN' ) || req.hasRole( 'ROLE_USER' ) && req.isUser( userId )
     );
 
-    var user = users.read( id );
+    var user = users.read( userId );
     user = stripByRole( req, user );
 
     return response.json( user )
@@ -57,24 +59,24 @@ app.post( '/', function ( req ) {
     var user = users.create( req.params );
 
     return response.created().json( user )
-        .addHeaders( { 'Location' : buildPost( req, user.id ) } );
+        .addHeaders( { 'Location' : buildPost( req, user.userId ) } );
 } );
 
-app.put( '/:id', function ( req, id ) {
+app.put( '/:userId', function ( req, userId ) {
     req.allow(
-        req.hasRole( 'ROLE_ADMIN' ) || req.hasRole( 'ROLE_USER' ) && isUser( id )
+        req.hasRole( 'ROLE_ADMIN' ) || req.hasRole( 'ROLE_USER' ) && isUser( userId )
     );
 
     var user = users.update( req.params );
 
     return response.json( user )
-        .addHeaders( { 'Location' : buildPut( req, user.id ) } );
+        .addHeaders( { 'Location' : buildPut( req, user.userId ) } );
 } );
 
-app.del( '/:id', function ( req, id ) {
+app.del( '/:userId', function ( req, userId ) {
     req.allow( req.hasRole( 'ROLE_ADMIN' ) );
 
-    var user = users.del( id );
+    var user = users.del( userId );
 
     return response.json( user )
 } );
@@ -116,9 +118,9 @@ app.post( '/signup', function( req ) {
         throw e;
     }
 
-    emailService.sendVerificationEmail( token.id, user );
+    emailService.sendVerificationEmail( token.tokenId, user );
 
-    return response.created().json( { id: user.id } );
+    return response.created().json( { userId: user.userId } );
 });
 
 /**
@@ -135,7 +137,7 @@ app.post( '/:userId/resendtoken', function( req, userId ) {
     var user = users.read( userId );
     if (!user) return response.notFound();
 
-    var tokenHits = tokens.readByEmail( user.email.account );
+    var tokenHits = tokens.readByEmail( user.email.address );
 
     // The token may have expired
     if (tokenHits.length === 0) {
@@ -150,7 +152,7 @@ app.post( '/:userId/resendtoken', function( req, userId ) {
         token = tokenHits[0];
     }
 
-    emailService.sendVerificationEmail( token.id, user );
+    emailService.sendVerificationEmail( token.tokenId, user );
 
     return response.ok();
 });
@@ -190,13 +192,13 @@ app.post( '/passwordreset', function( req ) {
         token = tokenHits[0];
     }
 
-    emailService.sendResetPasswordEmail( token.id, user );
+    emailService.sendResetPasswordEmail( token.tokenId, user );
 
     return response.ok();
 });
 
 /**
- * ## POST /api/users/:id/verify/:token
+ * ## POST /api/users/:userId/verify/:token
  *
  * Sends the user's token to their email address again. If the user doesn't have a token
  * (as it must have expired) a new one is created.
@@ -224,14 +226,14 @@ app.post( '/:userId/verify/:tokenId', function( req, userId, tokenId ) {
 
     // The token was found, but is it for the same user?
     // todo: delete the json (used for debugging)
-    if (token.user.id !== userId) return response.notFound().json({
+    if (token.user.userId !== userId) return response.notFound().json({
         status: 404,
-        message: 'User ' + userId + ' did not match token ' + token.user.id
+        message: 'User ' + userId + ' did not match token ' + token.user.userId
     });
 
     // So, we have a match. Let's update the user's account and remove the token.
     users.update( {
-        id: token.user.id,
+        userId: token.user.userId,
         email: {
             status: 'verified'
         }
@@ -245,7 +247,7 @@ app.post( '/:userId/verify/:tokenId', function( req, userId, tokenId ) {
 });
 
 /**
- * ## POST /api/users/:id/password
+ * ## POST /api/users/:userId/password
  *
  * Resets the user's password to the value they choose. For security purposes, the user
  * must be aware of the email verification token associated with the user account.
@@ -285,14 +287,14 @@ app.post( '/:userId/password', function( req, userId ) {
 
     // The token was found, but is it for the same user?
     // todo: delete the json (used for debugging)
-    if (token.user.id !== userId) return response.notFound().json({
+    if (token.user.userId !== userId) return response.notFound().json({
         status: 404,
-        message: 'User ' + userId + ' did not match token ' + token.user.id
+        message: 'User ' + userId + ' did not match token ' + token.user.userId
     });
 
     // If all matchy-matchy then we can update the users password.
     var user = users.update( {
-        id: token.user.id,
+        userId: token.user.userId,
         password: req.params.password
     });
 
@@ -321,7 +323,7 @@ app.get( '/signin/:email', function( req, email ) {
     // If there is a user object, we won't be passing it back. Instead we will create the
     // most minimal object for the signin process to use.
     var result = {
-        id: user.id,
+        userId: user.userId,
         verified: user.email.status === 'verified',
         complete: user.password && user.password.length > 0
     };
@@ -341,4 +343,145 @@ function buildPut( req, id ) {
     var parts = url.split( '/' );
     parts.pop();
     return parts.join( '/' ) + '/' + id;
+}
+
+
+
+/* ******************************************************** */
+/* JOBS                                                     */
+/* ******************************************************** */
+
+
+app.get( '/:userId/jobs', function ( req ) {
+    java.lang.Thread.sleep( 5000 );
+    return response.json( {
+        success: true
+    } );
+} );
+
+/**
+ * ## POST /api/jobs/submit
+ *
+ * ### Body
+ * The POST body will contain a JSON object representing the job to submit
+ * ```js
+ *  {
+ *      "jobId": "1434",
+ *      "source": {
+ *          "service": "flickr",
+ *          "auth": {
+ *              "username": "jcook@gmail.com",
+ *              "accessToken": "access_jsd8as32h373fhasa8",
+ *              "refreshToken": "refresh_is812nms0an38dbcuz73"
+ *          }
+ *      },
+ *      "destination": {
+ *          "service": "picasa",
+ *          "auth": {
+ *              "username": "jcook@gmail.com",
+ *              "accessToken": "access_jsd8as32h373fhasa8",
+ *              "refreshToken": "refresh_is812nms0an38dbcuz73"
+ *          }
+ *      },
+ *      "content": [
+ *          "media"
+ *      ],
+ *      "action": {},
+ *      "status": {
+ *          "completion": 0,
+ *          "state": "pending"
+ *      }
+ * }
+ * ```
+ *
+ * This API call is different from a straight create job request (which is
+ * `POST /api/jobs/`. The submission of the job must perform several checks and the
+ * response will be dependent upon the state of several factors on the server. Here is a
+ * summary of the checks that take place:
+ *
+ * 1. The user must be authenticated. This API call is allowed to be submitted by an
+ *    unauthenticated user. Upon such a condition, we will not throw the standard 401.
+ *    Instead, we will return a 200 json response indicating that authentication is
+ *    needed. This will allow the client to invoke its own specialized UI used on the
+ *    jobs page to allow the user to sign in or sign up.
+ * 2. Check for the invoices for this destination account and user id. There are a few
+ *    possible scenarios as a result of this check:
+ *     1. An open invoice located.
+ *         1. If there is a running job with the same source account and an overlap in
+ *            content types, a response is returned to let the user know of this fact,
+ *            and the job cannot be submitted as-is.
+ *         2. If the running jobs do not overlap with this run, we will add it to the
+ *            invoice and **submit it** to workflow.
+ *     2. No open invoice was located.
+ *         1. If there are no running jobs for this destination, we check the invoices to
+ *            see if a test run has been submitted for this destination account. If it
+ *            has and it was successful, we will add this information to the response.
+ *         2. We will send the client a response indicating a need for payment. If their
+ *            source account is an .edu domain we will indicate a price of $5, otherwise
+ *            the price is $15.
+ */
+app.post( '/:userId/jobs/preauth', function ( req, userId ) {
+    req.allow(
+        req.hasRole( 'ROLE_ADMIN' ) || req.hasRole( 'ROLE_USER' ) && req.isUser( userId )
+    );
+
+    if (!req.params) throw {
+        status: 400,
+        message: 'A job is required in the post body'
+    };
+
+    var job = new domain.Job(req.params);
+    log.info( 'Job:', JSON.stringify( job ) );
+    var result = invoices.preauthorize( userId, job );
+
+    log.info( 'Result of preauth: {}', JSON.stringify( result ) );
+    return response.json( result );
+} );
+
+
+app.post( '/:userId/jobs/submit', function ( req, userId ) {
+    req.allow(
+        req.hasRole( 'ROLE_ADMIN' ) || req.hasRole( 'ROLE_USER' ) && req.isUser( userId )
+    );
+
+    if (!req.params) throw {
+        status: 400,
+        message: 'A payload is required in the post body'
+    };
+
+    var payload = req.params;
+
+    var job = new domain.Job( payload.job );
+
+    // Make sure the job can still be submitted
+    var preauth = invoices.preauthorize( userId, job );
+    if (!preauth.ok) {
+        return response.json( preauth );
+    }
+
+    // If we are ok, then pre-process the job.
+    var preparedJob = prepareJob( req.getUsername(), job, payload.payment );
+
+    // Submit the job to the workflow engine for processing
+    var activeJob = submitJob( preparedJob );
+
+    return response.json( activeJob.toJSON() );
+} );
+
+
+function submitJob( job ) {
+
+}
+
+/**
+ * The processing of a job will involve a few steps.
+ *
+ * 1. Create a customer record for the user if they do not yet have one.
+ * 2. Bill the user's credit card.
+ * 3. Lookup an open invoice or create a new one.
+ * 4. Append the job and the payment info to the invoice record.
+ *
+ */
+function prepareJob( userId, job, payment ) {
+
 }

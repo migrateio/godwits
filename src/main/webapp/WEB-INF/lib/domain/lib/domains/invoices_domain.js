@@ -9,7 +9,6 @@ var {format} = java.lang.String;
 exports.Invoices = BaseDomain.subClass( {
 
     init : function ( environment ) {
-        var {schema} = require( 'domain/schema/invoices.js' );
         var map = store.getMap( environment + '-invoices' );
         var pk = function ( obj ) {
             return obj.invoiceId;
@@ -17,6 +16,7 @@ exports.Invoices = BaseDomain.subClass( {
         var query = function ( key ) {
             return /^(select|where) /ig.test( key.trim() );
         };
+        var {schema} = require( 'domain/schema/invoices.js' );
         this._super( 'Invoices', map, pk, query, schema );
     },
 
@@ -30,7 +30,7 @@ exports.Invoices = BaseDomain.subClass( {
      * @param json
      */
     normalize: function( json ) {
-        return json.json ? json.json : json;
+        return json.toJSON && json.toJSON() || json;
     },
 
     prevalidate : function ( json ) {
@@ -90,7 +90,109 @@ exports.Invoices = BaseDomain.subClass( {
             and `userId` = "%s"',
             job.destination.service, job.destination.auth.username, userId );
 
-        return this.read( query );
+        var invoices = this.read( query );
+        // Sort by expiration date
+        invoices.sort(function (i1, i2) {
+            return i1.expires.localeCompare( i2.expires );
+        });
+        return invoices;
+    },
+
+    /**
+     * ## preAuthorize
+     * _Inspects the submitted job, the user and the records of current and past runs to
+     * determine whether the job may be submitted under the current conditions. If the job
+     * cannot be submitted, it is appended with several properties that will be necessary
+     * for the client to prompt the user for more information._
+     *
+     * ### Prerequisites
+     *
+     * 1. The user record is retrieved with their payment information. We will obtain their
+     *    stripe customer number if present, and the last 4 digits of their stored credit
+     *    card.
+     * 2. The destination record is pulled for this userId and the job's destination account.
+     *    1. We check as to whether a test run has been successfully made against this
+     *       account.
+     *    2. We note whether there is an open invoice for this job.
+     *    3. If this is a rerun (same source and destination) there is no additional
+     *       charge.
+     *    4. If it is a new source account, we calculate the outstanding balance.
+     *        1. If the source is an edu account, the amount is +$5 with a max of $15.
+     *        2. If the source is an non-edu account, the amount is +$15 with a max of $15.
+     * 3. We will load all running jobs against this destination account.
+     *    1. If the source account and a content type overlap a running job, this information
+     *       is returned to the client and the job cannot be submitted.
+     *
+     * ### Response
+     * The resulting response is a json object containing all of the information needed for
+     * the UI to properly handle the next stage of job submission.
+     *
+     * **last4**
+     * > If the user has an existing customer account with us, this is the last four
+     *   digits of their credit card on file. If they do not have this property, it
+     *   means they will have to submit payment info.
+     *
+     * **open**
+     * > If true, the invoice exists and has not yet expired. If false, there is no
+     *   invoice started for this destination account.
+     *
+     * **testedOn**
+     * > Returns the date this destination had been tested. If there is no property, the
+     *   account is available for a test run.
+     *
+     * **subscription**
+     *
+     * > **expires**
+     * > > The date the subscription expires, or will expire.
+     *
+     * > **due**
+     * > > The amount due to purchase or add to the subscription.
+     *
+     */
+    preauthorize : function ( userId, job ) {
+        // Verify the job has the necessary properties for submission.
+        if ( !job.isComplete() ) throw {
+            status : 400,
+            message : 'Job is not complete.'
+        };
+
+        // Setup the preauth variables we can set without an invoice
+        var preauth = {
+//        last4: users.payment && users.payment.last4
+        };
+
+        // Step 2. retrieve the invoice record (if any). Only one open invoice is allowed
+        // per destination. Since the readByJob() function sorts by expiration date, the
+        // first invoice in the list will potentially be the open one.
+        var invoices = this.readByJob( userId, job );
+
+        // If no invoice was returned in the search, then we will instantiate an empty
+        // invoice object
+        var invoice = invoices[0] || new Invoice( {} );
+
+        // Step 1.2 Check if this job overlaps with currently running jobs.
+        var overlap = invoice.overlappingJobs( job );
+        if ( overlap.length > 0 ) throw {
+            status: 400,
+            jobId: overlap.jobId,
+            message: 'Another job with the same source, destination and content is running.'
+        };
+
+        // Step 2.1 Check whether a test run has been done in the past
+        var testInfo = invoice.getTest();
+        if (testInfo) preauth.testedOn = testInfo.completed;
+
+        // Step 2.2 Check whether an open invoice exists, or in other words, does the
+        // user have any more time left since the last payment for this destination?
+        preauth.open = invoice.isOpen();
+
+        preauth.subscription = {
+            promotion: invoice.getPromotionType( job ),
+            expires: invoice.getExpiration(),
+            payment: invoice.calculatePayment( job )
+        };
+
+        return preauth;
     }
 
 } );

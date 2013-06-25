@@ -268,6 +268,24 @@ function Map( hazelcast, mapName ) {
         return 'Hazelcast Map [' + mapName + ']';
     };
 
+    var lock = function( key ) {
+        return map.lock( key );
+    };
+
+    var tryLock = function( key, time, timeunit ) {
+        if (!time) return map.tryLock( key );
+
+        if (!timeunit) timeunit = java.util.concurrent.TimeUnit.MILLISECONDS;
+        if (typeof timeunit === 'SECONDS')
+            timeunit = java.util.concurrent.TimeUnit.valueOf( timeunit );
+
+        return map.tryLock( key, time, timeunit );
+    };
+
+    var unlock = function( key ) {
+        return map.unlock( key );
+    };
+
     // Constructors ----------------------------------------------------------------
 
     if ( !mapName ) throw { status : 400,
@@ -308,11 +326,14 @@ function Map( hazelcast, mapName ) {
         evict : evict,
         get : get,
         keySet : keySet,
+        lock : lock,
         hzObject : map,
         name : mapName,
         put : put,
         remove : remove,
         size : size,
-        toString : toString
+        toString : toString,
+        tryLock : tryLock,
+        unlock : unlock
     };
 }

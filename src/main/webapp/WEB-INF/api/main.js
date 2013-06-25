@@ -18,7 +18,6 @@ app.configure(
 
 var {json} = require( 'ringo/jsgi/response' );
 
-app.mount( '/jobs', require( 'jobs' ) );
 app.mount( '/users', require( 'users' ) );
 app.mount( '/auth', require( 'auth' ) );
 app.mount( '/oauth', require( 'oauth/oauth_client' ) );
@@ -28,3 +27,5 @@ app.get('/', function (req) {
         success: true
     });
 });
+
+

@@ -30,7 +30,7 @@
 
             return {
                 loginConfirmed : function ( data ) {
-                    var user = data;
+                    user = data;
                     $rootScope.$broadcast( authEvents.EVENT_LOGIN_CONFIRMED, data );
                     httpBuffer.retryAll();
                 },

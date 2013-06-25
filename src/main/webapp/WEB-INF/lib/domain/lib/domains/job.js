@@ -8,6 +8,7 @@
  * **json** The json representation of a job.
  */
 exports.Job = function(job) {
+    if (typeof job.toJSON === 'function') return job;
 
 
     function isRunning() {
@@ -24,7 +25,7 @@ exports.Job = function(job) {
             && job.destination.auth && job.destination.auth.username
             && job.source && job.source.service
             && job.source.auth && job.source.auth.username
-            && job.contents && job.contents.length > 0;
+            && job.content && job.content.length > 0;
     }
 
     /**
@@ -62,10 +63,13 @@ exports.Job = function(job) {
     var obj = {
         sourceOverlaps: sourceOverlaps,
         isRunning: isRunning,
-        isComplete: isComplete
+        isComplete: isComplete,
+        toJSON : function toJSON() {
+            return job;
+        }
     };
 
-    Object.keys( job ).forEach( function ( prop ) {
+    Object.keys( job || {} ).forEach( function ( prop ) {
         obj[prop] = job[prop];
     } );
 

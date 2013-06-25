@@ -1,1 +1,31 @@
-<p>Job Action</p>
+<!--<script src="https://checkout.stripe.com/v2/checkout.js" type="text/javascript"></script>-->
+<ul class="job-action">
+    <li class="test">
+        <div data-ng-if="!preauth.testedOn">
+            <p>Test</p>
+        </div>
+        <div data-ng-if="preauth.testedOn">
+            <p>Tested on {{preauth.testedOn}}</p>
+        </div>
+    </li>
+    <li class="purchase" data-ng-switch="ui.view">
+        <div data-ng-switch-when="zero">
+            <p>No payment is required</p>
+        </div>
+        <div data-ng-switch-when="edu-partial">
+            <p>EDU Promotion, Payment due is {{ui.due}}</p>
+        </div>
+        <div data-ng-switch-when="edu-full">
+            <p>EDU Promotion, Payment due is {{ui.due}} and we are full.</p>
+        </div>
+        <div data-ng-switch-when="full">
+            <p>Full access, Payment due is {{ui.due}}</p>
+            <div>
+                <a class="btn btn-success" data-ng-click="purchase()" >Purchase</a>
+            </div>
+        </div>
+        <div data-ng-switch-default>
+            <p>Some kind of spinner</p>
+        </div>
+    </li>
+</ul>
