@@ -5,11 +5,6 @@ var {Google, Yahoo, Imap} = require( 'lib/migrate/main' );
 
 function onmessage( e ) {
 
-    /**
-     *
-     *
-     */
-
     var input = e.data.input;
 
     function doWork() {
@@ -125,7 +120,7 @@ function onmessage( e ) {
 
 
 exports.ActivityType = {
-    name : 'initCopy',
+    name : 'initFolders',
     version : '0.1.1',
     defaultTaskHeartbeatTimeout : '15',
     defaultTaskScheduleToCloseTimeout : 'NONE',

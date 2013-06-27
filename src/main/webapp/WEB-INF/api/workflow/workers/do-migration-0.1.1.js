@@ -21,15 +21,6 @@ function onmessage(e) {
                 break;
         }
 
-        // We have a source service instantiated now, time to do stuff.
-
-        var folders = source.getFolders();
-
-        for(var i=0; i<folders.length; i++) {
-            folders[i];
-        }
-
-
         e.source.postMessage( {
             module: module.id,
             status: 200
