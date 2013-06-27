@@ -35,19 +35,18 @@ function onmessage( e ) {
     function doWork() {
         var source;
 
-        // todo: encapsulate this somehow.
-        switch ( input.source.service ) {
-            case 'gmail':
-                source = new Google.Mail( input.source.auth );
-                break;
-            case 'yahoo':
-                source = new Yahoo.Mail( input.source.auth );
-                break;
-            default:
-                source = new Imap.Mail( input.source.auth );
-                break;
+        function getService( name, auth ) {
+            switch ( name ) {
+                case 'gmail':
+                    return new Google.Mail( auth );
+                case 'yahoo':
+                    return new Yahoo.Mail( auth );
+                default:
+                    return new Imap.Mail( auth );
+            }
         }
 
+        source = getService( input.source.service, input.source.auth );
         // We have a source service instantiated now, time to do stuff.
 
         var folders = source.getFolders();
