@@ -2,28 +2,45 @@ var log = require( 'ringo/logging' ).getLogger( module.id );
 // todo: figure out actual path.
 var {Google, Yahoo, Imap} = require( 'lib/migrate/main' );
 
-function onmessage(e) {
+function onmessage( e ) {
 
     var input = e.data.input;
 
     function doWork() {
-        var source;
 
-        switch (input.source.service) {
-            case 'gmail':
-                source = new Google.Mail(input.source.auth);
-                break;
-            case 'yahoo':
-                source = new Yahoo.Mail(input.source.auth);
-                break;
-            default:
-                source = new Imap.Mail(input.source.auth);
-                break;
+        var job = input.job;
+        var sourceServ;
+        var destinationServ;
+
+        sourceServ = getService( input.source.service, input.source.auth );
+        destinationServ = getService( input.destination.service, input.destination.auth );
+
+        var result = migrate( sourceServ, destinationServ, job );
+
+        function migrate( source, dest, job ) {
+            var mails = [];
+            for ( var i = 0; i < job.folders.length; i++ ) {
+                mails.concat.apply( source.read( job.folders[i].folderName, job.folders[i].uids ) );
+            }
+
+            return dest.write(mails);
+        }
+
+        function getService( name, auth ) {
+            switch ( name ) {
+                case 'gmail':
+                    return new Google.Mail( auth );
+                case 'yahoo':
+                    return new Yahoo.Mail( auth );
+                default:
+                    return new Imap.Mail( auth );
+            }
         }
 
         e.source.postMessage( {
-            module: module.id,
-            status: 200
+            module : module.id,
+            status : 200,
+            result : result
         } );
     }
 
@@ -32,11 +49,11 @@ function onmessage(e) {
 
 
 exports.ActivityType = {
-    name: 'initCopy',
-    version: '0.1.1',
-    defaultTaskHeartbeatTimeout: '15',
-    defaultTaskScheduleToCloseTimeout: 'NONE',
-    defaultTaskScheduleToStartTimeout: 'NONE',
-    defaultTaskStartToCloseTimeout: '10',
-    taskListName: 'test-tasklist-worker'
+    name : 'initCopy',
+    version : '0.1.1',
+    defaultTaskHeartbeatTimeout : '15',
+    defaultTaskScheduleToCloseTimeout : 'NONE',
+    defaultTaskScheduleToStartTimeout : 'NONE',
+    defaultTaskStartToCloseTimeout : '10',
+    taskListName : 'test-tasklist-worker'
 };
