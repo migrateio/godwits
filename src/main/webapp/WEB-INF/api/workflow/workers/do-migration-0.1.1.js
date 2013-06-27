@@ -25,7 +25,7 @@ function onmessage( e ) {
                 );
             }
 
-            return dest.write(mails);
+            return dest.write( mails );
         }
 
         e.source.postMessage( {

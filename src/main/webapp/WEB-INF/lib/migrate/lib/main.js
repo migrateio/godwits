@@ -104,5 +104,3 @@ exports.getService = function( name, auth ) {
             return new Imap.Mail( auth );
     }
 };
-
-}
