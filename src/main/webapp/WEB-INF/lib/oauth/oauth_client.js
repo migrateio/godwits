@@ -115,9 +115,7 @@ app.configure( 'error', 'notfound', 'params', 'mount', 'route' );
 var {json, html, redirect} = require( 'ringo/jsgi/response' );
 var {uuid} = require( 'utility' );
 var httpClient = require( 'ringo/httpclient' );
-//var httpClient = require( 'httpclient-jetty' );
 
-//var oauthClient = module.singleton( 'oauthclient', function () {
 var oauthClient = (function () {
     var clientData = {
         google : {
@@ -145,17 +143,17 @@ var oauthClient = (function () {
     return new OAuthClient( clientData );
 })();
 
-var redirectUrl = 'http://cpe-71-67-162-170.insight.res.rr.com:8080/api/oauth/callback/';
-
+var redirectUrl = 'https://cpe-71-67-162-170.insight.res.rr.com:8443/api/oauth/callback/';
+var uuidMap = new java.util.HashMap();
 
 /**
  * Request to authorize access to the given service for the current user.
  */
 app.get( '/:service', generateDialogUrl );
-
 app.get( '/callback', handleOAuthCallback );
 
-app.post( '/callback', handleOAuthCallback );
+// Cannot recall why this was necessary? Comment your code better, past self >:(
+//app.post( '/callback', handleOAuthCallback );
 
 /**
  * Get the state from the request. For most services this comes back as
@@ -170,23 +168,24 @@ app.post( '/callback', handleOAuthCallback );
  * @return {*}
  */
 function handleOAuthCallback( req ) {
-    var authCode = req.params.code;
+    var authCode = req.params.code || req.params.oauth_token;
     var state = JSON.parse( req.params.state || '{}' );
 
-    log.info('params: {}', JSON.stringify(req.param, null, 4) );
+//    var uuid = map.get(state.uid);
+    log.info( 'params get: {}', JSON.stringify( req.params, null, 4 ) );
 
-    var access = oauthClient.getAccessToken( state.service, authCode, redirectUrl );
+    var access = oauthClient.getAccessToken( state.service || 'yahoo', authCode, redirectUrl );
 
     log.info( 'handleOAuthCallback::Access token: {}', JSON.stringify( access, null, 4 ) );
 
-    var exchange = httpClient.request({
-        url: getUrlByService(state.service),
-        headers: {
-            Authorization: access.token_type + ' ' + access.access_token
+    var exchange = httpClient.request( {
+        url : getUrlByService( state.service || 'yahoo'),
+        headers : {
+            Authorization : access.token_type + ' ' + access.access_token
         }
-    });
+    } );
 
-    var userinfo = JSON.parse(exchange.content);
+    var userinfo = JSON.parse( exchange.content );
 
     function getUrlByService( service ) {
         var url;
@@ -195,18 +194,21 @@ function handleOAuthCallback( req ) {
             case 'google':
                 url = 'https://www.googleapis.com/oauth2/v3/userinfo';
                 break;
+            case 'yahoo':
+                url = 'http://query.yahooapis.com/v1/public/yql?q=select%20emails.handle%20from%20social.profile%20where%20guid%20%3D%20me';
+                break;
         }
 
         return url;
     }
 
-    var data = JSON.stringify({params : {state: state, code: authCode, userinfo: userinfo}, access : access});
+    var data = JSON.stringify( {params : {state : state, code : authCode, userinfo : userinfo}, access : access} );
 
     return html( '<html>\
             <body>\
             <script type="text/javascript">\
                 window.onload = function () {\
-                    window.opener.callback(\''+data+'\');\
+                    window.opener.callback(\'' + data + '\');\
                     self.close();\
                 }\
             </script>\
@@ -216,10 +218,12 @@ function handleOAuthCallback( req ) {
 }
 
 function generateDialogUrl( req, service ) {
-    log.info( '5generateDialogUrl::service: {}', service );
+    var _uuid = uuid();
+    uuidMap.put(_uuid, true);
+    log.info( '5generateDialogUrl::uuid: {}, service: {}', _uuid, service );
     var scope = 'calendar-r, docs-rw, media-rw, contacts-rw, profile-r';
 
-    var state = JSON.stringify( {service : service, uid : '123'} );
+    var state = JSON.stringify( {service : service, uid : _uuid} );
     var url = oauthClient.getDialogUrl( service, state, scope, redirectUrl, true );
 
     return json( {
@@ -227,6 +231,8 @@ function generateDialogUrl( req, service ) {
         url : url
     } );
 }
+
+
 
 
 /**
@@ -521,8 +527,9 @@ function OAuthClient( clientData ) {
      */
     function getDialogUrlOneOA( serviceDef, state, scope, redirectUrl, offline ) {
         // Request a request token from the OAuth server
+        state = JSON.parse( state );
         var params = [];
-        params.push( 'oauth_nonce=' + encodeURIComponent( uuid() ) );
+        params.push( 'oauth_nonce=' + encodeURIComponent( state.uid ) );
         params.push( 'oauth_consumer_key=' + encodeURIComponent( serviceDef.clientId ) );
         params.push( 'oauth_signature_method=' + encodeURIComponent( 'plaintext' ) );
         params.push( 'oauth_signature=' + encodeURIComponent( serviceDef.clientSecret ) + '\%26' );
@@ -567,6 +574,8 @@ function OAuthClient( clientData ) {
     function getAccessToken( service, authCode, redirectUri ) {
         var serviceDef = getServiceDefinition( service );
 
+        log.info( 'serviceDef: {}', JSON.stringify( serviceDef, null, 4 ) );
+
         var opts = {
             url : serviceDef.accessTokenUrl,
             method : serviceDef.tokenRequestMethod,
@@ -589,6 +598,42 @@ function OAuthClient( clientData ) {
         if ( exchange.status === 200 ) {
             log.info( 'Response: {}', exchange.content );
             return JSON.parse( exchange.content );
+        } else {
+            log.info( 'Response: {}', exchange.content );
+        }
+
+        return null;
+    }
+
+    function getAccessTokenOneOA( service, authCode, redirectUri ) {
+        var serviceDef = getServiceDefinition( service );
+
+        log.info( 'serviceDef: {}', JSON.stringify( serviceDef, null, 4 ) );
+
+        var opts = {
+            url : serviceDef.accessTokenUrl,
+            method : serviceDef.tokenRequestMethod,
+            data : {
+                code : authCode,
+                client_id : serviceDef.clientId,
+                client_secret : serviceDef.clientSecret,
+                redirect_uri : redirectUri,
+                grant_type : 'authorization_code',
+                headers : {
+                    'user-agent' : 'CommonJS OAuth Library'
+                }
+            },
+            contentType : 'application/x-www-form-urlencoded',
+            async : false
+        };
+        log.info( 'Making request: {}', JSON.stringify( opts, null, 4 ) );
+        var exchange = httpClient.request( opts );
+
+        if ( exchange.status === 200 ) {
+            log.info( 'Response: {}', exchange.content );
+            return JSON.parse( exchange.content );
+        } else {
+            log.info( 'Response: {}', exchange.content );
         }
 
         return null;
@@ -726,7 +771,7 @@ OAuthClient.prototype.services = {
             'mail-rw' : 'http://mail.google.com/mail/feed/atom/',
             'media-r' : 'http://picasaweb.google.com/data/',
             'media-rw' : 'http://picasaweb.google.com/data/',
-            'profile-r': 'email'
+            'profile-r' : 'email'
         }
     },
     instagram : {

@@ -40,9 +40,34 @@ exports.ImapService = Object.subClass( {
         // Assign the passed in options to as a property of the class.
         this.opts = opts;
 
+
+        log.info(JSON.stringify(opts, null, 4));
+
         // And some aliasing for ease of use.
         this.email = this.opts.email;
 
+        // factored out so we can override it in subclasses.
+        this.setProps();
+
+        try {
+            log.info( 'Trying to get session instance.' );
+            // Try to get a session instance.
+            this.session = javax.mail.Session.getInstance( this.props, null );
+            this.session.setDebug( true );
+        } catch ( e ) {
+            throw new WrappedException( 500, 'Error getting session.', e );
+        }
+
+        try {
+            log.info( 'Trying to get IMAP store.' );
+            // And now the IMAPStore.
+            this.store = this.session.getStore( 'imaps' );
+        } catch ( e ) {
+            throw new WrappedException( 500, 'Error getting IMAP store.', e );
+        }
+    },
+
+    setProps : function () {
         // Get the java properties object, we'll need this in order to get a session.
         this.props = java.lang.System.getProperties();
 
@@ -58,29 +83,13 @@ exports.ImapService = Object.subClass( {
         }
 
         log.info( 'Set mail.store.protocol to secure IMAP.' );
-
-        try {
-            log.info( 'Trying to get session instance.' );
-            // Try to get a session instance.
-            this.session = javax.mail.Session.getInstance( this.props, null );
-        } catch ( e ) {
-            throw new WrappedException( 500, 'Error getting session.', e );
-        }
-
-        try {
-            log.info( 'Trying to get IMAP store.' );
-            // And now the IMAPStore.
-            this.store = this.session.getStore( 'imaps' );
-        } catch ( e ) {
-            throw new WrappedException( 500, 'Error getting IMAP store.', e );
-        }
     },
 
     // Eventually we'll have to connect to the server. This function does the work involved in that.
     connect : function () {
 
-        // If we don't have a password or oauth token, we cannot connect.
-        if ( !(this.opts.password || this.opts.oauth) ) {
+        // If we don't have a password, we cannot connect.
+        if ( this.opts.password ) {
             throw new GenericException( 401, 'No authentication provided.' );
         }
 
@@ -92,11 +101,6 @@ exports.ImapService = Object.subClass( {
             } catch ( e ) {
                 throw new WrappedException( 500, 'Could not connect to store', e );
             }
-        }
-
-        // Oauth based connection.
-        if ( this.opts.oauth ) {
-            throw new GenericException( 400, 'Not yet implemented.' );
         }
 
     },
@@ -133,7 +137,7 @@ exports.ImapService = Object.subClass( {
 
         // Loop over messages, append each one individually.
 
-        folder.appendMessages(messages);
+        folder.appendMessages( messages );
 
 //        for ( var i = 0; i < messages.length; i++ ) {
 //            log.info( 'Appending message: {}', messages[i].getMessageNumber() );
@@ -184,7 +188,7 @@ exports.ImapService = Object.subClass( {
         if ( typeof folder === 'string' ) {
             try {
                 folder = this.store.getFolder( folder );
-            } catch (e) {
+            } catch ( e ) {
 
             }
         }
