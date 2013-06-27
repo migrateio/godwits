@@ -89,3 +89,7 @@ exports.Google = {
 exports.Yahoo = {
     Mail : require( './yahoo/mail/yahoo-mail' ).Service
 };
+
+exports.Imap = {
+    Mail : require( './imap/mail/imap' ).Service
+};
