@@ -70,8 +70,6 @@ exports.DelegatingMapStoreFactory = function ( options ) {
         return store;
     }
 
-    log.info( 'DelegatingMapStoreFactory::init' );
-
     return  new MapStoreFactory( {
         newMapStore : newMapStore
     } );

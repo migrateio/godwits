@@ -268,8 +268,8 @@ function Map( hazelcast, mapName ) {
         return 'Hazelcast Map [' + mapName + ']';
     };
 
-    var lock = function( key ) {
-        return map.lock( key );
+    var lock = function( key, time, timeunit ) {
+        map.lock( key );
     };
 
     var tryLock = function( key, time, timeunit ) {
@@ -283,7 +283,7 @@ function Map( hazelcast, mapName ) {
     };
 
     var unlock = function( key ) {
-        return map.unlock( key );
+        map.unlock( key );
     };
 
     // Constructors ----------------------------------------------------------------

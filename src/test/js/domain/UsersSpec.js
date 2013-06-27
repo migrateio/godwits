@@ -37,14 +37,14 @@ describe( 'User Domain', function () {
                 cvc : '478'
             }
         };
-        log.debug( 'test::initCustomer, creating card token: ', JSON.stringify( card ) );
+//        log.debug( 'test::initCustomer, creating card token: ', JSON.stringify( card ) );
         stripe.tokens.create( card ).then(
             function success( token ) {
                 expect( token.id ).toEqual( jasmine.any( String ) );
 
                 var betty;
                 try {
-                    log.debug( 'test::initCustomer, creating user: ', JSON.stringify( user ) );
+//                    log.debug( 'test::initCustomer, creating user: ', JSON.stringify( user ) );
                     betty = users.create( user );
                     expect( betty ).toBeDefined();
 //                    betty = new domain.User( result );
@@ -55,9 +55,9 @@ describe( 'User Domain', function () {
                 }
 
                 try {
-                    log.debug( 'test::initCustomer, stripifying betty: ', JSON.stringify( betty ) );
-                    var newBetty = betty.updateActiveCard( token.id ).wait( 5000 );
-                    log.debug( 'test::initCustomer, done updating stripe data: ', JSON.stringify( newBetty ) );
+//                    log.debug( 'test::initCustomer, stripifying betty: ', JSON.stringify( betty ) );
+                    var newBetty = users.updateActiveCard( betty, token.id ).wait( 5000 );
+//                    log.debug( 'test::initCustomer, done updating stripe data: ', JSON.stringify( newBetty ) );
                     deferred.resolve( newBetty );
                 } catch ( e ) {
                     log.warn( 'test::initCustomer, failed to stripify user: ',
@@ -85,7 +85,7 @@ describe( 'User Domain', function () {
         map.clear();
     } );
 
-    xdescribe( 'CRUD functions', function () {
+    describe( 'CRUD functions', function () {
         it( 'should fail if no body is included', function () {
             expect(function () {
                 users.create();
@@ -161,17 +161,15 @@ describe( 'User Domain', function () {
             expect( results ).toBeArray();
             expect( results.length ).toEqual( 2 );
 
-            // Convert to a map for comparing. todo: Create an "array in any order" match
-            var expected = {};
-            delete results[0].created;
-            delete results[1].created;
-            expected[results[0].userId] = results[0];
-            expected[results[1].userId] = results[1];
-            var actual = {};
-            actual[samples.barney.userId] = samples.barney;
-            actual[samples.betty.userId] = samples.betty;
-
-            expect( expected ).toEqual( actual );
+            // Should have a result for betty and one for barney
+            var [a, b] = results;
+            expect( a.userId ).not.toEqual( b.userId );
+            expect(
+                a.userId === samples.barney.userId || a.userId === samples.betty.userId
+            ).toBeTruthy();
+            expect(
+                b.userId === samples.barney.userId || b.userId === samples.betty.userId
+            ).toBeTruthy();
 
             results = users.read(
                 'select * from `[mapname]` where `email.address` = "fred@bedrock.com"'
@@ -179,25 +177,24 @@ describe( 'User Domain', function () {
 
             expect( results ).toBeArray();
             expect( results.length ).toEqual( 1 );
-            delete results[0].created;
-            expect( results ).toEqual( [samples.fred] );
+            expect( results[0].userId ).toEqual( samples.fred.userId );
         } );
     } );
 
-    xdescribe( 'Customer creation functions', function () {
+    describe( 'Customer creation functions', function () {
 
         describe( 'should fail property checks', function () {
             it( 'should not be able to create stripe customer when unverified', function () {
                 var fred = new domain.User( samples.fred );
                 expect(function () {
-                    fred.updateActiveCard( '123' ).wait(5000);
+                    users.updateActiveCard( fred, 'fake_token' ).wait(5000);
                 } ).toThrowMatch( 'verified email' );
             } );
 
             it( 'should not be able to create stripe customer when no token', function () {
-                var fred = new domain.User( samples.barney );
+                var barney = new domain.User( samples.barney );
                 expect(function () {
-                    fred.updateActiveCard().wait(5000);
+                    users.updateActiveCard( barney ).wait(5000);
                 } ).toThrowMatch( 'requires.+token' );
             } );
         } );
@@ -285,11 +282,8 @@ describe( 'User Domain', function () {
             }, 5000);
 
             it( 'should not detect an charge-time card failure', function ( done ) {
-                try {
-                    initCustomer( CARD_CHARGE_CHK_FAIL, samples.betty ).wait( 5000 );
-                    done();
-                } catch ( e ) {
-                }
+                initCustomer( CARD_CHARGE_FAIL, samples.betty ).wait( 5000 );
+                done();
             }, 5000);
 
             it( 'should not detect an charge-time decline card failure', function ( done ) {
@@ -306,36 +300,6 @@ describe( 'User Domain', function () {
                 done();
             }, 5000 );
         } );
-    } );
-
-    describe( 'Payment charge functions', function () {
-        xit( 'should be able to handle a charge declined', function ( done ) {
-            var result = initCustomer( CARD_CHARGE_FAIL, samples.betty ).wait(5000);
-            try {
-                result.capturePayment( 15 ).wait(5000);
-            } catch ( e ) {
-                // Expecting the declined card to cause an error when processing payment.
-                var isExpected = e && e.detail && e.detail.code;
-                if ( /card_declined/.test( isExpected ) ) done();
-            }
-        }, 5000 );
-
-        xit( 'should be able to handle an invalid charge amount', function ( done ) {
-            var result = initCustomer( CARD_GOOD_VISA, samples.betty ).wait(5000);
-            try {
-                result.capturePayment( 0.15 ).wait(5000);
-            } catch ( e ) {
-                // Minimum charge amount is $0.50.
-                if ( /Cannot create a charge for that amount/.test( e.message ) ) done();
-            }
-        }, 5000 );
-
-        it( 'should be able to handle a good charge', function ( done ) {
-            var result = initCustomer( CARD_GOOD_VISA, samples.betty ).wait(5000);
-            result.capturePayment( 15 ).wait(5000);
-            done();
-        }, 5000 );
-
     } );
 
 } );
@@ -358,7 +322,7 @@ var samples = {
         name : 'wilma',
         password : '$2a$10$TzHJ5IdWP9ooyXanLoT5uuDYFeCTVUiHLw5JUjY9e8Wr9Ob7STHWC',
         payment : {
-            token : 'pay_token_1',
+            fingerprint : 'pay_token_1',
             last4 : '9876',
             type : 'Visa',
             expires : '2016-09-01T00:00:00.000Z'

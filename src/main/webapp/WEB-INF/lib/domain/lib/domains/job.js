@@ -8,7 +8,7 @@
  * **json** The json representation of a job.
  */
 exports.Job = function(job) {
-    if (typeof job.toJSON === 'function') return job;
+    if (job && typeof job.toJSON === 'function') return job;
 
 
     function isRunning() {

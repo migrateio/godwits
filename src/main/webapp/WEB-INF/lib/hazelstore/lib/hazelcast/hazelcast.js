@@ -119,7 +119,6 @@ function initializeMapStores( entry ) {
 }
 
 exports.getMap = function ( mapName ) {
-    log.debug( 'getMap::mapName: {}', mapName );
     var result = maps[mapName];
     if ( !result ) {
         log.debug( 'getMap::cache miss, mapName: {}', mapName );

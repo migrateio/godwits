@@ -1,0 +1,8 @@
+digraph G {
+	job                         [shape=box];
+	user                        [shape=box];
+	invoice                     [shape=box];
+	job -> invoice              [label="destination"];
+	user -> invoice             [label="userId"];
+	invoice -> "calc payment";
+}

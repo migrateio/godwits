@@ -67,7 +67,6 @@ exports.BaseDomain = Object.subClass( {
 
         // Flesh out the object with default/required values from the schema
         var newObj = this.generateDefaults( json );
-        log.debug( 'After generating defaults: {}', JSON.stringify( newObj ) );
 
         this.prevalidate( newObj );
 
@@ -108,8 +107,6 @@ exports.BaseDomain = Object.subClass( {
 //        log.debug( 'Merging {} into object {}, resulting in {}',
 //            JSON.stringify( json ), JSON.stringify( obj ), JSON.stringify( newObj ) );
         newObj = this.generateDefaults( newObj );
-        log.debug( 'After generating defaults: {}', JSON.stringify( newObj ) );
-
 
         this.prevalidate( newObj );
 
@@ -150,22 +147,30 @@ exports.BaseDomain = Object.subClass( {
 
             // Queries will return arrays of json strings
             if (Array.isArray(obj)) {
-                var result = obj.map(function(item) {
+                return obj.map( function ( item ) {
                     if ( typeof item === 'string' ) {
                         return JSON.parse( item );
                     } else {
                         return null;
                     }
-                });
-//                log.info( 'Result in Map: {}', JSON.stringify( result, null, 4 ) );
-                return result;
+                } );
             }
         }
 
         return obj;
     },
 
-    readLock : function ( pkey, ttl, timeunit ) {
+    lock : function ( pkey ) {
+        // Verify that the parameter is correct
+        if ( !pkey ) throw {
+            status : 400,
+            message : this.name + '::readLock requires a primary key value'
+        };
+
+        this.map.lock( pkey );
+    },
+
+    unlock : function ( pkey, ttl, timeunit ) {
         // Verify that the parameter is correct
         if ( !pkey ) throw {
             status : 400,
@@ -173,13 +178,7 @@ exports.BaseDomain = Object.subClass( {
         };
 
         // Get the current object from the map
-        var obj = this.map.lock( pkey, ttl, timeunit );
-        if ( !obj ) throw {
-            status : 404,
-            message : this.name + '::readLock not found [' + pkey + ']'
-        };
-
-        return obj;
+        this.map.unlock( pkey );
     },
 
     del : function del( pkey ) {
