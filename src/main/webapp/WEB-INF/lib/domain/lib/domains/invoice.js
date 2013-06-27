@@ -1,8 +1,10 @@
 var log = require( 'ringo/logging' ).getLogger( module.id );
 
 var {Job} = require( './job' );
+var {format} = java.lang.String;
 
 exports.Invoice = function ( invoice ) {
+    if (invoice && typeof invoice.toJSON === 'function') return invoice;
 
     function intersect( a, b ) {
         a = [].concat( a );
@@ -30,7 +32,7 @@ exports.Invoice = function ( invoice ) {
      * @param checkJob
      */
     function overlappingJobs( checkJob ) {
-        return [].concat( invoice.jobs ).filter( function ( job ) {
+        return [].concat( invoice.jobs || [] ).filter( function ( job ) {
             var match = true;
             var jobObj = new Job( job );
             match = match && jobObj.isRunning() && jobObj.sourceOverlaps( checkJob.source );
@@ -59,12 +61,11 @@ exports.Invoice = function ( invoice ) {
      * > The amount charged for the subscription thus far
      */
     function calculatePayment( job ) {
-        var totalCharged = isNaN( invoice.totalCharged ) ? 0.00 : invoice.totalCharged;
-        var isEdu = job.source && job.source.auth && job.source.auth.hostname
-            && /\.edu$/ig.test( job.source.auth.hostname );
-        var due = isEdu ? 5.00 : 15.00;
+        var totalCharged = isNaN( invoice.totalCharged ) ? 0 : invoice.totalCharged;
+        var isEdu = getPromotionType( job ) === 'edu';
+        var due = isEdu ? 500 : 1500;
         return {
-            due : due + totalCharged > 15 ? 15 - totalCharged : due,
+            due : due + totalCharged > 1500 ? 1500 - totalCharged : due,
             charged : totalCharged
         }
     }
@@ -87,19 +88,104 @@ exports.Invoice = function ( invoice ) {
         } );
     }
 
-    function addJob( job ) {
-        if ( !invoice.jobs ) invoice.jobs = [];
-        invoice.jobs.push( job );
+    function getTest() {
+        return invoice.test;
     }
 
+    function getPromotionType( job ) {
+        var isEdu = job.source && job.source.auth && job.source.auth.hostname
+            && /\.edu$/ig.test( job.source.auth.hostname );
+        return isEdu ? 'edu' : 'full'
+    }
+
+    function addJob(job, payment) {
+        if (!invoice.jobs) invoice.jobs = [];
+        var now = Date.now();
+        var testedOn = new Date( now );
+        var expires = new Date(now + 1000 * 60 * 60 * 24 * 30);
+
+        var j = {
+            content: job.content,
+            expires: expires.toISOString(),
+            jobId: job.jobId,
+            status: job.status,
+            source: job.source
+        };
+
+        if (payment.test) {
+            j.test = true;
+            invoice.test = {
+                jobId: job.jobId,
+                started: testedOn.toISOString()
+            };
+        }
+        invoice.jobs.push( j );
+    }
+
+    function addCharge(job, charge) {
+        if (!invoice.transactions) invoice.transactions = [];
+        var num = invoice.invoiceNum + '/' + format('%03.0f', invoice.transactions.length + 1);
+
+        // This may not be needed as I hadn't seen it fail. Better safe than sorry.
+        var date;
+        try {
+            date = new Date( charge.created * 1000 ).toISOString();
+        } catch ( e ) {
+            log.warn( 'Error creating date from charge:', charge.created );
+            date = new Date().toISOString();
+        }
+
+        invoice.transactions.push( {
+            relatedJob: job.jobId,
+
+            invoiceDate : date,
+            invoiceNum : num,
+
+            service: 'stripe',
+            txType: 'charge',
+
+            amount: charge.amount,
+            captureId : charge.id,
+            customerId: charge.customer,
+            last4: charge.card.last4,
+            fingerprint: charge.card.fingerprint,
+            type: charge.card.type
+        } );
+
+        // Update total charges
+        var total = 0;
+        invoice.transactions.forEach(function (tx) {
+            total = /charge/.test( tx.txType ) ? total + tx.amount : total - tx.amount;
+        });
+        invoice.totalCharged = total;
+    }
+
+
+/*
+    // Ensure the invoice has the required properties
+    log.info( 'Instantiation Invoice', JSON.stringify( invoice, null, 4 ) );
+    function reqCheck(prop) {
+        if (typeof invoice[prop] === 'undefined') throw {
+            status: 400,
+            message: 'Required property not present [' + prop + ']'
+        };
+    }
+    ['destination', 'expires', 'invoiceId', 'invoiceNum', 'starts',
+        'totalCharged', 'userId'].forEach(reqCheck);
+*/
+
     var obj = {
+        addCharge : addCharge,
         addComment : addComment,
         addJob : addJob,
         calculatePayment : calculatePayment,
         getExpiration : getExpiration,
+        getPromotionType: getPromotionType,
+        getTest : getTest,
         isOpen : isOpen,
-        json : invoice,
-        getTest : invoice.test,
+        toJSON : function toJSON() {
+            return invoice;
+        },
         overlappingJobs : overlappingJobs
     };
 

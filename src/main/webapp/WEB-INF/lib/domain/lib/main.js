@@ -29,6 +29,31 @@ exports.bcrypt = function (raw, salt) {
     return BCrypt.hashpw(raw, salt);
 };
 
+exports.deferSafe = function( defer, func ) {
+    return function () {
+        try {
+            func.apply( this, arguments );
+        } catch ( e if e.printStackTrace ) {
+            log.error( 'Deferred error (java exception):', e );
+            e.printStackTrace();
+            defer.resolve( {
+                status : 500,
+                message : 'Unexpected error caught by deferred error handler.',
+                error : e.toString()
+            }, true );
+        } catch ( e if e.rhinoException ) {
+            log.error( 'Deferred error (rhino exception):', e );
+            defer.resolve( {
+                status : 500,
+                message : 'Unexpected error caught by deferred error handler.',
+                error : e.message
+            }, true );
+        } catch (e) {
+            log.error( 'Deferred error:', JSON.stringify( e ) );
+            defer.resolve( e, true );
+        }
+    }
+};
 
 
 /**
@@ -105,4 +130,5 @@ exports.Invoices = require( './domains/invoices_domain' ).Invoices;
 
 exports.Job = require( './domains/job' ).Job;
 exports.Invoice = require( './domains/invoice' ).Invoice;
+exports.User = require( './domains/user' ).User;
 

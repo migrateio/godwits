@@ -73,6 +73,10 @@ exports.schema = {
                         "uniqueItems": true,
                         additionalItems: false
                     },
+                    expires: {
+                        type: 'string',
+                        format: 'date-time'
+                    },
                     jobId : {
                         type : 'string'
                     },
@@ -125,7 +129,7 @@ exports.schema = {
                 jobId : {
                     type : 'string'
                 },
-                completed : {
+                started : {
                     type : 'string',
                     format : 'date-time'
                 }
@@ -133,7 +137,7 @@ exports.schema = {
             required: ['jobId']
         },
         totalCharged : {
-            type : 'number',
+            type : 'integer',
             'default': 0
         },
         transactions : {
@@ -142,7 +146,10 @@ exports.schema = {
                 type : 'object',
                 properties : {
                     amount : {
-                        type : 'number'
+                        type : 'integer'
+                    },
+                    relatedJob : {
+                        type : 'string'
                     },
                     authId : {
                         type : 'string'
@@ -162,15 +169,25 @@ exports.schema = {
                     },
                     service : {
                         type : 'string',
-                        'enum' : ['google', 'yahoo', 'microsoft', 'imap']
+                        'enum' : ['stripe']
+                    },
+                    txType : {
+                        type : 'string',
+                        'enum' : ['charge', 'refund']
+                    },
+                    last4 : {
+                        type : 'string'
+                    },
+                    fingerprint : {
+                        type : 'string'
                     },
                     type : {
                         type : 'string'
                     }
                 },
                 required: [
-                    'amount', 'captureId', 'customerId', 'invoiceDate', 'invoiceNum',
-                    'service', 'type'
+                    'amount', 'relatedJob', 'captureId', 'customerId', 'invoiceDate',
+                    'invoiceNum', 'service', 'last4', 'fingerprint', 'type'
                 ]
             }
         },

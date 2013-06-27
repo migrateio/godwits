@@ -491,6 +491,10 @@
                 <hz.multicast.enabled>true</hz.multicast.enabled>
                 <hz.aws.enabled>false</hz.aws.enabled>
 
+                <!-- Stripe Payment Services -->
+                <stripe.public_key>pk_test_47piF2jdDs2jCkzclRy4HwWz</stripe.public_key>
+                <stripe.secret_key>sk_test_EeLn3Yz6vjKeDIyio6oHw6NS</stripe.secret_key>
+
                 <!-- AWS App Access -->
                 <aws.app.access_key>AKIAIIQOWQM6FFLQB2EQ</aws.app.access_key>
                 <aws.app.secret_key>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</aws.app.secret_key>
@@ -516,6 +520,10 @@
                 <hz.multicast.enabled>false</hz.multicast.enabled>
                 <hz.aws.enabled>true</hz.aws.enabled>
 
+                <!-- Stripe Payment Services -->
+                <stripe.public_key>pk_test_47piF2jdDs2jCkzclRy4HwWz</stripe.public_key>
+                <stripe.secret_key>sk_test_EeLn3Yz6vjKeDIyio6oHw6NS</stripe.secret_key>
+
                 <!-- AWS App Access -->
                 <aws.app.access_key>AKIAJUK7QWOGW5XMHLXQ</aws.app.access_key>
                 <aws.app.secret_key>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</aws.app.secret_key>
@@ -540,6 +548,10 @@
                 <hz.password>an3kd7c6bl</hz.password>
                 <hz.multicast.enabled>false</hz.multicast.enabled>
                 <hz.aws.enabled>true</hz.aws.enabled>
+
+                <!-- Stripe Payment Services -->
+                <stripe.public_key>${migrate.stripe.public_key}</stripe.public_key>
+                <stripe.secret_key>${migrate.stripe.secret_key}</stripe.secret_key>
 
                 <!-- AWS App Access -->
                 <aws.app.access_key>${migrate.aws.app.access_key}</aws.app.access_key>

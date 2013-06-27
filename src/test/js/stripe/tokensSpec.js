@@ -7,7 +7,7 @@ var stripe = require( 'stripe' )( api_key );
 describe( 'Stripe tokens', function () {
 
     it( 'should create tokens', function ( done ) {
-        stripe.token.create( {
+        stripe.tokens.create( {
             card : { number : "4242424242424242",
                 exp_month : 1,
                 exp_year : 2021,
@@ -27,7 +27,7 @@ describe( 'Stripe tokens', function () {
         var tokenId;
 
         beforeEach( function ( done ) {
-            stripe.token.create( {
+            stripe.tokens.create( {
                 card : { number : "4242424242424242",
                     exp_month : 1,
                     exp_year : 2021,
@@ -42,7 +42,7 @@ describe( 'Stripe tokens', function () {
         } );
 
         it( 'will retrieve card by token', function ( done ) {
-            stripe.token.retrieve( tokenId ).then(
+            stripe.tokens.retrieve( tokenId ).then(
                 function ( card ) {
                     expect( card ).toBeDefined();
                     expect( card.object ).toEqual( 'token' );

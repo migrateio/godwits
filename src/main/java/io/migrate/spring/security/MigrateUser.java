@@ -18,10 +18,9 @@ public class MigrateUser implements UserDetails {
 	private static final Logger LOG = LoggerFactory.getLogger(MigrateUser.class);
 
     private Map<String, Object> user;
-	private String id;
+	private String userId;
 	private String password;
 	private Collection<GrantedAuthority> authorities;
-	private String username = "";
 	private String name = "";
 	private String email;
     private String status;
@@ -30,7 +29,7 @@ public class MigrateUser implements UserDetails {
     public MigrateUser(Map<String, Object> user) {
 		LOG.debug("Generating new MigrateUser for user: {}", user);
         this.user = user;
-		this.id = (String) user.get("id");
+		this.userId = (String) user.get("userId");
 		this.name = (String) user.get("name");
 		this.password = ((String) user.get("password"));
 
@@ -67,7 +66,7 @@ public class MigrateUser implements UserDetails {
 	}
 
 	/**
-	 * Indicates whether the user's account has expired. An expired account cannot be authenticated.
+	 * Indicates whether the users account has expired. An expired account cannot be authenticated.
 	 *
 	 * @return <code>true</code> if the user's account is valid (ie non-expired), <code>false</code> if no longer valid
 	 *         (ie expired)
@@ -107,7 +106,7 @@ public class MigrateUser implements UserDetails {
 
     @Override
     public String getUsername() {
-        return id;
+        return userId;
     }
 
     public Map<String, Object> getMap() {
@@ -122,8 +121,8 @@ public class MigrateUser implements UserDetails {
 		return name;
 	}
 
-	public String getId() {
-		return id;
+	public String getUserId() {
+		return userId;
 	}
 
 	public boolean isUser() {
@@ -137,7 +136,7 @@ public class MigrateUser implements UserDetails {
     @Override
     public String toString() {
         return "MigrateUser{" +
-                "id='" + id + '\'' +
+                "userId='" + userId + '\'' +
                 ", name='" + name + '\'' +
                 ", email='" + email + '\'' +
                 ", status='" + status + '\'' +

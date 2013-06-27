@@ -16,10 +16,25 @@ exports.schema = {
         payment: {
             type: 'object',
             properties: {
+                stored: {
+                    type: 'boolean',
+                    'default' : false
+                },
+                fingerprint: {
+                    type: 'string'
+                },
                 last4: {
                     type: 'string'
+                },
+                type: {
+                    type: 'string'
+                },
+                expires: {
+                    type: 'string',
+                    format: 'date-time'
                 }
             },
+            required: ['stored'],
             additionalProperties: false
         },
         services: {
@@ -27,10 +42,10 @@ exports.schema = {
             strip: 'ROLE_USER',
             properties: {
                 stripe: {
-                    type: 'string'
+                    type: 'object'
                 },
                 xero: {
-                    type: 'string'
+                    type: 'object'
                 }
             },
             additionalProperties: false

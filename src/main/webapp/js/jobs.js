@@ -15,12 +15,29 @@
             function newJob() {
                 return {
                     jobId : '' + (random( 1000 ) + 1000),
-                    source : {},
-                    destination : {},
-                    content : [],
-                    action : {},
-                    status : {
-                        completion : 0.00
+                    "source" : {
+                        "service" : "flickr",
+                        "auth" : {
+                            "username" : "jcook@gmail.com",
+                            "accessToken" : "access_jsd8as32h373fhasa8",
+                            "refreshToken" : "refresh_is812nms0an38dbcuz73"
+                        }
+                    },
+                    "destination" : {
+                        "service" : "picasa",
+                        "auth" : {
+                            "username" : "jcook@gmail.com",
+                            "accessToken" : "access_jsd8as32h373fhasa8",
+                            "refreshToken" : "refresh_is812nms0an38dbcuz73"
+                        }
+                    },
+                    "content" : [
+                        "media"
+                    ],
+                    "action" : {},
+                    "status" : {
+                        "completion" : 0,
+                        "state" : "pending"
                     }
                 };
             }
@@ -41,16 +58,15 @@
     mod.controller( 'mio-job-controller',
         ['$log', '$scope', '$timeout', '$element', 'mioServices',
             function ( $log, $scope, $timeout, $element, mioServices ) {
-
                 // Watch the job to see when the job is ready to be submitted
                 $scope.$watch(
-                    function() {
+                    function () {
                         return $scope.job.source && $scope.job.source.service
                             && $scope.job.destination && $scope.job.destination.service
                             && $scope.job.content && $scope.job.content.length > 0;
                     },
-                    function(newValue) {
-                        if (!$scope.job.status) $scope.job.status = {};
+                    function ( newValue ) {
+                        if ( !$scope.job.status ) $scope.job.status = {};
                         $scope.job.status.state = newValue ? 'pending' : '';
                         $log.info( 'Watching for state', newValue, $scope.job );
                     }
@@ -421,8 +437,8 @@
                             scope.serviceObj.service = scope.serviceDef.name;
                             scope.serviceObj.auth = {
                                 username : data.params.userinfo.email,
-                                accessToken: data.access.access_token,
-                                refreshToken: data.access.refresh_token
+                                accessToken : data.access.access_token,
+                                refreshToken : data.access.refresh_token
                             };
                             scope.toggle();
                             jobCtrl.broadcast( JOB_DRAWER_TOGGLE );
@@ -432,24 +448,22 @@
                             scope.errorMsg = 'Failed to authenticate with service.';
                         };
 
-/*
-                        $timeout(function() {
+                        $timeout( function () {
                             success( {
-                                params: {
-                                    userinfo: {
-                                        email: 'jcook@gmail.com'
+                                params : {
+                                    userinfo : {
+                                        email : 'jcook@gmail.com'
                                     }
                                 },
-                                access: {
+                                access : {
                                     access_token : 'access_jsd8as32h373fhasa8',
                                     refresh_token : 'refresh_is812nms0an38dbcuz73'
                                 }
                             } );
-                        }, 1500);
-*/
+                        }, 1500 );
 
-                        mioServices.oauthLink( scope.serviceDef.name )
-                            .then( success, failure );
+//                        mioServices.oauthLink( scope.serviceDef.name )
+//                            .then( success, failure );
                     };
 
                     scope.oauthUnlink = function () {
@@ -578,14 +592,179 @@
         }]
     );
 
-    mod.directive( 'mioJobAction', ['$log', '$parse', '$compile',
-        function ( $log, $parse, $compile ) {
+    /**
+     * ## Directive mio-job-action
+     *
+     * _A directive which will monitor changes to the job and submit to the server for a
+     * `preauth` object when the job details are modified and it is called upon. The
+     * screen may display a busy indicator while the directive is calling the server._
+     *
+     * The UI control object we build will determine which of four different purchase
+     * views are displayed. Possible permutation ingredients are:
+     *
+     * * promotion (edu|full)
+     *   Indicates whether the job's source account is an edu account or full (non-edu)
+     *
+     * * max (true|false)
+     *   Indicates whether the user has been charged the max amount for the invoice ($15)
+     *
+     * * due (0|5|10|15)
+     *   The amount due will depend on the promotion type and how much has been charged
+     *   against the invoice.
+     *
+     * That leaves us with 16 permutations, so we have to decide what is important to the
+     * user in order to make a purchase decision. Obviously the `due` amount will be
+     * displayed. If the user has selected an edu account, we will want to let them know
+     * about the special $5 price for edu source accounts.
+     *
+     * Some unanswered questions:
+     * 1. Does the user want to know that they have maxed out an invoice and all future
+     *    jobs will be at no charge? Should this be shown after payment and job
+     *    submission?
+     * 2. If the user is charged $10, should we explain that they are being charged $15,
+     *    but because of an earlier edu payment, their balance is only $10?
+     * 3. If the user is charged for two .edu accounts for $5/each, is it worth telling
+     *    them that another $5 will allow them to transfer from any non-edu account?
+     * 4. Is the due amount of $0 a special condition? Should we tell the user that
+     *    no payment is necessary or just submit the job?
+     *
+     * **full**
+     * > The user has selected a non-edu source and the full price of $15 is charged.
+     *
+     * **edu-partial**
+     * > The user has selected an edu source and they will be charged $5 for this job.
+     *   They have not yet reached the $15 max.
+     *
+     * **edu-full**
+     * > The user has selected an edu source and they will be charged $5 for this job and
+     *   they have reached the $15 max.
+     *
+     * **zero**
+     * > The user's job is due no money because their invoice has been maxed out at $15.
+     *
+     *
+     */
+    mod.directive( 'mioJobAction', ['$log', 'mioServices',
+        function ( $log, mioServices ) {
             return {
                 require : '^mioJob',
                 restrict : 'MACE',
-                scope : {block : '=mioJobAction'},
+                scope : {
+                    job : '=mioJobRef'
+                },
                 templateUrl : '/partials/job/job-action.html',
                 link : function ( scope, element, attrs, jobCtrl ) {
+                    // The ui object will hold properties that tell what is needed
+                    // to submit the job.
+                    scope.ui = {};
+
+                    // Watching for changes in the job, will allow us to fetch a preauth
+                    // object in the background before the user clicks on the migrate
+                    // button and exposes this component in the drawer.
+                    (function() {
+                        // Using the properties in preauth, determine the type of view
+                        // which will be displayed: full, edu-partial, edu-full or zero.
+                        var determineView = function( preauth ) {
+                            var sub = preauth.subscription;
+                            if (sub.due === 0) return 'zero';
+                            var result = [];
+                            if (sub.promotion === 'edu') result.push( 'edu' );
+                            if (sub.due < 15) result.push('partial');
+                            else result.push( 'full' );
+                            return result.join( '-' );
+                        };
+
+                        // We will convert the preauth object into a ui object suitable
+                        // for controlling the displayed views.
+                        var makeUI = function(preauth) {
+                            scope.ui = {
+                                testedOn : preauth.testedOn,
+                                view : determineView( preauth ),
+                                due : preauth.subscription.payment.due
+                            };
+                            $log.info( 'ui', scope.ui );
+                        };
+
+                        // If the job has changed, we will update the preauth object in
+                        // the scope to reflect the new settings.
+                        var jobChanged = function() {
+                            mioServices.preauthJob( scope.job ).then(
+                                function success( data ) {
+                                    $log.info( 'Received this preauth', data );
+                                    scope.preauth = {
+                                        "open" : false,
+                                        "subscription" : {
+                                            "expires" : "2013-07-19T19:56:26.587Z",
+                                            "payment" : {
+                                                "due" : 15,
+                                                "charged" : 0,
+                                                "promotion" : 'full'
+                                            }
+                                        }
+                                    };
+                                    makeUI( scope.preauth );
+                                },
+                                function error( data ) {
+                                    if ( data.status === 401 ) {
+                                        $log.info( 'Will be authenticating', data );
+                                        scope.preauth = {};
+                                    }
+                                }
+                            );
+                        };
+
+                        scope.$watch(function() {
+                            var isComplete = scope.job
+                                && scope.job.destination && scope.job.destination.service
+                                && scope.job.destination.auth && scope.job.destination.auth.username
+                                && scope.job.source && scope.job.source.service
+                                && scope.job.source.auth && scope.job.source.auth.username
+                                && scope.job.content && scope.job.content.length > 0;
+                            if (isComplete) return JSON.stringify( {
+                                destination: scope.job.destination,
+                                source: scope.job.source,
+                                content: scope.job.content
+                            } );
+                        }, jobChanged);
+                    })();
+
+                    scope.purchase = function () {
+                        $log.info( 'Payment submission:', arguments );
+                        var amount = parseInt( scope.ui.amount );
+
+                        var success = function(result) {
+                            $log.info( 'Result:', result );
+
+                            if (typeof result.id !== 'string') {
+                                // Can this happen. How should we handle it? What are the
+                                // error conditions?
+                            }
+
+                            mioServices.submitJob( job, result.id ).then(
+                                function success() {
+
+                                },
+                                function error() {
+                                    // Perhaps another job was submitted before this one
+                                    // and payment is off or overlap has occurred. Tell
+                                    // the user.
+                                }
+                            );
+                        };
+
+                        StripeCheckout.open({
+                            // todo: Need a way to transfer server-side data to client
+                            key:         'pk_test_47piF2jdDs2jCkzclRy4HwWz',
+                            address:     false,
+                            amount:      amount * 100,
+                            currency:    'usd',
+                            name:        'Migrate IO',
+                            description: 'Migration Job ( $' + amount + ' )',
+                            panelLabel:  'Pay',
+                            image:       '/img/icons/app-icon-128.png',
+                            token:       success
+                        });
+                    }
                 }
             }
         }] );
@@ -849,12 +1028,12 @@
                 require : '^mioJob',
                 restrict : 'ACE',
                 scope : {
-                    status : '=mioData'
+                    job : '=mioData'
                 },
                 template : '\
                     <div>\
                         <a class="btn btn-success" data-ng-click="select()" \
-                            data-ng-class=" { disabled : !status.state } " >\
+                            data-ng-class=" { disabled : !job.status.state } " >\
                             {{label}}\
                         </a>\
                     </div>\
@@ -862,7 +1041,7 @@
                 link : function ( scope, element, attrs, jobCtrl ) {
                     // The text which is on the button will depend on the particular
                     // state of the job.
-                    switch (scope.status.state || 'pending') {
+                    switch ( scope.job.status.state || 'pending' ) {
                         case 'pending':
                             scope.label = 'Migrate';
                             break;
@@ -872,15 +1051,20 @@
                         case 'error':
                             scope.label = 'Migrate';
                             break;
-                        case 'complete':
+                        case 'completed':
                             scope.label = 'Run Again';
                             break;
                         default:
                             scope.label = 'Migrate';
                     }
+
+                    scope.select = function () {
+                        jobCtrl.broadcast( JOB_DRAWER_TOGGLE, 'action' );
+                    }
                 }
             }
         }]
-    )
+    );
+
 })( jQuery, angular );
 

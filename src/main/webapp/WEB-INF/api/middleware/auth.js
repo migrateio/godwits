@@ -41,12 +41,6 @@ exports.middleware = function ( next, app ) {
             return !!servletRequest.getUserPrincipal();
         };
 
-
-        function checkCondition() {
-            return true;
-        }
-
-
         /**
          * Returns a 403 error if the current request does not satisfy the authorization
          * requirements.

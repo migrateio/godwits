@@ -1,6 +1,4 @@
 var log = require( 'ringo/logging' ).getLogger( module.id );
-var {uuid} = require( 'utility' );
-var {PromiseList} = require( 'ringo/promise' );
 
 var api_key = 'sk_test_EeLn3Yz6vjKeDIyio6oHw6NS';
 

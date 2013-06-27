@@ -84,7 +84,7 @@
                         // If the user's signin status is complete, then direct them to
                         // enter their password, otherwise we need them to verify their
                         // token.
-                        $scope.model.userId = response.id;
+                        $scope.model.userId = response.userId;
                         $scope.state.step = response.complete
                             ? 'password' : 'verify';
                     } );
@@ -130,7 +130,7 @@
                     } )
                     .success( function ( response, status ) {
                         $log.info( 'Signup response', response );
-                        $scope.model.userId = response.id;
+                        $scope.model.userId = response.userId;
                         $scope.state.step = 'verify';
                     } );
             }

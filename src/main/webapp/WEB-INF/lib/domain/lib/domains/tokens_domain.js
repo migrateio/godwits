@@ -14,11 +14,11 @@ var removeOnEvict = module.singleton('listeners', function() {
         map.addEntryListener( {
             name : map.name,
             entryEvicted : function ( entry ) {
-                log.info( 'Evicted the entry, key: ' + entry.key );
+                log.debug( 'Evicted the entry, key: ' + entry.key );
                 map.remove( entry.key );
             },
             entryRemoved : function ( entry ) {
-                log.info( 'Removed the entry, key: ' + entry.key );
+                log.debug( 'Removed the entry, key: ' + entry.key );
             }
         } );
         listeners[map.name] = true;

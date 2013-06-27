@@ -45,7 +45,7 @@ describe( "Customer API", function () {
     it( 'should retrieve a list of customers', function () {
         var customers = stripe.customers.list().wait( 5000 );
         expect( customers.object ).toEqual( 'list' );
-        expect( customers.count ).toEqual( 3 );
+        expect( customers.count ).toBeGreaterThan( 2 );
     } );
 
     it( 'can update a customer', function () {

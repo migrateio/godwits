@@ -490,3 +490,21 @@
 }
 
 
+/* The job's action drawer */
+.job-action {
+    background: url('/img/content/straight_separator.png') no-repeat 384px 50%;
+}
+
+.jobs div.job-detail ul.job-action > li > div {
+    background: #eeeeff;
+    width: 100%;
+    height: 80px;
+}
+
+.job-action li.test {
+    width: 350px;
+}
+
+.job-action li.purchase {
+    width: 540px;
+}

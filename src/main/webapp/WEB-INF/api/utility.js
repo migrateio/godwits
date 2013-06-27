@@ -5,6 +5,24 @@ var config = exports.config = {
     version : '0.1.0'
 };
 
+/**
+ * Returns a random character from the list of tokenChars.
+ * 6 character permutation will represent 55^6 permutations = 27,680,640,625
+ */
+var tokenChars = '23456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz';
+var tokenLen = tokenChars.length;
+var random = new java.security.SecureRandom();
+var randomChar = function () {
+    return tokenChars.charAt( Math.floor( random.nextDouble() * tokenLen ) );
+};
+exports.makeToken = function(length) {
+    var result = '';
+    for (var i = 0; i < length; i++) {
+        result += randomChar();
+    }
+    return result;
+};
+
 
 exports.uuid = function () {
     var uuid = java.util.UUID.randomUUID();

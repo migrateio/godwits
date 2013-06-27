@@ -115,8 +115,8 @@
 
     var mod = ng.module( 'migrate-services', [] );
 
-    mod.factory( 'mioServices', [ '$log', '$http', '$timeout', '$q', '$window',
-        function ( $log, $http, $timeout, $q, $window ) {
+    mod.factory( 'mioServices', [ '$log', '$http', '$timeout', '$q', '$window', 'authService',
+        function ( $log, $http, $timeout, $q, $window, authService ) {
             /**
              * Attempts an authentication against the specified service. Returns a
              * promise indicating success or failure.
@@ -236,13 +236,61 @@
                 return deferred.promise;
             }
 
+            function preauthJob( job ) {
+                var user = authService.user();
+                $log.info( 'Authenticated user: ', user );
+
+                // If the user has not yet authenticated, the call to the server to
+                // preauth the job is not necessary. We will return a "faked" 401
+                // response so the UI can kick off a custom authentication routine.
+                if (!user) {
+                    var deferred = $q.defer();
+                    deferred.reject({ status: 401 });
+                    return deferred.promise;
+                }
+
+                return $http.post( '/api/users/' + user.userId + '/jobs/preauth', job );
+            }
+
+            function submitJob( job, token ) {
+                var deferred = $q.defer();
+
+                var user = authService.user();
+                if (!user) {
+                    deferred.reject({ status: 401 });
+                }
+
+                var payload = {
+                    job: job,
+                    payment: {
+                        service: stripe,
+                        token: token
+                    }
+                };
+
+
+                $http.post( '/api/users/' + user.userId + '/jobs/submit', payload ).then(
+                    function success( response ) {
+                        $log.info( 'Job submission response:', response );
+                        deferred.resolve( response.data );
+                    },
+                    function error( response ) {
+                        deferred.reject( response );
+                    }
+                );
+
+                return deferred.promise;
+            }
+
 
             // Functions exposed by mioServices
             return {
-                oauthLink : oauthLink,
+                authenticate : authenticate,
                 contentIntersection : contentIntersection,
                 getServices : getServices,
-                authenticate : authenticate
+                oauthLink : oauthLink,
+                preauthJob : preauthJob,
+                submitJob : submitJob
             }
 
         } ] );

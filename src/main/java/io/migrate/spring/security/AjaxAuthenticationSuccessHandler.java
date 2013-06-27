@@ -48,7 +48,7 @@ public class AjaxAuthenticationSuccessHandler extends SimpleUrlAuthenticationSuc
         // User types are returned when Spring uses the in-memory auth provider
         else if (p instanceof User) {
             String username = ((User) p).getUsername();
-            userMap.put("id", username);
+            userMap.put("userId", username);
             userMap.put("roles", ((User) p).getAuthorities().toArray());
 
             HashMap<String, Object> email = new HashMap<String, Object>();

@@ -63,7 +63,11 @@ var {request} = require( 'ringo/httpclient' );
 
 function error( message ) {
     var deferred = new Deferred();
-    deferred.resolve( '', true );
+    var result = {
+        status: 400,
+        message: message
+    };
+    deferred.resolve( result, true );
     return deferred.promise;
 }
 
@@ -109,7 +113,19 @@ module.exports = function ( api_key, options ) {
             error : function ( message, status, exchange ) {
                 log.warn( 'Stripe request error, status: {}, message: {}',
                     status, message + '\n' + exchange.content );
-                deferred.resolve( message, true );
+
+                var result = {
+                    status: status,
+                    message: message
+                };
+
+                try {
+                    var errorDetail = JSON.parse( exchange.content );
+                    result.detail = errorDetail.error;
+                } catch ( e ) {
+                }
+
+                deferred.resolve( result, true );
             }
         };
 
@@ -250,7 +266,7 @@ module.exports = function ( api_key, options ) {
                 return get( "/v1/coupons", { count : count, offset : offset} );
             }
         },
-        token : {
+        tokens : {
             create : function ( data ) {
                 return post( "/v1/tokens", data )
             },
@@ -258,7 +274,7 @@ module.exports = function ( api_key, options ) {
                 return get( "/v1/tokens/" + token_id, {} )
             }
         },
-        account : {
+        accounts : {
             retrieve : function () {
                 get( "/v1/account", {} )
             }
