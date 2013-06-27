@@ -1,6 +1,6 @@
 var log = require( 'ringo/logging' ).getLogger( module.id );
 // todo: figure out actual path.
-var {Google, Yahoo, Imap} = require( 'lib/migrate/main' );
+var {Google, Yahoo, Imap, getService} = require( 'lib/migrate/main' );
 
 
 function onmessage( e ) {
@@ -9,17 +9,6 @@ function onmessage( e ) {
 
     function doWork() {
         var source;
-
-        function getService( name, auth ) {
-            switch ( name ) {
-                case 'gmail':
-                    return new Google.Mail( auth );
-                case 'yahoo':
-                    return new Yahoo.Mail( auth );
-                default:
-                    return new Imap.Mail( auth );
-            }
-        }
 
         source = getService( input.source.service, input.source.auth );
 
