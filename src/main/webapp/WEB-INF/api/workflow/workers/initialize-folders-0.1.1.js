@@ -1,6 +1,6 @@
 var log = require( 'ringo/logging' ).getLogger( module.id );
 // todo: figure out actual path.
-var {Google, Yahoo, Imap, getService} = require( 'lib/migrate/main' );
+var {getService} = require( 'lib/migrate/main' );
 
 
 function onmessage( e ) {
@@ -10,12 +10,27 @@ function onmessage( e ) {
     function doWork() {
         var source;
 
-        source = getService( input.source.service, input.source.auth );
 
-        // We have a source service instantiated now, time to do stuff.
-        var folders = input.source.folders;
+        try {
+            source = getService( input.source.service, input.source.auth );
 
-        var result = createJobs( getUIDS( source, folders ) );
+            // We have a source service instantiated now, time to do stuff.
+            var folders = input.source.folders;
+
+            var result = createJobs( getUIDS( source, folders ) );
+
+            e.source.postMessage( {
+                module : module.id,
+                status : 200,
+                result : result
+            } );
+
+        } catch (e) {
+            e.source.postError( {
+                reason : '',
+                details : e.message
+            } );
+        }
 
         function getUIDS( service, folders ) {
             var result = [];
@@ -97,15 +112,7 @@ function onmessage( e ) {
 
             return jobs;
         }
-
-        e.source.postMessage( {
-            module : module.id,
-            status : 200,
-            result : result
-        } );
     }
-
-
 }
 
 

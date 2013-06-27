@@ -1,6 +1,6 @@
 var log = require( 'ringo/logging' ).getLogger( module.id );
 // todo: figure out actual path.
-var {Google, Yahoo, Imap, getService} = require( 'lib/migrate/main' );
+var {getService} = require( 'lib/migrate/main' );
 
 function onmessage( e ) {
 
@@ -11,11 +11,24 @@ function onmessage( e ) {
         var job = input.job;
         var sourceServ;
         var destinationServ;
+        try {
+            sourceServ = getService( input.source.service, input.source.auth );
+            destinationServ = getService( input.destination.service, input.destination.auth );
 
-        sourceServ = getService( input.source.service, input.source.auth );
-        destinationServ = getService( input.destination.service, input.destination.auth );
+            var result = migrate( sourceServ, destinationServ, job );
 
-        var result = migrate( sourceServ, destinationServ, job );
+            e.source.postMessage( {
+                module : module.id,
+                status : 200,
+                result : result
+            } );
+        } catch (e) {
+            e.source.postError( {
+                reason : '',
+                details : e.message
+            } );
+        }
+
 
         function migrate( source, dest, job ) {
             var mails = [];
@@ -27,15 +40,7 @@ function onmessage( e ) {
 
             return dest.write( mails );
         }
-
-        e.source.postMessage( {
-            module : module.id,
-            status : 200,
-            result : result
-        } );
     }
-
-
 }
 
 
