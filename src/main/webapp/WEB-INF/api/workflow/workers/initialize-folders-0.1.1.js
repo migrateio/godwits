@@ -35,7 +35,7 @@ function onmessage( e ) {
                 var messages = folders[i].getMessages( 0, folders[i].messageCount );
                 var uids = [];
                 for ( var j = 0; j < messages.length; j++ ) {
-                    uids.push( messages[j].getuid );
+                    uids.push( messages[j].getUID() );
                 }
 
                 result.push( {
