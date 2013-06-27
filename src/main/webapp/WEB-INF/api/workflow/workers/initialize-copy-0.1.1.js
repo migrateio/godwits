@@ -35,7 +35,7 @@ function onmessage( e ) {
     function doWork() {
         var source;
 
-        // encapsulate this somehow.
+        // todo: encapsulate this somehow.
         switch ( input.source.service ) {
             case 'gmail':
                 source = new Google.Mail( input.source.auth );
