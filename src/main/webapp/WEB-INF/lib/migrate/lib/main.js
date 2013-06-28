@@ -89,3 +89,18 @@ exports.Google = {
 exports.Yahoo = {
     Mail : require( './yahoo/mail/yahoo-mail' ).Service
 };
+
+exports.Imap = {
+    Mail : require( './imap/mail/imap' ).Service
+};
+
+exports.getService = function( name, auth ) {
+    switch ( name ) {
+        case 'gmail':
+            return new Google.Mail( auth );
+        case 'yahoo':
+            return new Yahoo.Mail( auth );
+        default:
+            return new Imap.Mail( auth );
+    }
+};

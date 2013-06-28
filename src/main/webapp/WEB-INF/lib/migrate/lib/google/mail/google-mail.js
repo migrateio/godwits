@@ -53,16 +53,11 @@ exports.Service = ImapService.subClass( {
         if ( typeof attempts === 'undefined' ) attempts = 3;
 
         function reconnect() {
-
-            log.info(JSON.stringify(this.opts, null, 4));
             var data = refreshAccessToken( 'google', this.opts.oauth.refreshToken );
-            log.info(data);
+
+            this.opts.auth = data;
 
             this.connect();
-
-            // use refresh token
-            // set access token props
-            // connect()
         }
 
         if ( attempts < 0 ) throw {};
