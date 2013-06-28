@@ -89,7 +89,7 @@ exports.ImapService = Object.subClass( {
     connect : function () {
 
         // If we don't have a password, we cannot connect.
-        if ( this.opts.password ) {
+        if ( !this.opts.password ) {
             throw new GenericException( 401, 'No authentication provided.' );
         }
 

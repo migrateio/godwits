@@ -17,36 +17,36 @@ exports.Service = ImapService.subClass( {
             port : 993
         } );
 
-        var data = refreshAccessToken( 'google', this.opts.oauth.refreshToken );
-        log.info(data);
-
         // If they're connecting via oauth, we'll need to send protocol downstream manually.
         // The
         if ( this.opts.oauth ) {
+            var data = refreshAccessToken( 'google', this.opts.oauth.refreshToken );
+            log.info(data);
+
             var emptyPassword = "";
             this.store.connect( this.opts.hostname, this.opts.port, this.opts.email, emptyPassword );
         } else {
-
             // If they're not connecting via oauth we just call the super of this function.
             this._super( this.opts );
-
         }
     },
 
     setProps : function () {
         this._super();
 
-        // Extra props for gmail oauth support.
-        this.props.put( "mail.imaps.sasl.enable", "true" );
-        this.props.put( "mail.imaps.sasl.mechanisms", "XOAUTH2" );
-        this.props.put( 'mail.imaps.sasl.mechanisms.oauth2.oauthToken', this.opts.oauth.accessKey );
+        if(this.opts.oauth) {
+            // Extra props for gmail oauth support.
+            this.props.put( "mail.imaps.sasl.enable", "true" );
+            this.props.put( "mail.imaps.sasl.mechanisms", "XOAUTH2" );
+            this.props.put( 'mail.imaps.sasl.mechanisms.oauth2.oauthToken', this.opts.oauth.accessKey );
+        }
     },
 
-    getFolders : function () {
-        return this.retry(function () {
-            return this._super();
-        });
-    },
+//    getFolders : function () {
+//        return this.retry(function () {
+//            return this._super();
+//        });
+//    },
 
     retry : function ( func, attempts ) {
 
