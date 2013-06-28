@@ -25,7 +25,7 @@ function onmessage( e ) {
                 result : result
             } );
 
-        } catch (e) {
+        } catch ( e ) {
             e.source.postError( {
                 reason : '',
                 details : e.message
@@ -44,7 +44,7 @@ function onmessage( e ) {
 
                 result.push( {
                     folderName : folders[i].getFullName(),
-                    messageCount : folders[i].messageCount(),
+//                    messageCount : folders[i].messageCount(),
                     uids : uids
                 } );
             }
@@ -52,21 +52,21 @@ function onmessage( e ) {
             return result;
         }
 
+
         function createJobs( folders ) {
             // This should probably go in a configuration file.
             const MAX_MESSAGES = 100;
-
             var done = false;
 
             // These probably shouldn't be named so similar...
             var jobs = [];
-            var job = {};
 
             // Loop until we're done.
-            while ( done ) {
+            while ( !done ) {
+
                 // Each iteration of this loop is a new job.
                 // We initialize the job thusly.
-                job = {
+                var job = {
                     folders : [],
                     messageCount : 0
                 };
@@ -75,13 +75,12 @@ function onmessage( e ) {
                 while ( job.messageCount < MAX_MESSAGES ) {
 
                     // Iterate over all folders passed to us.
-                    for ( var i = 0; i < folders.length; i++ ) {
+                    for ( var i = folders.length - 1; i >= 0; i-- ) {
 
                         // If a folder has no uids we don't care about it anymore, so we just get rid of it,
                         // update our iterator, and kick to the next iteration of the loop.
                         if ( folders[i].uids.length === 0 ) {
                             folders.splice( i, 1 );
-                            i--;
                             continue;
                         }
 
@@ -92,26 +91,42 @@ function onmessage( e ) {
                             uids : []
                         } );
 
+                        folder = job.folders[--folder];
+
                         // Finally, we'll loop over the uids in said folder until the job we're building has
                         // enough messages, or until we run out of uids to move into the job.
-                        while ( job.messageCount < MAX_MESSAGES || folders[i].uids.length === 0 ) {
-                            folder.uids.push( folders[i].uids.shift() );
-                            job.messageCount++;
+
+                        if ( job.messageCount <= MAX_MESSAGES && folders[i].uids.length !== 0 ) {
+
+                            var difference = Math.min( MAX_MESSAGES - job.messageCount, folders[i].uids.length );
+                            var array = folders[i].uids.splice( 0, difference );
+
+                            folder.uids = folder.uids.concat( array );
+                            job.messageCount += difference;
                         }
+
+                        if ( job.messageCount >= MAX_MESSAGES ) {
+                            break;
+                        }
+                    }
+
+                    if ( job.messageCount === 0 ) {
+                        break;
                     }
                 }
 
                 // Getting here means our job has gotten the max number of messages it can hold.
-                jobs.push( job );
+                if ( job.messageCount > 0 ) jobs.push( job );
 
                 // If there's no folders to read from we're done, else we're not.
                 if ( folders.length === 0 ) {
                     done = true;
+                    break;
                 }
             }
-
             return jobs;
         }
+
     }
 }
 
