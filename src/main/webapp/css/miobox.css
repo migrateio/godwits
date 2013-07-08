@@ -1,0 +1,126 @@
+.mio-box {
+    position: relative;
+    overflow: hidden;
+    width: 100%;
+    height: 100%;
+}
+
+.mio-box > div {
+    width: 100%;
+    height: 100%;
+}
+
+.mio-box .dimmer {
+    position: absolute;
+    background-color: #ffffff;
+    width: 100%;
+    height: 100%;
+    opacity: 0.5;
+    z-index: 100;
+    transition: opacity linear 0.1s;
+}
+
+.dimmer.fade-show {
+    opacity: 0;
+}
+
+.dimmer.fade-show.fade-show-active {
+    opacity: 0.3;
+}
+
+.dimmer.fade-hide {
+    opacity: 0.3;
+}
+
+.dimmer.fade-hide.fade-hide-active {
+    opacity: 0;
+}
+
+
+.mio-face {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background-color: #eeffee;
+    z-index: 1;
+    -webkit-transition: all 300ms cubic-bezier(0.680, 0, 0.265, 1); /* older webkit */
+    -webkit-transition: all 300ms cubic-bezier(0.680, -0.550, 0.265, 1.550);
+    -moz-transition: all 300ms cubic-bezier(0.680, -0.550, 0.265, 1.550);
+    -ms-transition: all 300ms cubic-bezier(0.680, -0.550, 0.265, 1.550);
+    -o-transition: all 300ms cubic-bezier(0.680, -0.550, 0.265, 1.550);
+    transition: all 300ms cubic-bezier(0.680, -0.550, 0.265, 1.550); /* easeInOutBack */
+}
+
+
+.mio-face.left-show {
+    left: 100%;
+    top: 0;
+}
+
+.mio-face.left-show.left-show-active {
+    left: 0;
+}
+
+.mio-face.left-hide {
+    left: 0;
+    top: 0;
+}
+
+.mio-face.left-hide.left-hide-active {
+    left: -100%;
+}
+
+.mio-face.top-show {
+    left: 0;
+    top: -100%;
+}
+
+.mio-face.top-show.top-show-active {
+    top: 0;
+}
+
+.mio-face.top-hide {
+    left: 0;
+    top: 0;
+}
+
+.mio-face.top-hide.top-hide-active {
+    top: -100%;
+}
+
+.mio-face.right-show {
+    left: -100%;
+    top: 0;
+}
+
+.mio-face.right-show.right-show-active {
+    left: 0;
+}
+
+.mio-face.right-hide {
+    left: 0;
+    top: 0;
+}
+
+.mio-face.right-hide.right-hide-active {
+    left: 100%;
+}
+
+.mio-face.bottom-show {
+    left: 0;
+    top: 100%;
+}
+
+.mio-face.bottom-show.bottom-show-active {
+    top: 0;
+}
+
+.mio-face.bottom-hide {
+    left: 0;
+    top: 0;
+}
+
+.mio-face.bottom-hide.bottom-hide-active {
+    top: 100%;
+}
+

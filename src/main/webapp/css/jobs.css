@@ -428,8 +428,8 @@
     transition: all linear 0.05s;
     color: #990000;
     opacity: 0;
-    top: 5px;
-    right: 5px;
+    top: 0;
+    right: 0;
     cursor: pointer;
 }
 
@@ -440,31 +440,9 @@
 .mio-tab-btn-account div.remove:hover {
     font-size: 30px;
     opacity: 1;
-    top: 0;
-    right: 0;
+    top: -5px;
+    right: -5px;
 }
-
-.mio-tab-btn-account .slider-hide,
-.mio-tab-btn-account .slider-show {
-    transition: all linear 0.125s;
-}
-
-.mio-tab-btn-account .slider-show {
-    left: -100%;
-}
-
-.mio-tab-btn-account .slider-show.slider-show-active {
-    left: 0;
-}
-
-.mio-tab-btn-account .slider-hide {
-    left: 0;
-}
-
-.mio-tab-btn-account .slider-hide.slider-hide-active {
-    left: 100%;
-}
-
 
 /* Content button in the job's tab bar */
 

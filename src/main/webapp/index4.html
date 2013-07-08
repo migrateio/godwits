@@ -1,0 +1,302 @@
+<!doctype html>
+<html ng-app="plunker">
+<head>
+<meta charset="utf-8">
+<title>Box/Face Example</title>
+<style>
+    .box {
+        border: 10px solid #eeeeff;
+        /*padding: 10px;*/
+        margin: 10px;
+        position: relative;
+        overflow: hidden;
+        width: 300px;
+        height: 200px;
+    }
+
+    .box .dimmer {
+        position: absolute;
+        background-color: #000000;
+        width: 300px;
+        height: 200px;
+        opacity: 0;
+        z-index: 100;
+        transition: opacity linear 0.1s;
+    }
+
+    .face {
+        position: absolute;
+        width: 300px;
+        height: 200px;
+        text-align: center;
+        font-size: 60px;
+        line-height: 200px;
+        background-color: #eeffee;
+        z-index: 1;
+        -webkit-transition: all 300ms cubic-bezier(0.680, 0, 0.265, 1); /* older webkit */
+        -webkit-transition: all 300ms cubic-bezier(0.680, -0.550, 0.265, 1.550);
+        -moz-transition: all 300ms cubic-bezier(0.680, -0.550, 0.265, 1.550);
+        -ms-transition: all 300ms cubic-bezier(0.680, -0.550, 0.265, 1.550);
+        -o-transition: all 300ms cubic-bezier(0.680, -0.550, 0.265, 1.550);
+        transition: all 300ms cubic-bezier(0.680, -0.550, 0.265, 1.550); /* easeInOutBack */
+    }
+
+    .left-show {
+        left: 100%;
+        top: 0;
+    }
+
+    .left-show.left-show-active {
+        left: 0;
+    }
+
+    .left-hide {
+        left: 0;
+        top: 0;
+    }
+
+    .left-hide.left-hide-active {
+        left: -100%;
+    }
+
+    .top-show {
+        left: 0;
+        top: -100%;
+    }
+
+    .top-show.top-show-active {
+        top: 0;
+    }
+
+    .top-hide {
+        left: 0;
+        top: 0;
+    }
+
+    .top-hide.top-hide-active {
+        top: -100%;
+    }
+
+    .right-show {
+        left: -100%;
+        top: 0;
+    }
+
+    .right-show.right-show-active {
+        left: 0;
+    }
+
+    .right-hide {
+        left: 0;
+        top: 0;
+    }
+
+    .right-hide.right-hide-active {
+        left: 100%;
+    }
+
+    .bottom-show {
+        left: 0;
+        top: 100%;
+    }
+
+    .bottom-show.bottom-show-active {
+        top: 0;
+    }
+
+    .bottom-hide {
+        left: 0;
+        top: 0;
+    }
+
+    .bottom-hide.bottom-hide-active {
+        top: 100%;
+    }
+
+</style>
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.1/jquery.min.js"></script>
+<script src="//ajax.googleapis.com/ajax/libs/angularjs/1.1.5/angular.js"></script>
+<script>
+    var mod = angular.module( 'plunker', [] );
+
+    mod.controller( 'ParentController',
+            ['$log', '$scope', '$timeout', '$element',
+                function ( $log, $scope, $timeout, $element ) {
+                    $scope.data = {
+                        one : 'one',
+                        two : 'two',
+                        three : 'three',
+                        four : 'four'
+                    }
+                }
+            ]
+    );
+
+    mod.factory( 'boxService', [ '$log', '$rootScope',
+        function ( $log, $rootScope ) {
+
+            var _state = {};
+
+            function broadcast( boxId, prop, newValue, oldValue ) {
+                $rootScope.$broadcast( 'event_box', boxId, prop, newValue, oldValue );
+            }
+
+            function showFace( boxId, faceId ) {
+                var state = _state[boxId] = _state[boxId] || {};
+                var oldValue = state.face;
+
+                if ( faceId !== oldValue )
+                    broadcast( boxId, 'face', faceId, oldValue );
+
+                _state[boxId].face = faceId;
+            }
+
+            function dim( boxId ) {
+                var state = _state[boxId] = _state[boxId] || {};
+                var oldValue = state.dim || false;
+                var value = !oldValue;
+                if ( value !== oldValue )
+                    broadcast( boxId, 'dim', value, oldValue );
+
+                _state[boxId].dim = value;
+            }
+
+            return {
+                showFace : showFace,
+                dim : dim
+            }
+        }
+    ] )
+            .run(
+            ['$rootScope', 'boxService',
+                function ( $rootScope, boxService ) {
+                    $rootScope.box = boxService;
+                }
+            ]
+    );
+
+    mod.controller( 'boxController', ['$log', '$scope', '$element',
+        function ( $log, $scope, $element ) {
+            var faces = {};
+            var boxId, box;
+
+            this.registerBox = function ( _boxId, _box ) {
+                boxId = _boxId;
+                box = _box;
+            };
+
+            this.registerFace = function ( id, face ) {
+                faces[id] = face;
+            };
+
+            $scope.$on( 'event_box', function ( e, bxId, prop, newValue, oldValue ) {
+                if ( bxId !== boxId ) return;
+                if ( prop === 'face' ) {
+                    if ( faces[oldValue] ) faces[oldValue].hide();
+                    if ( faces[newValue] ) faces[newValue].show();
+                } else {
+                    if ( newValue && box && box.dim ) box.dim();
+                    if ( !newValue && box && box.undim ) box.undim();
+                }
+            } );
+        }
+    ] );
+
+    mod.directive( 'mioBox', [ '$log', function ( $log ) {
+        return {
+            restrict : 'A',
+            scope : false,
+            replace : false,
+            controller : 'boxController',
+            link : function ( scope, element, attrs, boxCtrl ) {
+                var dimmer = angular
+                        .element( '<div class="dimmer"></div>' )
+                        .prependTo( element );
+
+                var dim = function () {
+                    dimmer.css( {opacity : 0.3} );
+                };
+                var undim = function () {
+                    dimmer.css( {opacity : 0} );
+                };
+                boxCtrl.registerBox( attrs.mioBox, { dim : dim, undim : undim} );
+            }
+        };
+    } ] );
+
+    mod.directive( 'mioFace', [ '$log', '$animator', function ( $log, $animator ) {
+        return {
+            require : '^mioBox',
+            restrict : 'A',
+            scope : false,
+            link : function ( scope, element, attrs, boxCtrl ) {
+                var showDir = attrs.mioIn || attrs.mioAnimate || 'left';
+                var hideDir = attrs.mioOut || attrs.mioAnimate || showDir;
+
+//                attrs.ngAnimate = {
+//                    show : showDir + '-show',
+//                    hide : hideDir + '-hide'
+//                };
+
+                var animator = $animator( scope, attrs );
+                $log.info( '$animator', attrs.ngAnimate );
+                element.hide();
+                boxCtrl.registerFace( attrs.mioFace, {
+                    hide : function() {
+                        animator.hide(element)
+                    },
+                    show : function() {
+                        animator.show(element)
+                    }
+                } );
+            }
+        };
+    } ] );
+
+    mod.directive( 'gallery', [ '$log', function ( $log ) {
+        return {
+            restrict : 'A',
+            template : '\
+                <div class="box" data-mio-box="{{boxId}}" >\
+                    <div class="face" data-mio-face="1" data-ng-animate="{show: \'top-show\', hide: \'bottom-hide\'}">{{data.one}}</div>\
+                    <div class="face" data-mio-face="2" data-ng-animate="{show: \'top-show\', hide: \'bottom-hide\'}">{{data.two}}</div>\
+                    <div class="face" data-mio-face="3" data-ng-animate="{show: \'top-show\', hide: \'bottom-hide\'}">{{data.three}}</div>\
+                    <div class="face" data-mio-face="4" data-ng-animate="{show: \'top-show\', hide: \'bottom-hide\'}">{{data.four}}</div>\
+                </div>\
+                ',
+            scope : {
+                boxId: '@gallery'
+            },
+            link : function ( scope, element, attrs, boxCtrl ) {
+                scope.data = {
+                    one : 'uno',
+                    two : 'dos',
+                    three : 'tres',
+                    four : 'quatro'
+                };
+                $log.info( 'gallery', scope );
+            }
+        };
+    } ] );
+
+</script>
+</head>
+<body>
+
+<div data-ng-controller="ParentController">
+
+    <div>
+        <span>Box A</span>
+        <button data-ng-click="box.showFace('A', '1')">1</button>
+        <button data-ng-click="box.showFace('A', '2')">2</button>
+        <button data-ng-click="box.showFace('A', '3')">3</button>
+        <button data-ng-click="box.showFace('A', '4')">4</button>
+        <button data-ng-click="box.dim('A')">Dim</button>
+    </div>
+
+    <div data-gallery="A"></div>
+
+</div>
+
+</body>
+</html>

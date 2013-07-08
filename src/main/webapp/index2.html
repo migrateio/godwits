@@ -1,186 +1,69 @@
 <!doctype html>
-<!--[if lt IE 7]>
-<html class="no-js lt-ie9 lt-ie8 lt-ie7" lang="en"> <![endif]-->
-<!--[if IE 7]>
-<html class="no-js lt-ie9 lt-ie8" lang="en"> <![endif]-->
-<!--[if IE 8]>
-<html class="no-js lt-ie9" lang="en"> <![endif]-->
-<!--[if gt IE 8]><!-->
-<html class="no-js" lang="en"> <!--<![endif]-->
+<html ng-app="plunker" >
 <head>
-    <title>Migrate IO | Transfer your email, contacts, calendars, photos and more</title>
-
     <meta charset="utf-8">
-    <meta name="fragment" content="!"/>
-    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-    <!--<base href="/">-->
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description"
-          content="Safely and quickly transfer all of your emails, calendars, photos and more from one web service to another using the indistry leading cloud migration service.">
+    <title>AngularJS Plunker</title>
+    <script src="//code.jquery.com/jquery-1.10.1.min.js"></script>
+    <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.0.7/angular.js"></script>
+    <script>
+        var mod = angular.module('plunker', []);
 
-
-    <link rel="stylesheet" href="lib/fonts/squirrel/stylesheet.css" type="text/css" charset="utf-8">
-    <link href='//fonts.googleapis.com/css?family=Leckerli+One'
-          rel='stylesheet' type='text/css'>
-    <link href="lib/bootstrap/css/bootstrap.min.css" rel="stylesheet" type="text/css">
-    <link href="lib/bootstrap/css/bootstrap-responsive.css" rel="stylesheet"
-          type="text/css">
-    <link rel="stylesheet" href="lib/font-awesome/css/font-awesome.min.css">
-    <!--[if IE 7]>
-    <link rel="stylesheet" href="lib/font-awesome/css/font-awesome-ie7.min.css">
-    <![endif]-->
-    <link href="css/migrate-basecamp.css" rel="stylesheet" type="text/css">
-    <link href="css/default.css" rel="stylesheet" type="text/css">
-    <link href="css/jobs.css" rel="stylesheet" type="text/css">
-    <!--[if lte IE 8]>
-    <link href="css/default-ie8.css" rel="stylesheet" type="text/css">
-    <![endif]-->
-
-
-    <!-- Fav and touch icons -->
-    <link rel="apple-touch-icon" sizes="144x144"
-          href="img/icons/app-icon-144.png">
-    <link rel="apple-touch-icon" sizes="114x114"
-          href="img/icons/app-icon-114.png">
-    <link rel="apple-touch-icon" sizes="72x72"
-          href="img/icons/app-icon-72.png">
-    <link rel="apple-touch-icon" href="img/icons/app-icon-57.png">
-    <link rel="shortcut icon" href="img/icons/app-icon-32.png">
-    <!--[if IE]>
-    <link rel="shortcut icon" href="img/icons/favicon.ico"><![endif]-->
-    <!-- or, set for IE10 win -->
-    <meta name="msapplication-TileColor" content="#1EB6CE">
-    <meta name="msapplication-TileImage"
-          content="lib/local/img/icons/app-icon-128-a.png">
-</head>
-
-<body>
-
-<div>
-    <div class="mio-scroller-controller">
-        <div class="mio-scroller" mio-scroller-slots="5" ng-cloak>
-            <div class="mio-scrollee" ng-repeat="item in items"
-                 mio-slot-num="{{item}}" mio-slot-width="190" mio-slot-height="80">
-                <div ng-click="toggle()">{{$parent.item}}</div>
-                <div class="expando">Expansion area {{$parent.item}}</div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<script>
-    /*!
-     * $script.js Async loader & dependency manager
-     * https://github.com/ded/script.js
-     * (c) Dustin Diaz, Jacob Thornton 2011
-     * License: MIT
-     */
-    (function ( a, b ) {
-        typeof module != "undefined" ? module.exports = b() : typeof define == "function" && define.amd ? define( a, b ) : this[a] = b()
-    })( "$script", function () {
-        function q( a, b, c ) {
-            for ( c = 0, j = a.length; c < j; ++c )if ( !b( a[c] ) )return k;
-            return 1
-        }
-
-        function r( a, b ) {
-            q( a, function ( a ) {
-                return!b( a )
-            } )
-        }
-
-        function s( a, b, i ) {
-            function o( a ) {
-                return a.call ? a() : d[a]
-            }
-
-            function p() {
-                if ( !--n ) {
-                    d[m] = 1, k && k();
-                    for ( var a in f )q( a.split( "|" ), o ) && !r( f[a], o ) && (f[a] = [])
+        mod.controller('dataHolder', ['$log', '$scope',
+            function($log, $scope) {
+                $scope.data = {
+                    global: 'global-data'
                 }
             }
+        ]);
 
-            a = a[l] ? a : [a];
-            var j = b && b.call, k = j ? b : i, m = j ? a.join( "" ) : b, n = a.length;
-            return setTimeout( function () {
-                r( a, function ( a ) {
-                    if ( h[a] )return m && (e[m] = 1), h[a] == 2 && p();
-                    h[a] = 1, m && (e[m] = 1), t( !c.test( a ) && g ? g + a + ".js" : a, p )
-                } )
-            }, 0 ), s
-        }
+        mod.directive( 'child', [ '$log', function ( $log ) {
+            return {
+                restrict : 'A',
+                scope : {
+                    childValue: '@child'
+                },
+                replace : true,
+                template: '<div>\
+                    <div>Child: {{childValue}}</div>\
+                    <div>Higher level data: {{data.global}}</div>\
+                </div>',
+                link : function ( scope, element, attrs ) {
+                }
+            };
+        } ] );
 
-        function t( c, d ) {
-            var e = a.createElement( "script" ), f = k;
-            e.onload = e.onerror = e[p] = function () {
-                if ( e[n] && !/^c|loade/.test( e[n] ) || f )return;
-                e.onload = e[p] = null, f = 1, h[c] = 2, d()
-            }, e.async = 1, e.src = c, b.insertBefore( e, b.firstChild )
-        }
+        mod.directive( 'parent', [ '$log', function ( $log ) {
+            return {
+                restrict : 'A',
+                scope : {
+                    parentValue: '@parent'
+                },
+                replace : true,
+                template: '<div>\
+                    <div>Parent: {{parentValue}}</div> \
+                    <div>Higher level data: {{data.global}}</div>\
+                    <span>Child Wrapper [ \
+                        <blockquote><div child="{{parentValue}}"></div></blockquote> \
+                    ]</span> \
+                  </div>',
+                link : function ( scope, element, attrs ) {
+                }
+            };
+        } ] );
+    </script>
+</head>
+<body>
 
-        var a = document, b = a.getElementsByTagName( "head" )[0], c = /^https?:\/\//, d = {}, e = {}, f = {}, g, h = {}, i = "string", k = !1, l = "push", m = "DOMContentLoaded", n = "readyState", o = "addEventListener", p = "onreadystatechange";
-        return!a[n] && a[o] && (a[o]( m, function u() {
-            a.removeEventListener( m, u, k ), a[n] = "complete"
-        }, k ), a[n] = "loading"), s.get = t, s.order = function ( a, b, c ) {
-            (function d( e ) {
-                e = a.shift(), a.length ? s( e, d ) : s( e, b, c )
-            })()
-        }, s.path = function ( a ) {
-            g = a
-        }, s.ready = function ( a, b, c ) {
-            a = a[l] ? a : [a];
-            var e = [];
-            return!r( a, function ( a ) {
-                d[a] || e[l]( a )
-            } ) && q( a, function ( a ) {
-                return d[a]
-            } ) ? b() : !function ( a ) {
-                f[a] = f[a] || [], f[a][l]( b ), c && c( e )
-            }( a.join( "|" ) ), s
-        }, s
-    } )
+<div ng-controller="dataHolder">
+    <h1>Child directive standalone</h1>
+    <div child="child-direct"></div>
 
+    <h1>Child directive embedded</h1>
+    <div parent="child-passthru"></div>
 
-    $script( [
-        '//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js',
-        '/lib/modernizr/modernizr.js'
-    ], function () {
-        $script( '//ajax.googleapis.com/ajax/libs/angularjs/1.1.5/angular.min.js', function () {
-            if ( $( 'html.lt-ie9' ) )
-                $script( [
-                    '/lib/angular-1.1.4/angular-resource.min.js',
-                    '/lib/json3/json3.min.js',
-                    '//html5shim.googlecode.com/svn/trunk/html5.js',
-                    '/lib/local/js/angular-ie8.js'
-                ] );
-            $script( [
-                '/lib/ui-bootstrap/ui-bootstrap-tpls-0.3.0.js',
-                '/lib/analytics/angular-google-analytics.js'
-            ], function () {
-                var random = '156';
-                $script( [
-                    '//widget.uservoice.com/g24P8VJVl5NXUnRAXLcOKA.js',
-                    '/lib/devbar/devbar.js?rnd=' + random,
-                    '/lib/security/auth.js?rnd=' + random,
-                    '/lib/security/spring.js?rnd=' + random,
-                    '/lib/security/signin.js?rnd=' + random,
-                    '/lib/oauth/oauth.js?rnd=' + random,
-                    '/js/users.js?rnd=' + random,
-                    '/js/services.js?rnd=' + random,
-                    '/js/jobs.js?rnd=' + random,
-                    '/js/directives.js?rnd=' + random,
-                    '/js/app.js?rnd=' + random
-                ], function () {
-                    $( 'html' ).removeClass( 'no-js' );
-                    $( function () {
-                        angular.bootstrap( document, ['migrateApp'] );
-                    } );
-                } );
-            } );
-        } );
-    } );
+    <h1>Child directive standalone</h1>
+    <div child="other-child-direct"></div>
+</div>
 
-</script>
 </body>
 </html>

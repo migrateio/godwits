@@ -28,6 +28,7 @@
     <link href="css/migrate-basecamp.css" rel="stylesheet" type="text/css">
     <link href="css/default.css" rel="stylesheet" type="text/css">
     <link href="css/jobs.css" rel="stylesheet" type="text/css">
+    <link href="css/miobox.css" rel="stylesheet" type="text/css">
     <!--[if lte IE 8]>
     <link href="css/default-ie8.css" rel="stylesheet" type="text/css">
     <![endif]-->
@@ -150,25 +151,25 @@
 
 
     $script([
-        '//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js',
+        '/lib/jquery/jquery.min.js',
         '/lib/modernizr/modernizr.js'
     ], function() {
-        $script('//ajax.googleapis.com/ajax/libs/angularjs/1.1.5/angular.min.js', function() {
+        $script('/lib/angular/1.1.5/angular.min.js', function() {
             if ($('html.lt-ie9'))
                 $script( [
                     '/lib/angular-1.1.4/angular-resource.min.js',
                     '/lib/json3/json3.min.js',
-                    '//html5shim.googlecode.com/svn/trunk/html5.js',
+                    '/lib/html5shiv/html5.js',
                     '/lib/local/js/angular-ie8.js'
                 ] );
             $script( [
                 '/lib/ui-bootstrap/ui-bootstrap-tpls-0.3.0.js',
                 '/lib/analytics/angular-google-analytics.js'
             ], function () {
-                var random = '156';
+                var random = '158';
                 $script( [
                     '//checkout.stripe.com/v2/checkout.js',
-                    '//widget.uservoice.com/g24P8VJVl5NXUnRAXLcOKA.js',
+                    '/lib/uservoice/g24P8VJVl5NXUnRAXLcOKA.js',
                     '/lib/devbar/devbar.js?rnd=' + random,
                     '/lib/security/auth.js?rnd=' + random,
                     '/lib/security/spring.js?rnd=' + random,

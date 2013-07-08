@@ -950,8 +950,8 @@
 
 
     // <div class="mio-tab-btn-account" mio-account="jobs[0].source" mio-account-type="source"/>
-    mod.directive( 'mioTabBtnAccount', ['$log',
-        function ( $log ) {
+    mod.directive( 'mioTabBtnAccount', ['$log', '$timeout',
+        function ( $log, $timeout ) {
             return {
                 require : '^mioJob',
                 restrict : 'ACE',
@@ -960,58 +960,70 @@
                     label : '@mioAccountType'
                 },
                 template : '\
-                    <div style="display: none;" data-ng-show="show(\'add\')" class="pane" data-ng-animate="\'slider\'">\
-                        <a data-ng-click="select()" class="btn btn-trans">\
+                    <div class="mio-box" data-mio-box="pane">\
+                        <div class="mio-face" data-mio-face="plus" \
+                                data-ng-animate="{show: \'right-show\', hide: \'left-hide\'}">\
+                            <a data-ng-click="select()" class="btn btn-trans">\
+                                <table><tr>\
+                                    <td><i class="icon-plus-sign"/></td>\
+                                     <td><p class="lbl">Add {{label}} account</p></td>\
+                                 </tr></table>\
+                            </a>\
+                        </div>\
+                        <div class="mio-face" data-mio-face="delete" \
+                                data-ng-animate="{show: \'top-show\', hide: \'top-hide\'}">\
                             <table><tr>\
-                                <td><i class="icon-plus-sign"/></td>\
-                                 <td><p class="lbl">Add {{label}} account</p></td>\
+                                <td><a data-ng-click="del()" class="btn btn-danger">Delete?</a></td>\
+                                 <td><a data-ng-click="cancel()" class="btn btn-info">Cancel</a></td>\
                              </tr></table>\
-                        </a>\
-                    </div>\
-                    <div style="display: none;" data-ng-show="show(\'del\')" class="pane" data-ng-animate="\'slider\'">\
-                        <table><tr>\
-                            <td><a data-ng-click="del()" class="btn btn-danger">Delete?</a></td>\
-                             <td><a data-ng-click="cancel()" class="btn btn-info">Cancel</a></td>\
-                         </tr></table>\
-                    </div>\
-                    <div style="display: none;" data-ng-show="show(\'svc\')" class="pane" data-ng-animate="\'slider\'">\
-                        <a data-ng-click="select()" class="btn btn-trans">\
-                            <table>\
-                                <tr><td><img data-ng-src="/img/services/{{account.service}}.png" /></td></tr>\
-                                <tr><td><p>jcook@</p></td></tr>\
-                            </table>\
-                        </a>\
-                        <div style="display: none;" data-ng-show="show(\'svc\')" data-ng-click="remove()" class="remove" data-ng-animate="\'fader\'">\
-                            <i class="icon-remove-sign"></i>\
+                        </div>\
+                        <div class="mio-face" data-mio-face="service" \
+                                data-ng-animate="{show: \'left-show\', hide: \'left-hide\'}">\
+                            <a data-ng-click="select()" class="btn btn-trans">\
+                                <table>\
+                                    <tr><td><img data-ng-src="/img/services/{{account.service}}.png" /></td></tr>\
+                                    <tr><td><p>{{account.auth.username|regex:"(.*)@"}}</p></td></tr>\
+                                </table>\
+                            </a>\
+                            <div class="remove" data-ng-show="pane === \'service\'" \
+                                    data-ng-click="remove()" data-ng-animate="\'fader\'">\
+                                <i class="icon-remove-sign"></i>\
+                            </div>\
                         </div>\
                     </div>\
                 ',
                 link : function ( scope, element, attrs, jobCtrl ) {
                     element.addClass( scope.label );
-                    scope.deleting = false;
 
-                    scope.show = function ( pane ) {
-                        if ( pane === 'add' ) return !scope.account.service;
-                        if ( pane === 'del' ) return scope.account.service && scope.deleting;
-                        if ( pane === 'svc' ) return scope.account.service && !scope.deleting;
-                    };
+                    scope.$watch(scope.account, function() {
+                        scope.pane = scope.account.service ? 'service' : 'plus';
+                        $log.info( 'mioTabBtnAccount, pane', scope.pane );
+                    });
 
                     scope.cancel = function () {
-                        scope.deleting = false;
+                        scope.pane = 'service';
                     };
 
                     scope.remove = function () {
-                        scope.deleting = true;
+                        scope.pane = 'delete';
                     };
 
                     scope.del = function () {
-                        scope.deleting = false;
                         scope.account = {};
                     };
 
                     scope.select = function () {
                         jobCtrl.broadcast( JOB_DRAWER_TOGGLE, scope.label );
                     };
+
+/*
+                    function changePane() {
+                        var panes = ['service', 'delete', 'plus'];
+                        scope.pane = panes[Math.floor(Math.random() * 3)];
+                        $timeout( changePane, 2000 );
+                    }
+                    $timeout( changePane, 2000 );
+*/
                 }
             }
         }]

@@ -1,0 +1,105 @@
+<!doctype html>
+<html ng-app="plunker" >
+<head>
+    <meta charset="utf-8">
+    <title>AngularJS Plunker</title>
+    <style>
+        em {
+            color: red;
+            font-style: normal;
+        }
+    </style>
+    <script src="//code.jquery.com/jquery-1.10.1.min.js"></script>
+    <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.0.7/angular.js"></script>
+    <script>
+        var mod = angular.module('plunker', []);
+
+        mod.controller('dataHolder', ['$log', '$scope',
+            function($log, $scope) {
+                $scope.data = {
+                    global: 'global-data'
+                }
+            }
+        ]);
+
+        mod.directive( 'child', [ '$log', function ( $log ) {
+            return {
+                restrict : 'A',
+                scope : {
+                    childValue: '@child'
+                },
+                replace : true,
+                transclude: true,
+                template: '<div>\
+                    <p>\
+                        <span>Child: </span>\
+                        <em>{{childValue || "ERROR"}}</em>\
+                    </p>\
+                    <p>\
+                        <span>Higher level data: </span>\
+                        <em>{{data.global || "ERROR"}}</em>\
+                    </p>\
+                    <div ng-transclude></div>\
+                </div>',
+                link : function ( scope, element, attrs ) {
+                }
+            };
+        } ] );
+
+        mod.directive( 'parent', [ '$log', function ( $log ) {
+            return {
+                restrict : 'A',
+                scope : {
+                    parentValue: '@parent'
+                },
+                replace : true,
+                transclude: true,
+                template: '<div>\
+                    <p>\
+                        <span>Parent: </span><em>{{parentValue || "ERROR"}}</em></p> \
+                    <p>\
+                        <span>Higher level data: </span>\
+                        <em>{{data.global || "ERROR"}}</em>\
+                    </p>\
+                    <p>Child Wrapper [ \
+                        <blockquote><div child="{{parentValue}}">\
+                            <p>\
+                                <span>Higher level data: </span>\
+                                <em>{{data.global || "ERROR"}}</em>\
+                            </p>\
+                        </blockquote> \
+                    ]</p> \
+                  </div>',
+                link : function ( scope, element, attrs ) {
+                }
+            };
+        } ] );
+    </script>
+</head>
+<body>
+
+<div ng-controller="dataHolder">
+    <h1>Child directive standalone</h1>
+    <div child="child-direct">
+        <p>
+            <span>Transcluded data: </span>
+            <em>{{data.global}}</em>
+        </p>
+    </div>
+
+    <h1>Child directive embedded</h1>
+    <div parent="child-passthru">
+        <h4>Global data: {{data.global}}</h4>
+    </div>
+
+    <h1>Child directive standalone</h1>
+    <div child="other-child-direct">
+        <p>
+            <span>Transcluded data: </span>
+            <em>{{data.global}}</em>
+        </p>
+    </div>
+</div>
+
+</body>
+</html>
