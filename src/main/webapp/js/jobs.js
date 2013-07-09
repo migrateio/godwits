@@ -966,7 +966,7 @@
                             <a data-ng-click="select()" class="btn btn-trans">\
                                 <table><tr>\
                                     <td><i class="icon-plus-sign"/></td>\
-                                     <td><p class="lbl">Add {{label}} account</p></td>\
+                                     <td><span class="text">Add {{label}} account</span></td>\
                                  </tr></table>\
                             </a>\
                         </div>\
@@ -982,7 +982,7 @@
                             <a data-ng-click="select()" class="btn btn-trans">\
                                 <table>\
                                     <tr><td><img data-ng-src="/img/services/{{account.service}}.png" /></td></tr>\
-                                    <tr><td><p>{{account.auth.username|regex:"(.*)@"}}</p></td></tr>\
+                                    <tr><td><span class="lbl">{{account.auth.username|regex:"(.*)@"}}</span></td></tr>\
                                 </table>\
                             </a>\
                             <div class="remove" data-ng-show="pane === \'service\'" \
@@ -995,10 +995,9 @@
                 link : function ( scope, element, attrs, jobCtrl ) {
                     element.addClass( scope.label );
 
-                    scope.$watch(scope.account, function() {
-                        scope.pane = scope.account.service ? 'service' : 'plus';
-                        $log.info( 'mioTabBtnAccount, pane', scope.pane );
-                    });
+                    scope.$watch('account', function() {
+                        scope.pane = scope.account && scope.account.service ? 'service' : 'plus';
+                    }, true);
 
                     scope.cancel = function () {
                         scope.pane = 'service';
@@ -1044,9 +1043,15 @@
                 },
                 template : '\
                     <div>\
-                        <a class="btn btn-success" data-ng-click="select()" \
+                        <a class="btn btn-trans" data-ng-click="select()" \
                             data-ng-class=" { disabled : !job.status.state } " >\
-                            {{label}}\
+                            <table><tr>\
+                                <td><span class="icon-stack">\
+                                    <i class="icon-circle icon-stack-base"></i>\
+                                    <i class="icon-right-triangle icon-light"></i>\
+                                </span></td>\
+                                <td><span class="text">Migrate</span></td>\
+                             </tr></table>\
                         </a>\
                     </div>\
                 ',
@@ -1070,9 +1075,37 @@
                             scope.label = 'Migrate';
                     }
 
-                    scope.select = function () {
-                        jobCtrl.broadcast( JOB_DRAWER_TOGGLE, 'action' );
+                    var icon = element.find( '.icon-stack' );
+                    function expandIcon() {
+                        icon.removeClass("icon-spin-0");
+                        //noinspection SillyAssignmentJS
+                        icon.get(0).offsetWidth = icon.get(0).offsetWidth;
+                        icon.addClass("icon-spin-90");
                     }
+                    function collapseIcon() {
+                        icon.removeClass("icon-spin-90");
+                        //noinspection SillyAssignmentJS
+                        icon.get(0).offsetWidth = icon.get(0).offsetWidth;
+                        icon.addClass("icon-spin-0");
+                    }
+
+                    scope.open = false;
+                    scope.$watch('open', function(newValue, oldValue) {
+                        if (newValue === oldValue) return;
+                        if (newValue) expandIcon(); else collapseIcon();
+                    } );
+
+                    scope.select = function () {
+                        expandIcon();
+                        jobCtrl.broadcast( JOB_DRAWER_TOGGLE, 'action' );
+                        scope.open = !scope.open;
+                    };
+
+                    $scope.$on( JOB_SERVICES_CLOSEALL, function () {
+                        if (scope.open) {
+                            scope.open = false;
+                        }
+                    } );
                 }
             }
         }]

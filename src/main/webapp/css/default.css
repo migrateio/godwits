@@ -400,6 +400,84 @@ form .add-on a, form .add-on a:hover {
 }
 
 
+.icon-stack span {
+    color: white;
+}
+
+.icon-right-triangle:before {
+    content: "\25b8";
+}
+
+
+/* Animated rotating icon */
+.btn [class^="icon-"].icon-spin-90,
+.nav [class^="icon-"].icon-spin-90,
+.btn [class*=" icon-"].icon-spin-90,
+.nav [class*=" icon-"].icon-spin-90,
+.btn [class^="icon-"].icon-spin-0,
+.nav [class^="icon-"].icon-spin-0,
+.btn [class*=" icon-"].icon-spin-0,
+.nav [class*=" icon-"].icon-spin-0 {
+    display: inline-block;
+}
+
+.icon-spin-90 {
+    display: inline-block;
+    -moz-animation: spin-90 0.1s 1 linear forwards;
+    -o-animation: spin-90 0.1s 1 linear forwards;
+    -webkit-animation: spin-90 0.1s 1 linear forwards;
+    animation: spin-90 0.1s 1 linear forwards;
+}
+
+.icon-spin-0 {
+    display: inline-block;
+    -moz-animation: spin-90 0.1s 1 linear reverse;
+    -o-animation: spin-90 0.1s 1 linear reverse;
+    -webkit-animation: spin-90 0.1s 1 linear reverse;
+    animation: spin-90 0.1s 1 linear reverse;
+}
+
+@-moz-keyframes spin-90 {
+  0% {
+    -moz-transform: rotate(0deg);
+  }
+  100% {
+    -moz-transform: rotate(90deg);
+  }
+}
+@-webkit-keyframes spin-90 {
+  0% {
+    -webkit-transform: rotate(0deg);
+  }
+  100% {
+    -webkit-transform: rotate(90deg);
+  }
+}
+@-o-keyframes spin-90 {
+  0% {
+    -o-transform: rotate(0deg);
+  }
+  100% {
+    -o-transform: rotate(90deg);
+  }
+}
+@-ms-keyframes spin-90 {
+  0% {
+    -ms-transform: rotate(0deg);
+  }
+  100% {
+    -ms-transform: rotate(90deg);
+  }
+}
+@keyframes spin-90 {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(90deg);
+  }
+}
+
 
 
 
