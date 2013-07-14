@@ -35,7 +35,7 @@ exports.Invoice = function ( invoice ) {
         return [].concat( invoice.jobs || [] ).filter( function ( job ) {
             var match = true;
             var jobObj = new Job( job );
-            match = match && jobObj.isRunning() && jobObj.sourceOverlaps( checkJob.source );
+            match = match && jobObj.isNotCompleted() && jobObj.sourceOverlaps( checkJob.source );
             return match && intersect( checkJob.content, job.content ).length > 0;
         } );
     }
@@ -88,8 +88,22 @@ exports.Invoice = function ( invoice ) {
         } );
     }
 
-    function getTest() {
-        return invoice.test;
+    // todo: test
+    function getLastJobs() {
+        var result = {};
+        if (invoice && invoice.jobs) {
+            var jobs = [].concat(invoice.jobs);
+            jobs.sort(function(a,b){
+                return a.starts.localeCompare( b.starts );
+            });
+            jobs.forEach( function ( job ) {
+                if ( !result.active &&
+                    (job.status === 'pending' || job.status === 'active') )
+                    result.active = job;
+                if ( !result.completed && job.status === 'completed' ) result.completed = job;
+            } );
+        }
+        return result;
     }
 
     function getPromotionType( job ) {
@@ -101,11 +115,12 @@ exports.Invoice = function ( invoice ) {
     function addJob(job, payment) {
         if (!invoice.jobs) invoice.jobs = [];
         var now = Date.now();
-        var testedOn = new Date( now );
+        var today = new Date( now );
         var expires = new Date(now + 1000 * 60 * 60 * 24 * 30);
 
         var j = {
             content: job.content,
+            starts: today.toISOString(),
             expires: expires.toISOString(),
             jobId: job.jobId,
             status: job.status,
@@ -116,7 +131,7 @@ exports.Invoice = function ( invoice ) {
             j.test = true;
             invoice.test = {
                 jobId: job.jobId,
-                started: testedOn.toISOString()
+                starts: today.toISOString()
             };
         }
         invoice.jobs.push( j );
@@ -181,7 +196,7 @@ exports.Invoice = function ( invoice ) {
         calculatePayment : calculatePayment,
         getExpiration : getExpiration,
         getPromotionType: getPromotionType,
-        getTest : getTest,
+        getLastJobs : getLastJobs,
         isOpen : isOpen,
         toJSON : function toJSON() {
             return invoice;

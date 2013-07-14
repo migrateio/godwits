@@ -308,6 +308,42 @@ div.signin div.step {
     padding: 5px;
 }
 
+div.signin form p.callout {
+    font-size: 12px;
+    line-height: 14px;
+    color: #999999;
+    float: left;
+    width: 180px;
+    margin-right: 10px;
+    text-align: left;
+}
+
+div.signin form .vinegar, form .honey {
+    position: absolute;
+    left: -2310px;
+}
+
+div.signin form span.error {
+    color: #d20f17;
+}
+
+div.signin form span.error a {
+    color: #fa101a;
+    text-decoration: underline;
+}
+
+div.signin form div.submit {
+    text-align: right;
+}
+
+div.signin form .add-on a, form .add-on a:hover {
+    text-decoration: none;
+    outline: 0;
+}
+
+
+
+/*
 .slideup-leave, .slideup-enter {
     -webkit-transform: translate3d(0, 0, 0);
 }
@@ -324,7 +360,7 @@ div.signin div.step {
     -moz-transition: all 400ms cubic-bezier(0.000, 1.225, 0.495, 1.145);
     -ms-transition: all 400ms cubic-bezier(0.000, 1.225, 0.495, 1.145);
     -o-transition: all 400ms cubic-bezier(0.000, 1.225, 0.495, 1.145);
-    transition: all 400ms cubic-bezier(0.000, 1.225, 0.495, 1.145);
+    transition: all 5400ms cubic-bezier(0.000, 1.225, 0.495, 1.145);
 
     -webkit-transition-timing-function: cubic-bezier(0.000, 1, 0.495, 1);
     -webkit-transition-timing-function: cubic-bezier(0.000, 1.225, 0.495, 1.145);
@@ -333,7 +369,7 @@ div.signin div.step {
     -o-transition-timing-function: cubic-bezier(0.000, 1.225, 0.495, 1.145);
     transition-timing-function: cubic-bezier(0.000, 1.225, 0.495, 1.145);
 
-    transition-delay: 0.400s;
+    transition-delay: 5400ms;
     -webkit-transition-delay: 0.400s;
 
     top: 0;
@@ -352,7 +388,7 @@ div.signin div.step {
     -moz-transition: all 400ms cubic-bezier(0.205, -0.180, 0.920, -0.155);
     -ms-transition: all 400ms cubic-bezier(0.205, -0.180, 0.920, -0.155);
     -o-transition: all 400ms cubic-bezier(0.205, -0.180, 0.920, -0.155);
-    transition: all 400ms cubic-bezier(0.205, -0.180, 0.920, -0.155);
+    transition: all 5400ms cubic-bezier(0.205, -0.180, 0.920, -0.155);
 
     -webkit-transition-timing-function: cubic-bezier(0.205, 0, 0.920, 0);
     -webkit-transition-timing-function: cubic-bezier(0.205, -0.180, 0.920, -0.155);
@@ -364,40 +400,9 @@ div.signin div.step {
     top: -200px;
     opacity: 0;
 }
+*/
 
 
-form p.callout {
-    font-size: 12px;
-    line-height: 14px;
-    color: #999999;
-    float: left;
-    width: 180px;
-    margin-right: 10px;
-    text-align: left;
-}
-
-form .vinegar, form .honey {
-    position: absolute;
-    left: -2310px;
-}
-
-form span.error {
-    color: #d20f17;
-}
-
-form span.error a {
-    color: #fa101a;
-    text-decoration: underline;
-}
-
-form div.submit {
-    text-align: right;
-}
-
-form .add-on a, form .add-on a:hover {
-    text-decoration: none;
-    outline: 0;
-}
 
 
 .icon-stack span {

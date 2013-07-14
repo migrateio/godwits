@@ -1,24 +1,33 @@
 <div data-ng-controller="signin-secure-controller">
     <form name="formSecure" novalidate data-ng-submit="submit()">
 
-        <div class="controls">
-            <div class="input-prepend input-append">
-                <span class="add-on"><span class="icon-key gray"></span></span>
-                <input data-pass-xray="showPass" type="password" name="password"
-                       data-ng-model="password" placeholder="Password" required />
-                <span class="add-on"><a data-ng-click="togglePass()"><i class="gray" data-ng-class="showhide"></i></a></span>
-            </div>
-            <div data-validtip="password">
-                <span data-ng-show="formSecure.password.$error.required">Please select a password</span>
-            </div>
-        </div>
+        <table>
+            <tr>
+                <td>
+                    <div class="controls">
+                        <div class="input-prepend input-append">
+                            <span class="add-on"><span class="icon-key gray"></span></span>
+                            <input data-pass-xray="showPass" type="password" name="password"
+                                   data-ng-model="password" placeholder="Password" required />
+                            <span class="add-on"><a data-ng-click="togglePass()"><i class="gray" data-ng-class="showhide"></i></a></span>
+                        </div>
+                        <div data-validtip="password">
+                            <span data-ng-show="formSecure.password.$error.required">Please select a password</span>
+                        </div>
+                    </div>
+                    <p class="callout" data-ng-bind-html-unsafe="callout"></p>
+                </td>
+                <td>
+                    <div class="controls submit">
+                        <input type="hidden" data-ng-model="model.token" />
+                        <input class="honey" name="username" data-ng-model="honey" type="text" />
+                        <input data-ng-disabled="formSecure.$invalid" class="btn btn-success" type="submit" value="Update"/>
+                        <p><a data-ng-click="state.step = 'email'">Cancel</a></p>
+                    </div>
+                </td>
+            </tr>
+        </table>
 
-        <div class="controls submit">
-            <p class="callout" data-ng-bind-html-unsafe="callout"></p>
-            <input type="hidden" data-ng-model="model.token" />
-            <input class="honey" name="username" data-ng-model="honey" type="text" />
-            <input data-ng-disabled="formSecure.$invalid" class="btn btn-success" type="submit" value="Update"/>
-        </div>
     </form>
 </div>
 

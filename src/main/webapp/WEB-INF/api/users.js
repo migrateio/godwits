@@ -92,7 +92,7 @@ app.del( '/:userId', function ( req, userId ) {
  *
  * ```js
  * {
- *     name: '',
+ *     username: '',
  *     email: {
  *         address: ''
  *     }

@@ -68,7 +68,7 @@
                     function ( newValue ) {
                         if ( !$scope.job.status ) $scope.job.status = {};
                         $scope.job.status.state = newValue ? 'pending' : '';
-                        $log.info( 'Watching for state', newValue, $scope.job );
+//                        $log.info( 'Watching for state', newValue, $scope.job );
                     }
                 );
 
@@ -128,8 +128,8 @@
                  */
                 $scope.detailName = '';
                 $scope.$on( JOB_DRAWER_TOGGLE, function ( e, detailName ) {
-                    $log.info( 'Toggling drawer, old detailName:', $scope.detailName,
-                        'new detailName:', detailName );
+//                    $log.info( 'Toggling drawer, old detailName:', $scope.detailName,
+//                        'new detailName:', detailName );
 
                     // Give the ui animation time to close the drawer if it was open
                     var delay = $scope.ui.open ? 200 : 0;
@@ -431,7 +431,7 @@
 
 
                     scope.oauthLink = function () {
-                        $log.info( 'oauthLink', scope );
+//                        $log.info( 'oauthLink', scope );
 
                         var success = function ( data ) {
                             scope.serviceObj.service = scope.serviceDef.name;
@@ -467,7 +467,7 @@
                     };
 
                     scope.oauthUnlink = function () {
-                        $log.info( 'oauthUnlink', scope );
+//                        $log.info( 'oauthUnlink', scope );
 
 //                        mioServices.oauthUnlink(
 //                          scope.serviceDef.name, scope.serviceObj.auth.refreshToken
@@ -480,7 +480,7 @@
                     scope.submit = function () {
                         jobCtrl.authenticate( service.service.name, scope.auth ).then(
                             function () {
-                                $log.info( 'mioJobService, save auth', scope );
+//                                $log.info( 'mioJobService, save auth', scope );
                                 scope.serviceObj.service = scope.serviceDef.name;
                                 if ( scope.serviceDef.auth === 'password' ) {
                                     scope.serviceObj.auth = {
@@ -552,7 +552,7 @@
                             return source + '/' + dest;
                         }, function () {
                             availableContent = jobCtrl.getContentIntersection();
-                            $log.info( 'mioJobContent, updating content intersection', availableContent );
+//                            $log.info( 'mioJobContent, updating content intersection', availableContent );
                         }
                     );
 
@@ -654,79 +654,132 @@
                 },
                 templateUrl : '/partials/job/job-action.html',
                 link : function ( scope, element, attrs, jobCtrl ) {
-                    // The ui object will hold properties that tell what is needed
-                    // to submit the job.
-                    scope.ui = {};
+                    // The preauth object will hold properties that tell what is needed
+                    // to submit the job. If the preauth object has yet to be returned
+                    // from the server, pending will be 'true'.
+                    scope.preauth = {
+                        pending: true
+                    };
 
-                    // Watching for changes in the job, will allow us to fetch a preauth
-                    // object in the background before the user clicks on the migrate
-                    // button and exposes this component in the drawer.
-                    (function() {
-                        // Using the properties in preauth, determine the type of view
-                        // which will be displayed: full, edu-partial, edu-full or zero.
-                        var determineView = function( preauth ) {
-                            var sub = preauth.subscription;
-                            if (sub.due === 0) return 'zero';
-                            var result = [];
-                            if (sub.promotion === 'edu') result.push( 'edu' );
-                            if (sub.due < 15) result.push('partial');
-                            else result.push( 'full' );
-                            return result.join( '-' );
-                        };
+                    // If the job has changed, we will update the preauth object in
+                    // the scope to reflect the new settings.
+                    var jobChanged = function() {
+                        mioServices.preauthJob( scope.job ).then(
+                            function success( result ) {
+                                scope.preauth = result.data;
+                                scope.preauth.last4 = '1234';
+                                scope.preauth.cardType = 'MasterCard';
 
-                        // We will convert the preauth object into a ui object suitable
-                        // for controlling the displayed views.
-                        var makeUI = function(preauth) {
-                            scope.ui = {
-                                testedOn : preauth.testedOn,
-                                view : determineView( preauth ),
-                                due : preauth.subscription.payment.due
-                            };
-                            $log.info( 'ui', scope.ui );
-                        };
+                                // edu
+//                                    scope.preauth.payment.promotion = 'edu';
+//                                    scope.preauth.payment.amounts.due = 500;
 
-                        // If the job has changed, we will update the preauth object in
-                        // the scope to reflect the new settings.
-                        var jobChanged = function() {
-                            mioServices.preauthJob( scope.job ).then(
-                                function success( data ) {
-                                    $log.info( 'Received this preauth', data );
-                                    scope.preauth = {
-                                        "open" : false,
-                                        "subscription" : {
-                                            "expires" : "2013-07-19T19:56:26.587Z",
-                                            "payment" : {
-                                                "due" : 15,
-                                                "charged" : 0,
-                                                "promotion" : 'full'
-                                            }
+                                // zero
+//                                scope.preauth.payment.amounts.due = 0;
+
+                                // error
+                                scope.preauth.error = {
+                                    message: 'The job as defined overlaps with other \
+                                        running jobs.',
+                                    tooltip: '',
+                                    jobs: [
+                                        { jobId: '123', content: ['mails', 'contacts']},
+                                        { jobId: '321', content: ['documents', 'mails', 'media']},
+                                        { jobId: '987', content: ['mails']},
+                                        { jobId: '000', content: ['mails', 'contacts', 'calendars', 'documents', 'media']}
+                                    ]
+                                };
+
+                                if (!scope.preauth.error) {
+                                    var dest = mioServices.getService( scope.job.destination.service );
+                                    var due = Math.floor( scope.preauth.payment.amounts.due / 100 );
+                                    var max = Math.floor( scope.preauth.payment.amounts.charged / 100 );
+                                    var expires = scope.preauth.payment.expiresFmt;
+
+                                    // Create the view details
+                                    if ( scope.preauth.payment.amounts.due === 0 ) {
+                                        // No payment is necessary.
+                                        scope.preauth.view = {
+                                            headline : 'You are paid in full!',
+                                            tooltip : 'Thanks for using our service. \
+                                        You may migrate any number source accounts \
+                                        to your ' + dest.fullname + ' account for \
+                                        no additional fees until ' + expires + '.',
+                                            caption : 'Our servers are standing by for \
+                                            your job.',
+                                            amount : '$0'
+                                        };
+                                    } else {
+                                        if ( scope.preauth.payment.promotion === 'edu' ) {
+                                            // User is paying for an educational migrate
+                                            scope.preauth.view = {
+                                                headline : 'Education discount!',
+                                                tooltip : 'We will migrate all of the \
+                                            content from your EDU account to your ' +
+                                                    dest.fullname + ' account for the low \
+                                            price of $' + due + '. For a 30-day \
+                                            period ending on ' + expires + ' you \
+                                            will be able to re-run this job as many \
+                                            times as you like.',
+                                                caption : 'Students and educators save today.',
+                                                amount : '$' + due
+                                            };
+                                        } else {
+                                            // User is paying for a full migrate
+                                            scope.preauth.view = {
+                                                headline : 'Ready to migrate!',
+                                                tooltip : 'We will migrate all of the \
+                                            data from any number of source accounts \
+                                            to your ' + dest.fullname + ' account \
+                                            for the low price of $' + due + '. For \
+                                            a 30-day period ending on ' + expires +
+                                                    ' you will be able to re-run this job as \
+                                                  many times as you like. You may also \
+                                                  create new jobs to move other accounts \
+                                                  to your ' + dest.fullname + ' account \
+                                            for no additional cost.',
+                                                caption : 'Sit back while we do the heavy \
+                                            lifting for you.',
+                                                amount : '$' + due
+                                            };
                                         }
-                                    };
-                                    makeUI( scope.preauth );
-                                },
-                                function error( data ) {
-                                    if ( data.status === 401 ) {
-                                        $log.info( 'Will be authenticating', data );
-                                        scope.preauth = {};
+
                                     }
                                 }
-                            );
-                        };
 
-                        scope.$watch(function() {
-                            var isComplete = scope.job
-                                && scope.job.destination && scope.job.destination.service
-                                && scope.job.destination.auth && scope.job.destination.auth.username
-                                && scope.job.source && scope.job.source.service
-                                && scope.job.source.auth && scope.job.source.auth.username
-                                && scope.job.content && scope.job.content.length > 0;
-                            if (isComplete) return JSON.stringify( {
-                                destination: scope.job.destination,
-                                source: scope.job.source,
-                                content: scope.job.content
-                            } );
-                        }, jobChanged);
-                    })();
+                                $log.info( 'Preauth', scope.preauth );
+                            },
+                            function error( result ) {
+                                if ( result.status === 401 ) {
+                                    $log.info( 'Will be authenticating', result );
+                                    scope.preauth = {
+                                        auth: true
+                                    };
+                                }
+                            }
+                        );
+                    };
+
+                    // Job watcher returns a string value which will change if any
+                    // value on the job's source, destination or content properties
+                    // are modified. It basically constructs a JSON string of the
+                    // props.
+                    var jobWatcher = function() {
+                        var isComplete = scope.job
+                            && scope.job.destination && scope.job.destination.service
+                            && scope.job.destination.auth && scope.job.destination.auth.username
+                            && scope.job.source && scope.job.source.service
+                            && scope.job.source.auth && scope.job.source.auth.username
+                            && scope.job.content && scope.job.content.length > 0;
+                        if (isComplete) return JSON.stringify( {
+                            destination: scope.job.destination,
+                            source: scope.job.source,
+                            content: scope.job.content
+                        } );
+                        return '';
+                    };
+
+                    scope.$watch(jobWatcher, jobChanged);
 
                     scope.purchase = function () {
                         $log.info( 'Payment submission:', arguments );
@@ -1101,7 +1154,7 @@
                         scope.open = !scope.open;
                     };
 
-                    $scope.$on( JOB_SERVICES_CLOSEALL, function () {
+                    scope.$on( JOB_SERVICES_CLOSEALL, function () {
                         if (scope.open) {
                             scope.open = false;
                         }

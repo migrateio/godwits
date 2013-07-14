@@ -1,4 +1,4 @@
-<div class="btn-group">
+<!--<div class="btn-group">
     <button type="button" class="btn btn-primary" data-ng-model="state.step" btn-radio="'email'">email</button>
     <button type="button" class="btn btn-primary" data-ng-model="state.step" btn-radio="'signup'">signup</button>
     <button type="button" class="btn btn-primary" data-ng-model="state.step" btn-radio="'verify'">verify</button>
@@ -7,8 +7,8 @@
     <button type="button" class="btn btn-primary" data-ng-model="state.step" btn-radio="'password'">password</button>
     <button type="button" class="btn btn-primary" data-ng-model="state.step" btn-radio="'resetmsg'">resetmsg</button>
     <button type="button" class="btn btn-primary" data-ng-model="state.step" btn-radio="'error'">error</button>
-</div>
-<div class="signin" data-ng-switch="state.step" data-ng-animate="'slideup'">
+</div>-->
+<div data-ng-switch="state.step" data-ng-animate="'slideup'">
     <div class="steps">
         <div data-ng-switch-when="email">
             <div class="step" data-ng-include src="'partials/signin/email.html'" ></div>

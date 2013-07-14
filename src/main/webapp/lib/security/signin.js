@@ -23,7 +23,7 @@
         function ( $log, $scope, $users, $routeParams, $location ) {
             $scope.model = {
                 email : 'jim@poolpicks.com',
-                firstname : '',
+                username : '',
                 tokenId: '',
                 userId: ''
             };
@@ -31,6 +31,17 @@
             $scope.state = {
                 step : $routeParams.step || 'email'
             };
+
+            $scope.cancel = function () {
+                $scope.state.step = 'email';
+                $scope.model = {
+                    email : '',
+                    username : '',
+                    tokenId: '',
+                    userId: ''
+                };
+            };
+
 
             $scope.$watch( 'state.step', function ( value ) {
 //                var newPath = '/signin/' + value;
@@ -112,19 +123,15 @@
 
             $scope.honey = '';
 
-            $scope.back = function () {
-                $scope.state.step = 'email';
-            };
-
             $scope.submit = function () {
-                if (!$scope.model.firstname) return;
+                if (!$scope.model.username) return;
 
                 if ($scope.honey) {
                     $scope.state.step = 'email';
                     return;
                 }
 
-                $users.createUserRecord( $scope.model.email, $scope.model.firstname )
+                $users.createUserRecord( $scope.model.email, $scope.model.username )
                     .error( function ( response, status ) {
                         $scope.state.step = 'error';
                     } )
@@ -276,7 +283,7 @@
             $scope.showPass = true;
             $scope.togglePass = function() {
                 $scope.showPass = !$scope.showPass;
-                $scope.showhide = $scope.showPass ? 'icon-lock' : 'icon-unlock';
+                $scope.showhide = $scope.showPass ? 'icon-unlock' : 'icon-lock';
             };
             $scope.togglePass();
 
@@ -371,7 +378,7 @@
             $scope.showPass = true;
             $scope.togglePass = function() {
                 $scope.showPass = !$scope.showPass;
-                $scope.showhide = $scope.showPass ? 'icon-lock' : 'icon-unlock';
+                $scope.showhide = $scope.showPass ? 'icon-unlock' : 'icon-lock';
             };
             $scope.togglePass();
 

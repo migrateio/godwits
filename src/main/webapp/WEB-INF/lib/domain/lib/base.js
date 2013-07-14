@@ -108,7 +108,7 @@ exports.BaseDomain = Object.subClass( {
 //            JSON.stringify( json ), JSON.stringify( obj ), JSON.stringify( newObj ) );
         newObj = this.generateDefaults( newObj );
 
-        this.prevalidate( newObj );
+        this.prevalidate( newObj, obj );
 
         // Validate the new object
         var schema = this.validate( newObj );
