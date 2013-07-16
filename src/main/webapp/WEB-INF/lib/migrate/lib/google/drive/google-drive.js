@@ -57,6 +57,10 @@ exports.Drive = function ( credentials ) {
         }
     }
 
+    function getAllFiles() {
+
+    }
+
     function refreshToken( credentials ) {
         var opts2 = {
             url : serviceDef.accessTokenUrl,
