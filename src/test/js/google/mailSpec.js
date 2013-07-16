@@ -190,8 +190,11 @@ function cleanSlate(service) {
 
     service.store.close();
 }
-
-function generateDummyEmails() {
-
-}
-
+//
+//function generateDummyEmails() {
+//
+//}
+//
+//function generateDummyEmail(json) {
+//
+//}
