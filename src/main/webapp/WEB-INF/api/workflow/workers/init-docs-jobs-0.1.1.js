@@ -13,7 +13,7 @@ function onmessage( e ) {
         try {
             source = getService( input.source.service, input.source.auth );
 
-            var files = source.getAllFiles();
+            var files = source.read();
 
             function splitJobs(files) {
                 var result = [];
@@ -26,6 +26,8 @@ function onmessage( e ) {
 
                 return result;
             }
+
+            var result = splitJobs(files);
 
             e.source.postMessage( {
                 status : 200,
