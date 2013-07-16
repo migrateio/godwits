@@ -1,0 +1,445 @@
+<!doctype html>
+<html ng-app="plunker">
+<head>
+<meta charset="utf-8">
+<title>Scroller Example</title>
+
+<link rel="stylesheet" href="lib/font-awesome/css/font-awesome.min.css">
+<style>
+    .mio-scroll {
+        border: 10px solid #eeeeff;
+        margin: 10px;
+        position: relative;
+        overflow: hidden;
+        width: 940px;
+        height: 100px;
+    }
+
+    .mio-scroller {
+        margin: 0;
+        padding: 0;
+        left: -10px;
+        display: block;
+        list-style: none;
+        position: absolute;
+        white-space: nowrap;
+        font-size: 0;
+    }
+
+    .mio-scrollbar {
+        position: absolute;
+        top: 0;
+        background-color: #ddeeee;
+        width: 10px;
+        height: 100%;
+        z-index: 5;
+        line-height: 100px;
+        font-size: 14px;
+        color: #b8c7c8;
+        transition: all linear 0.125s;
+        cursor: pointer;
+        text-align: center;
+    }
+
+    .mio-scrollbar:hover {
+        background-color: #ccdddd;
+        width: 30px;
+        font-size: 20px;
+        color: #f1feff;
+    }
+
+    .mio-scroll-item {
+        padding: 10px;
+        margin-left: 10px;
+        display: inline-block;
+        /*border: 1px solid blue;*/
+        background-color: #ffeeff;
+        height: 80px;
+        white-space: nowrap;
+    }
+
+    .mio-scroll-item div.expand {
+        background-color: red;
+        height: 100px;
+        font-size: 16px;
+    }
+
+    .mio-scroll-item > div {
+        display: inline-block;
+        height: 100%;
+    }
+
+    .mio-scroll-item > div.item {
+        background-color: blue;
+        width: 160px;
+    }
+
+    .mio-scroll-item > div.expando {
+        /*border: 1px solid green;*/
+        width: 0;
+        vertical-align: top;
+        overflow: hidden;
+    }
+
+    .block1 {
+        width: 190px;
+    }
+
+    .block2 {
+        width: 380px;
+    }
+
+    .block3 {
+        width: 570px;
+    }
+
+    .block4 {
+        width: 760px;
+    }
+
+</style>
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.1/jquery.min.js"></script>
+<script src="//ajax.googleapis.com/ajax/libs/angularjs/1.1.5/angular.js"></script>
+<script>
+    $.extend( $.easing, {
+                easeInOutBack : function ( x, t, b, c, d, s ) {
+                    if ( s == undefined ) s = 1.70158;
+                    if ( (t /= d / 2) < 1 ) return c / 2 * (t * t * (((s *= (1.525)) + 1) * t - s)) + b;
+                    return c / 2 * ((t -= 2) * t * (((s *= (1.525)) + 1) * t + s) + 2) + b;
+                }
+            }
+    );
+
+    var mod = angular.module( 'plunker', [] );
+
+    mod.controller( 'mioScrollController', ['$log', '$scope', '$element', '$timeout',
+        function ( $log, scope, element, $timeout ) {
+            var leftOffset = -10;
+
+            var scroll = element;
+            var scroller = element.find('.mio-scroller');
+
+            var items = [];
+            var expanded = -1;
+
+            var left = 0;
+
+            // Now that we have collected the animations, execute them.
+            function applyAnimations(animations) {
+//                scope.$apply( function() {
+                    while ( animations.length > 0 ) {
+                        var anim = animations.shift();
+                        if (anim) {
+                            var easing = anim.attrs.left ? 'swing' : 'easeInOutBack';
+                            anim.element.animate( anim.attrs, {
+                                duration : 300,
+                                easing : easing
+                            } );
+                        }
+                    }
+//                } );
+            }
+
+            /**
+             * Returns the min/max value for the scroller left position such that the
+             * expanded index item is fully visible.
+             */
+            function getScrollerMaxMin( index, expanded ) {
+                var scrollWidth = scroll.width();
+                var scrollerWidth = scroller.width();
+
+                var expandedItem = items[index];
+                if (!expandedItem) {
+                    var scrollerMinWidth = 0;
+                    for (var i = 0, c = items.length; i < c; i++)
+                        scrollerMinWidth += items[i].width;
+                    return {
+                        min: scrollWidth - scrollerMinWidth,
+                        max: leftOffset
+                    }
+                }
+
+                // maxLeft is the largest left value for the scroller that would fit the
+                // selected item and its expanded width.
+                var expandedWidth = expanded ? expandedItem.expand.outerWidth() : 0;
+                var totalWidth = expandedItem.width + expandedWidth;
+                var maxLeft = expandedItem.left + scrollWidth - totalWidth;
+
+                // minLeft is the left value which would place the selected box at the
+                // far left of the visible portion of the scroller.
+                var minLeft = expandedItem.left - 10;
+
+                return {
+                    min: minLeft,
+                    max: maxLeft
+                }
+            }
+
+            /**
+             * Ensures the scroller is properly positioned within the scroll box. The
+             * scroller cannot scroll left beyond the leftOffset value or right beyond
+             * the width of the scroller (with expanded element) - scroll box width.
+             *
+             * ( scrollBox.width - scroller.width )  >=  left  >=  leftOffset
+             *
+             */
+            function constrainScroller( scrollerLeft, index, expanded ) {
+                var constraints = getScrollerMaxMin( index, expanded );
+
+                // Constrain the scrollerLeft
+                var newLeft = scrollerLeft > constraints.max ? constraints.max
+                        : scrollerLeft < constraints.min ? constraints.min : scrollerLeft;
+
+                $log.info( 'Constraining scroller', {
+                    min: constraints.min,
+                    max: constraints.max,
+                    scrollerLeft: scrollerLeft,
+                    newLeft: newLeft
+                } );
+                return {
+                    element: scroller,
+                    attrs: {
+                        left: newLeft
+                    }
+                };
+            }
+
+            function blockCollapse() {
+                result = [];
+                if ( expanded >= 0 ) {
+                    // If there is an expanded item, set its width to 0
+                    result.push( {
+                        element : items[expanded].expando,
+                        attrs : {
+                            width : 0
+                        }
+                    } );
+                    expanded = -1;
+                }
+
+                return result;
+            }
+
+            function blockExpand( index ) {
+                var result = blockCollapse();
+
+                // Make sure the expansion item will have its width set to the
+                // width of the expanded element contained within it.
+                var expandMe = items[index];
+                result.push( {
+                    element : expandMe.expando,
+                    attrs : {
+                        width : expandMe.expand.outerWidth()
+                    }
+                } );
+
+                // If the left needs an update, make it so
+                var scrollerLeft = scroller.position().left;
+                result.push( constrainScroller( scrollerLeft, index, true ) );
+
+                expanded = index;
+
+                return result;
+            }
+
+            function scrollPage( distance ) {
+                var anims = blockCollapse();
+
+                var scrollerPos = scroller.position().left;
+                var newPos = scrollerPos + distance;
+
+                anims.push(constrainScroller( newPos ) );
+
+                return anims;
+            }
+
+            this.scrollLeft = function() {
+                var scrollWidth = scroll.width();
+                var anims = scrollPage( scrollWidth - 180 );
+                applyAnimations( anims );
+            };
+
+            this.scrollRight = function() {
+                var scrollWidth = scroll.width();
+                var anims = scrollPage( -scrollWidth + 180 );
+                applyAnimations( anims );
+            };
+
+            this.registerItem = function ( item ) {
+                var result = {};
+                result.item = $( item );
+                result.left = left;
+                result.width = result.item.outerWidth(true);
+                result.expando = result.item.find( '.expando' );
+                result.expand = result.expando.find( 'div > div' );
+                left -= result.width;
+
+                var index = items.length;
+                items.push( result );
+                return index;
+            };
+
+            /**
+             * When an expando section is targeted to slide open, any existing
+             * sliders will shut. In addition, the scroller may have to slide left to
+             * allow the expanding section to fit in the visible area.
+             */
+            this.expand = function ( index ) {
+                var anims = blockExpand( index );
+                applyAnimations( anims );
+            };
+
+            this.collapse = function collapse( index ) {
+                var anims = blockCollapse( );
+
+                // If the left needs an update, make it so
+                var scrollerLeft = scroller.position().left;
+                anims.push( constrainScroller( scrollerLeft ) );
+
+                applyAnimations( anims );
+            };
+
+            this.toggle = function( index ) {
+                var openAlso = expanded !== index;
+                var anims = blockCollapse( );
+                if (openAlso) anims = anims.concat( blockExpand( index ) );
+                else {
+                    var scrollerLeft = scroller.position().left;
+                    anims.push( constrainScroller( scrollerLeft ) );
+                }
+                applyAnimations( anims );
+            }
+        }
+    ] );
+
+    mod.directive( 'mioScroll', [ '$log', function ( $log ) {
+        return {
+            restrict : 'A',
+            scope : true,
+            replace : false,
+            controller : 'mioScrollController',
+            link : function ( scope, element, attrs, scrollCtrl ) {
+//                    $log.info( 'mioScroll', scope );
+            }
+        };
+    } ] );
+
+    mod.directive( 'mioScroller', [ '$log', function ( $log ) {
+        return {
+            restrict : 'A',
+            scope : false,
+            replace : false,
+            require : '^mioScroll',
+            link : function ( scope, element, attrs, scrollCtrl ) {
+//                    $log.info( 'mioScroll', scope );
+//                    element.find('> div' ).forEach(function(div) {
+//                        scrollCtrl.registerItem( div );
+//                    });
+            }
+        };
+    } ] );
+
+    mod.directive( 'mioScrollbar', [ '$log', function ( $log ) {
+        return {
+            restrict : 'A',
+            scope : false,
+            replace : false,
+            require : '^mioScroll',
+            link : function ( scope, element, attrs, scrollCtrl ) {
+                var dir = attrs.mioScrollbar;
+                element.css( dir, '0' );
+//                element.css( dir, '-10px' );
+                var clazz = dir === 'left' ? 'icon-caret-left' : 'icon-caret-right';
+                element.html( '<i class="' + clazz + '"/>' );
+                element.bind('click', function() {
+                    if (dir === 'left') scrollCtrl.scrollLeft();
+                    else scrollCtrl.scrollRight();
+                });
+            }
+        };
+    } ] );
+
+    mod.directive( 'mioScrollItem', [ '$log', function ( $log ) {
+        return {
+            restrict : 'A',
+            scope : false,
+            replace : false,
+            require : '^mioScroll',
+            link : function ( scope, element, attrs, scrollCtrl ) {
+                var index = scrollCtrl.registerItem( element );
+
+                scope.toggle = function() {
+                    scrollCtrl.toggle(index);
+                };
+
+                scope.collapse = function() {
+                    scrollCtrl.collapse(index);
+                };
+
+                scope.expand = function() {
+                    scrollCtrl.expand(index);
+                }
+            }
+        };
+    } ] );
+
+    mod.directive( 'mioExpando', [ '$log', function ( $log ) {
+        return {
+            restrict : 'A',
+            template : '<div class="expando"><div data-ng-transclude/></div>',
+            replace : true,
+            transclude : true,
+            require : '^mioScroll',
+            link : function ( scope, element, attrs, scrollCtrl ) {
+//                    $log.info( 'mioExpando', scope );
+            }
+        };
+    } ] );
+
+    mod.directive( 'mioButton', [ '$log', function ( $log ) {
+        return {
+            restrict : 'A',
+            link : function ( scope, element, attrs, scrollCtrl ) {
+                scope.click = function() {
+                    scope.toggle();
+                };
+            }
+        };
+    } ] );
+
+    mod.controller( 'sampleData', ['$scope', function(scope) {
+        scope.expanders = [];
+        for (var i = 0; i < 15; i++) {
+            var val = Math.floor( Math.random() * 4 ) + 1;
+            scope.expanders.push( { value : val, clazz: 'block' + val } );
+        }
+    }]);
+
+</script>
+</head>
+<body>
+
+<div ng-controller="sampleData">
+
+    <div class="mio-scroll" data-mio-scroll>
+        <div class="mio-scrollbar" data-mio-scrollbar="left"></div>
+        <div class="mio-scrollbar" data-mio-scrollbar="right"></div>
+        <ul class="mio-scroller" data-mio-scroller>
+            <li ng-repeat="expander in expanders" class="mio-scroll-item" data-mio-scroll-item>
+                <div class="item" data-mio-button>
+                    <button ng-click="click()">Toggle {{expander.value}}</button>
+                    <h2>{{$index}}</h2>
+                </div>
+                <div data-mio-expando>
+                    <div class="expand" ng-class="expander.clazz">
+                        {{$index}} expanded ({{expander.value}})
+                    </div>
+                </div>
+            </li>
+        </ul>
+    </div>
+
+</div>
+
+</body>
+</html>

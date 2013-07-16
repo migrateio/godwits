@@ -130,11 +130,7 @@ function SwfClient( workflowOptions, accessKey, secretKey ) {
             log.debug( 'swfClient.registerWorkflowType( {} )', request );
             swfClient.registerWorkflowType( request );
 //            } catch ( e if e.javaException instanceof TypeAlreadyExistsException ) {
-        } catch ( e if e
-    .
-        javaException instanceof TypeAlreadyExistsException
-    )
-        {
+        } catch ( e if e.javaException instanceof TypeAlreadyExistsException ) {
         }
     }
 

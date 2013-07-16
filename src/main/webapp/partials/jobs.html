@@ -1,19 +1,23 @@
-<div class="container">
-    <div class="jobs" data-ng-controller="mio-jobs-controller">
-        <h2>
-            Jobs <a data-ng-click="newJobs()" class="btn btn-info">New Jobs</a>
-        </h2>
+<div class="container inner">
+    <div class="row">
 
-        <ul>
-            <li data-ng-repeat="job in jobs">
-                <div data-mio-job="job"></div>
-                <div>
-                    <pre>{{ job | json }}</pre>
-                </div>
-            </li>
-        </ul>
+        <div class="jobs" data-ng-controller="mio-jobs-controller">
+            <h2>
+                Jobs <a data-ng-click="newJobs()" class="btn btn-info">New Jobs</a>
+            </h2>
 
-        <a data-ng-click="newJobs()" class="btn btn-info">New Jobs</a>
+            <ul>
+                <li data-ng-repeat="job in jobs">
+                    <div data-mio-job="job"></div>
+                    <div>
+                        <pre>{{ job | json }}</pre>
+                    </div>
+                </li>
+            </ul>
+
+            <a data-ng-click="newJobs()" class="btn btn-info">New Jobs</a>
+        </div>
+
     </div>
 </div>
 

@@ -505,7 +505,7 @@
             var boxId, box;
 
             function update(newValue, oldValue) {
-                $log.info( 'mioBoxController, update', newValue, oldValue );
+//                $log.info( 'mioBoxController, update', newValue, oldValue );
                 if ( faces[oldValue] ) faces[oldValue].hide();
                 if ( faces[newValue] ) faces[newValue].show();
             }
@@ -524,7 +524,7 @@
                 boxId = _boxId;
                 box = _box;
 
-                $log.info( 'mioBoxController', _boxId, $scope );
+//                $log.info( 'mioBoxController', _boxId, $scope );
                 $scope.$watch( _boxId, update );
             };
 
@@ -566,7 +566,7 @@
                     undim : function() { scope.dim = false; }
                 } );
 
-                $log.info( 'mioBox', scope, attrs );
+//                $log.info( 'mioBox', scope, attrs );
             }
         };
     } ] );

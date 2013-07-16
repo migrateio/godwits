@@ -17,6 +17,7 @@ exports.schema = {
                         type : 'string'
                     }
                 },
+                additionalProperties: false,
                 required: ['created', 'message', 'userId']
             }
         },
@@ -47,11 +48,8 @@ exports.schema = {
                     }
                 }
             },
+            additionalProperties: false,
             required: ['service']
-        },
-        expires : {
-            type : 'string',
-            format : 'date-time'
         },
         invoiceId : {
             type : 'string'
@@ -72,6 +70,10 @@ exports.schema = {
                         },
                         "uniqueItems": true,
                         additionalItems: false
+                    },
+                    starts: {
+                        type: 'string',
+                        format: 'date-time'
                     },
                     expires: {
                         type: 'string',
@@ -113,15 +115,17 @@ exports.schema = {
                                 }
                             }
                         },
-                        required: ['service']
+                        additionalProperties: false,
+                        required: ['service', 'auth']
+                    },
+                    test: {
+                        type: 'boolean',
+                        'default': false
                     }
                 },
-                required: ['content', 'jobId', 'status', 'source']
+                additionalProperties: false,
+                required: ['content', 'jobId', 'status', 'source', 'starts', 'expires']
             }
-        },
-        starts : {
-            type : 'string',
-            format : 'date-time'
         },
         test : {
             type : 'object',
@@ -129,11 +133,12 @@ exports.schema = {
                 jobId : {
                     type : 'string'
                 },
-                started : {
+                starts : {
                     type : 'string',
                     format : 'date-time'
                 }
             },
+            additionalProperties: false,
             required: ['jobId']
         },
         totalCharged : {
@@ -185,6 +190,7 @@ exports.schema = {
                         type : 'string'
                     }
                 },
+                additionalProperties: false,
                 required: [
                     'amount', 'relatedJob', 'captureId', 'customerId', 'invoiceDate',
                     'invoiceNum', 'service', 'last4', 'fingerprint', 'type'
@@ -195,8 +201,8 @@ exports.schema = {
             type : 'string'
         }
     },
+    additionalProperties: false,
     required: [
-        'destination', 'expires', 'invoiceId', 'invoiceNum', 'starts',
-        'totalCharged', 'userId'
+        'destination', 'invoiceId', 'invoiceNum', 'totalCharged', 'userId'
     ]
 };

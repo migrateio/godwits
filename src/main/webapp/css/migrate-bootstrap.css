@@ -276,3 +276,37 @@ input[type="color"],
     background-color: #1da3b8;
 }
 
+
+
+
+.tooltip.in {
+    opacity: .95;
+    filter: alpha(opacity=95);
+}
+
+.tooltip-inner {
+    max-width: 260px;
+    padding: 12px;
+    color: #ffffff;
+    font-size: 14px;
+    background-color: #6fc8d6;
+    -webkit-border-radius: 1px;
+    -moz-border-radius: 1px;
+    border-radius: 1px;
+}
+
+.tooltip.top .tooltip-arrow {
+    border-top-color: #6fc8d6;
+}
+
+.tooltip.right .tooltip-arrow {
+    border-right-color: #6fc8d6;
+}
+
+.tooltip.left .tooltip-arrow {
+    border-left-color: #6fc8d6;
+}
+
+.tooltip.bottom .tooltip-arrow {
+    border-bottom-color: #6fc8d6;
+}

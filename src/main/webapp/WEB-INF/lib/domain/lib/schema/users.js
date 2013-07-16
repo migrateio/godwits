@@ -4,7 +4,7 @@ exports.schema = {
         userId: {
             type: 'string'
         },
-        name: {
+        username: {
             type: 'string',
             minLength : 1
         },
@@ -85,5 +85,5 @@ exports.schema = {
         }
     },
     additionalProperties: false,
-    required: ['userId', 'email', 'name', 'roles']
+    required: ['userId', 'email', 'username', 'roles']
 };

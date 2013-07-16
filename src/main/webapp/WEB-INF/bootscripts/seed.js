@@ -14,7 +14,7 @@ var users = new domain.Users( props['environment'] );
  */
 users.create( {
     userId : 'admin',
-    name : 'Admin',
+    username : 'admin',
     password : 'secret',
     email : {
         status : 'verified',
@@ -27,7 +27,7 @@ users.create( {
 // Delete before production
 users.create( {
     userId : 'fred',
-    name : 'Fred',
+    username : 'fred',
     password : 'secret',
     email : {
         status : 'verified',

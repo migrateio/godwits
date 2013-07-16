@@ -1,31 +1,157 @@
-<!--<script src="https://checkout.stripe.com/v2/checkout.js" type="text/javascript"></script>-->
-<ul class="job-action">
-    <li class="test">
-        <div data-ng-if="!preauth.testedOn">
-            <p>Test</p>
+<script src="https://checkout.stripe.com/v2/checkout.js" type="text/javascript"></script>
+
+<div data-ng-if="preauth.pending">
+    <div class="action-full">
+        <h3>Pending!</h3>
+    </div>
+</div>
+
+<div data-ng-if="!preauth.pending">
+
+    <div data-ng-if="preauth.auth">
+        <div class="action-left action-error">
+            <table><tr>
+                <td>
+                    <h3>Authenticate
+                        <i class="icon-info-sign"
+                           data-tooltip-placement="right" data-tooltip-popup-delay="500"
+                           data-tooltip-append-to-body="true" data-tooltip="
+                   Please sign in with your Migrate IO account information, or if this
+                   is your first time here you may begin the signup process by entering
+                   your email address to use for your account."/>
+                    </h3>
+                    <p>Sign in, or sign up now.</p>
+                </td>
+            </tr></table>
         </div>
-        <div data-ng-if="preauth.testedOn">
-            <p>Tested on {{preauth.testedOn}}</p>
-        </div>
-    </li>
-    <li class="purchase" data-ng-switch="ui.view">
-        <div data-ng-switch-when="zero">
-            <p>No payment is required</p>
-        </div>
-        <div data-ng-switch-when="edu-partial">
-            <p>EDU Promotion, Payment due is {{ui.due}}</p>
-        </div>
-        <div data-ng-switch-when="edu-full">
-            <p>EDU Promotion, Payment due is {{ui.due}} and we are full.</p>
-        </div>
-        <div data-ng-switch-when="full">
-            <p>Full access, Payment due is {{ui.due}}</p>
-            <div>
-                <a class="btn btn-success" data-ng-click="purchase()" >Purchase</a>
+
+        <div class="action-right">
+            <div class="sign" data-ng-controller="signin-controller">
+                <div data-ng-include src="'partials/signin/signin.html'" />
             </div>
         </div>
-        <div data-ng-switch-default>
-            <p>Some kind of spinner</p>
+    </div>
+
+    <div data-ng-if="!preauth.auth">
+        <div data-ng-if="preauth.canTest">
+            <div class="action-left">
+                <table>
+                    <tr>
+                        <td>
+                            <h3>
+                                Test Drive?
+                                <i class="icon-info-sign"
+                                   data-tooltip-placement="right" data-tooltip-popup-delay="500"
+                                   data-tooltip-append-to-body="true" data-tooltip="
+                       Before any payment is made, we encourage you to test our
+                       service by transfering up to 100 content items defined by
+                       this job to your {{ui.dest.fullname}} account. There is no
+                       charge for this test and you are granted one free test run
+                       for each destination account.
+                       "/>
+                            </h3>
+
+                            <p>Run a test job now.</p>
+                        </td>
+                        <td>
+                            <div class="btn-group">
+                                <a class="btn btn-success">Test Run</a>
+                            </div>
+                        </td>
+                    </tr>
+                </table>
+            </div>
         </div>
-    </li>
-</ul>
+
+        <div data-ng-if="!preauth.canTest">
+            <div class="action-left">
+                <table>
+                    <tr>
+                        <td style="text-align: left;">
+                            <h3>
+                                Latest runs:
+                                <i class="icon-info-sign"
+                                   data-tooltip-placement="right" data-tooltip-popup-delay="500"
+                                   data-tooltip-append-to-body="true" data-tooltip="
+                       The last successful job completed on {{}}. The last job started
+                       is still running. todo: say something
+                       "/>
+                            </h3>
+
+                            <p>Run a test job now.</p>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+
+        <div data-ng-if="preauth.error">
+            <div class="action-right action-error">
+                <table>
+                    <tr>
+                        <td>
+                            <h3>
+                                Error!
+                                <i class="icon-info-sign"
+                                   data-tooltip-placement="right" data-tooltip-popup-delay="500"
+                                   data-tooltip-append-to-body="true"
+                                   data-tooltip="{{preauth.error.tooltip}}"/>
+                            </h3>
+                            <p>{{preauth.error.message}}</p>
+                        </td>
+                        <td>
+                            <ul>
+                                <li><p><a data-ng-click="">Job 123</a></p></li>
+                                <li><p><a data-ng-click="">Job k93</a></p></li>
+                                <li><p><a data-ng-click="">Job abc</a></p></li>
+                            </ul>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+
+        <div data-ng-if="!preauth.error">
+
+            <div data-ng-if="preauth.view">
+                <div class="action-right">
+                    <table>
+                        <tr>
+                            <td style="text-align: left;">
+                                <h3>
+                                    {{preauth.view.headline}}
+                                    <i class="icon-info-sign"
+                                       data-tooltip-placement="right" data-tooltip-popup-delay="500"
+                                       data-tooltip-append-to-body="true"
+                                       data-tooltip="{{preauth.view.tooltip}}"/>
+                                </h3>
+                                <p>{{preauth.view.caption}}</p>
+                            </td>
+                            <td class="buy">
+                                <div class="btn-group">
+                                    <a class="btn btn-success" data-ng-click="purchase()">
+                                        <table>
+                                            <tr>
+                                                <td>Migrate</td>
+                                                <td style="width: 45px; text-align: right;">
+                                                    {{preauth.view.amount}}
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </a>
+                                    <h4 ng-if="preauth.last4">
+                                        <a data-ng-click="purchaseStored()">Use {{preauth.cardType}} ({{preauth.last4}})</a>
+                                    </h4>
+                                </div>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+

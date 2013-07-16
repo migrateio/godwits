@@ -15,6 +15,11 @@ exports.Job = function(job) {
         return job && job.status === 'active';
     }
 
+    // todo: test
+    function isNotCompleted() {
+        return job && job.status !== 'completed';
+    }
+
     /**
      * A job is considered complete if it has a source and destination account and content
      * types selected.
@@ -64,6 +69,7 @@ exports.Job = function(job) {
         sourceOverlaps: sourceOverlaps,
         isRunning: isRunning,
         isComplete: isComplete,
+        isNotCompleted: isNotCompleted,
         toJSON : function toJSON() {
             return job;
         }

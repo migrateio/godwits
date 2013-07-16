@@ -6,7 +6,7 @@ var {Deferred} = require( 'ringo/promise' );
 var {props} = require( 'utility' );
 var stripe = require( 'stripe' )( props['stripe.secret_key'] );
 
-var CARD_GOOD_VISA   = '4242424242424242';  // good visa number
+var CARD_GOOD_VISA = '4242424242424242';  // good visa number
 var CARD_CHARGE_FAIL = '4000000000000341';  // Attaching this card to a Customer object will succeed, but attempts to charge the customer will fail.
 var reISO8601 = /^\d{4}\-\d\d\-\d\dT\d\d:\d\d:\d\d\.\d\d\dZ$/;
 
@@ -51,7 +51,7 @@ describe( 'Invoice Domain', function () {
             }
         );
 
-        return deferred.promise.wait(5000);
+        return deferred.promise.wait( 5000 );
     }
 
     describe( 'testing object instantiation', function () {
@@ -114,21 +114,6 @@ describe( 'Invoice Domain', function () {
             expect( i.invoiceId ).toEqual( invoice.invoiceId );
         } );
 
-        it( 'should have starts and expires properties set', function () {
-            var i = invoices.read( invoice.invoiceId );
-            expect( i ).toBeDefined();
-
-            expect( i.starts ).toEqual( jasmine.any( String ) );
-            expect( i.expires ).toEqual( jasmine.any( String ) );
-
-            var elapsed = Date.now() - new Date( i.starts ).getTime();
-            expect( elapsed ).toBeLessThan( 5000 );
-
-            log.info( 'Dates: ', i.starts, i.expires );
-            var diff = new Date( i.expires ).getTime() - new Date( i.starts ).getTime();
-            expect( diff ).toEqual( 1000 * 60 * 60 * 24 * 30 );
-        } );
-
         it( 'should be able to read by dest lookup', function () {
             var i = invoices.readByJob( 'abcdef', {
                 destination : {
@@ -150,7 +135,7 @@ describe( 'Invoice Domain', function () {
                     }
                 }
             } );
-            expect( i ).toBeNull( );
+            expect( i ).toBeNull();
         } );
 
         it( 'should be able to add comments', function () {
@@ -180,35 +165,14 @@ describe( 'Invoice Domain', function () {
         } );
 
         it( 'should be able to append jobs', function () {
-            var date = new Date( '1992-10-03T11:30:00.123Z' );
-
             var i = invoices.read( invoice.invoiceId );
             expect( i ).toBeDefined();
 
-            var job1 = {
-                jobId : 'job_1',
-                content : ['mails', 'contacts'],
-                source : {
-                    service : 'yahoo',
-                    auth : {
-                        username : 'fred@yahoo.com'
-                    }
-                }
-            };
-            var job2 = {
-                jobId : 'job_2',
-                content : ['documents', 'media'],
-                status : 'active',
-                source : {
-                    service : 'microsoft',
-                    auth : {
-                        username : 'fred@live.com'
-                    }
-                }
-            };
+            var job1 = JSON.parse( JSON.stringify( job_open_1 ) );
+            var job2 = JSON.parse( JSON.stringify( job_open_2 ) );
 
-            i.addJob( job1, { payment: 500 } );
-            i.addJob( job2, { test: true } );
+            i.addJob( job1, { payment : 500 } );
+            i.addJob( job2, { test : true } );
 
             invoices.update( i );
 
@@ -219,18 +183,30 @@ describe( 'Invoice Domain', function () {
 
             // Jobs have some additional fields added to them when added, strip those
             // away after ensuring their presence
-            expect( i.jobs[1].expires ).toMatch( reISO8601 );
+            i.jobs.forEach(function(job) {
+                expect( job.expires ).toMatch( reISO8601 );
+                delete job.expires;
+                expect( job.starts ).toMatch( reISO8601 );
+                delete job.starts;
+            });
             expect( i.jobs[1].test ).toEqual( true );
-            delete i.jobs[1].expires;
             delete i.jobs[1].test;
-            expect( i.jobs[1] ).toEqual( job2 );
-
-            // Test for test property
-            expect( i.test.jobId ).toEqual( job2.jobId );
-            expect( i.test.started ).toMatch( reISO8601 );
 
             // Make sure default status property was created
             expect( i.jobs[0].status ).toEqual( 'pending' );
+            delete i.jobs[0].status;
+
+            // Destination is not stored in jobs array
+            delete job1.destination;
+            expect( i.jobs[0] ).toEqual( job1 );
+
+            delete job2.destination;
+            expect( i.jobs[1] ).toEqual( job2 );
+            expect( i.jobs[1].status ).toEqual( 'active' );
+
+            // Test for test property
+            expect( i.test.jobId ).toEqual( job2.jobId );
+            expect( i.test.starts ).toMatch( reISO8601 );
         } );
 
     } );
@@ -280,40 +256,19 @@ describe( 'Invoice Domain', function () {
         var invoice;
 
         beforeEach( function () {
-            invoice = invoices.create( {
+            var i = new domain.Invoice({
                 destination : {
                     service : 'google',
                     auth : {
                         username : 'jcook@migrate.io'
                     }
                 },
-                jobs : [
-                    {
-                        jobId : 'job_1',
-                        content : ['mails', 'contacts'],
-                        status : 'completed',
-                        source : {
-                            service : 'yahoo',
-                            auth : {
-                                username : 'fred@yahoo.com'
-                            }
-                        }
-                    },
-                    {
-                        jobId : 'job_2',
-                        content : ['documents', 'media'],
-                        status : 'active',
-                        source : {
-                            service : 'microsoft',
-                            auth : {
-                                username : 'fred@live.com'
-                            }
-                        }
-                    }
-                ],
                 invoiceNum : '12345',
                 userId : 'abcdef'
-            } );
+            });
+            i.addJob( job_done_1, { payment: 500 });
+            i.addJob( job_open_1, { payment: 500 });
+            invoice = invoices.create( i );
             expect( invoice.invoiceId ).toEqual( jasmine.any( String ) );
         } );
 
@@ -330,10 +285,10 @@ describe( 'Invoice Domain', function () {
 
             expect( laps ).toBeArray();
             expect( laps.length ).toEqual( 1 );
-            expect( laps[0].jobId ).toEqual( 'job_2' );
+            expect( laps[0].jobId ).toEqual( 'job_open_1' );
         } );
 
-        it( 'should detect overlap jobs when job is completed', function () {
+        it( 'should not detect overlap jobs when job is completed', function () {
             var laps = invoice.overlappingJobs( {
                 source : {
                     service : 'yahoo',
@@ -342,6 +297,51 @@ describe( 'Invoice Domain', function () {
                     }
                 },
                 content : ['contacts', 'mails', 'media']
+            } );
+
+            expect( laps ).toBeArray();
+            expect( laps.length ).toEqual( 0 );
+        } );
+
+        it( 'should not detect overlap jobs when there is no service match', function () {
+            var laps = invoice.overlappingJobs( {
+                source : {
+                    service : 'google',
+                    auth : {
+                        username : 'fred@live.com'
+                    }
+                },
+                content : ['contacts', 'mails', 'media']
+            } );
+
+            expect( laps ).toBeArray();
+            expect( laps.length ).toEqual( 0 );
+        } );
+
+        it( 'should not detect overlap jobs when there is no username match', function () {
+            var laps = invoice.overlappingJobs( {
+                source : {
+                    service : 'microsoft',
+                    auth : {
+                        username : 'fred@outlook.com'
+                    }
+                },
+                content : ['contacts', 'mails', 'media']
+            } );
+
+            expect( laps ).toBeArray();
+            expect( laps.length ).toEqual( 0 );
+        } );
+
+        it( 'should not detect overlap jobs when there is no content overlap', function () {
+            var laps = invoice.overlappingJobs( {
+                source : {
+                    service : 'microsoft',
+                    auth : {
+                        username : 'fred@live.com'
+                    }
+                },
+                content : ['contacts', 'mails', 'calendars']
             } );
 
             expect( laps ).toBeArray();
@@ -481,17 +481,17 @@ describe( 'Invoice Domain', function () {
             var tokenId = createToken( CARD_GOOD_VISA );
 
             var userId = exUsers.betty.userId;
-            var job = new domain.Job( inv_open_jobs2_active1.jobs[0] );
-            var payment = { due: 1500, tokenId: tokenId };
+            var job = new domain.Job( job_open_1 );
+            var payment = { due : 1500, tokenId : tokenId };
 
             var result = invoices.submitJob( userId, job, payment );
 
             expect( result ).toBeDefined();
             expect( result.userId ).toEqual( userId );
             expect( result.destination ).toEqual( {
-                service: job.destination.service,
-                auth: {
-                    username: job.destination.auth.username
+                service : job.destination.service,
+                auth : {
+                    username : job.destination.auth.username
                 }
             } );
             expect( result.totalCharged ).toEqual( 1500 );
@@ -499,16 +499,13 @@ describe( 'Invoice Domain', function () {
             expect( result.invoiceId ).toEqual( jasmine.any( String ) );
             expect( result.invoiceNum ).toEqual( jasmine.any( String ) );
 
-            expect( result.starts ).toMatch( reISO8601 );
-            expect( result.expires ).toMatch( reISO8601 );
-
             expect( result.jobs ).toBeArray();
-            expect( result.jobs.length ).toEqual(1);
+            expect( result.jobs.length ).toEqual( 1 );
         } );
 
         it( 'should be able to handle a test run', function () {
             var userId = exUsers.betty.userId;
-            var job = new domain.Job( inv_open_jobs2_active1.jobs[0] );
+            var job = new domain.Job( job_open_1 );
             var payment = { test : true };
 
             var result = invoices.submitJob( userId, job, payment );
@@ -516,9 +513,9 @@ describe( 'Invoice Domain', function () {
             expect( result ).toBeDefined();
             expect( result.userId ).toEqual( userId );
             expect( result.destination ).toEqual( {
-                service: job.destination.service,
-                auth: {
-                    username: job.destination.auth.username
+                service : job.destination.service,
+                auth : {
+                    username : job.destination.auth.username
                 }
             } );
             expect( result.totalCharged ).toEqual( 0 );
@@ -526,18 +523,15 @@ describe( 'Invoice Domain', function () {
             expect( result.invoiceId ).toEqual( jasmine.any( String ) );
             expect( result.invoiceNum ).toEqual( jasmine.any( String ) );
 
-            expect( result.starts ).toMatch( reISO8601 );
-            expect( result.expires ).toMatch( reISO8601 );
-
             expect( result.jobs ).toBeArray();
-            expect( result.jobs.length ).toEqual(1);
+            expect( result.jobs.length ).toEqual( 1 );
         } );
 
         it( 'will fail with a preauth due mismatch', function () {
-            var tokenId = createToken( CARD_CHARGE_FAIL );
+            var tokenId = createToken( CARD_GOOD_VISA );
 
             var userId = exUsers.betty.userId;
-            var job = new domain.Job( inv_open_jobs2_active1.jobs[0] );
+            var job = new domain.Job( job_open_1 );
             var payment = { tokenId : tokenId, due : 500 };
 
             try {
@@ -555,7 +549,7 @@ describe( 'Invoice Domain', function () {
             var tokenId = createToken( CARD_CHARGE_FAIL );
 
             var userId = exUsers.betty.userId;
-            var job = new domain.Job( inv_open_jobs2_active1.jobs[0] );
+            var job = new domain.Job( job_open_2 );
             var payment = { tokenId : tokenId, due : 1500 };
 
             try {
@@ -570,19 +564,19 @@ describe( 'Invoice Domain', function () {
         } );
 
         it( 'will fail running a test when already tested', function () {
-            var tokenId = createToken( CARD_CHARGE_FAIL );
+            var tokenId = createToken( CARD_GOOD_VISA );
 
             var userId = exUsers.betty.userId;
-            var job = new domain.Job( inv_open_jobs2_active1.jobs[0] );
+            var job = new domain.Job( job_open_1 );
             var payment = { test : true };
 
             var invoice = invoices.submitJob( userId, job, payment );
             expect( invoice ).toBeDefined();
             expect( invoice.userId ).toEqual( userId );
             expect( invoice.test.jobId ).toMatch( job.jobId );
-            expect( invoice.test.started ).toMatch( reISO8601 );
+            expect( invoice.test.starts ).toMatch( reISO8601 );
 
-            job = new domain.Job( inv_open_jobs2_active1.jobs[1] );
+            job = new domain.Job( job_open_2 );
 
             try {
                 invoices.submitJob( userId, job, payment );
@@ -599,19 +593,91 @@ describe( 'Invoice Domain', function () {
             var tokenId = createToken( CARD_GOOD_VISA );
 
             var userId = exUsers.betty.userId;
-            var job = new domain.Job( inv_open_jobs2_active1.jobs[0] );
-            var payment = { tokenId: tokenId, due: 1500 };
+            var job = new domain.Job( job_open_1 );
+            var payment = { tokenId : tokenId, due : 1500 };
 
             var invoice = invoices.submitJob( userId, job, payment );
             expect( invoice ).toBeDefined();
             expect( invoice.userId ).toEqual( userId );
 
-            job = new domain.Job( inv_open_jobs2_active1.jobs[1] );
+            job = new domain.Job( job_open_2 );
             payment = { due : 0 };
 
             invoice = invoices.submitJob( userId, job, payment );
         } );
     } );
+
+    var job_done_1 = {
+        jobId : 'job_done_1',
+        content : ['mails', 'contacts'],
+        status : 'completed',
+        source : {
+            service : 'yahoo',
+            auth : {
+                username : 'fred@yahoo.com'
+            }
+        },
+        destination : {
+            service : 'google',
+            auth : {
+                username : 'jcook@migrate.io'
+            }
+        }
+    };
+
+    var job_done_2 = {
+        jobId : 'job_done_2',
+        content : ['documents'],
+        status : 'completed',
+        source : {
+            service : 'microsoft',
+            auth : {
+                username : 'fred@live.com'
+            }
+        },
+        destination : {
+            service : 'google',
+            auth : {
+                username : 'jcook@migrate.io'
+            }
+        }
+    };
+
+    var job_open_1 = {
+        jobId : 'job_open_1',
+        content : ['documents', 'media'],
+//        status : 'pending',  Should be auto-created, testing
+        source : {
+            service : 'microsoft',
+            auth : {
+                username : 'fred@live.com'
+            }
+        },
+        destination : {
+            service : 'google',
+            auth : {
+                username : 'jcook@migrate.io'
+            }
+        }
+    };
+
+    var job_open_2 = {
+        jobId : 'job_open_2',
+        content : ['mails'],
+        status : 'active',
+        source : {
+            service : 'imap',
+            auth : {
+                username : 'fred@example.org'
+            }
+        },
+        destination : {
+            service : 'google',
+            auth : {
+                username : 'jcook@migrate.io'
+            }
+        }
+    };
 
     var inv_open_jobs2_active1 = {
         destination : {
@@ -620,45 +686,10 @@ describe( 'Invoice Domain', function () {
                 username : 'jcook@migrate.io'
             }
         },
-        jobs : [
-            {
-                jobId : 'job_1',
-                content : ['mails', 'contacts'],
-                status : 'completed',
-                source : {
-                    service : 'yahoo',
-                    auth : {
-                        username : 'fred@yahoo.com'
-                    }
-                },
-                destination : {
-                    service : 'google',
-                    auth : {
-                        username : 'jcook@migrate.io'
-                    }
-                }
-            },
-            {
-                jobId : 'job_2',
-                content : ['documents', 'media'],
-                status : 'active',
-                source : {
-                    service : 'microsoft',
-                    auth : {
-                        username : 'fred@live.com'
-                    }
-                },
-                destination : {
-                    service : 'google',
-                    auth : {
-                        username : 'jcook@migrate.io'
-                    }
-                }
-            }
-        ],
         invoiceNum : '12345',
         userId : 'user1'
     };
+
 
     var inv_open_jobs2_active0 = {
         destination : {
@@ -667,42 +698,6 @@ describe( 'Invoice Domain', function () {
                 username : 'jcook@migrate.io'
             }
         },
-        jobs : [
-            {
-                jobId : 'job_1',
-                content : ['mails', 'contacts'],
-                status : 'completed',
-                source : {
-                    service : 'yahoo',
-                    auth : {
-                        username : 'fred@yahoo.com'
-                    }
-                },
-                destination : {
-                    service : 'google',
-                    auth : {
-                        username : 'jcook@migrate.io'
-                    }
-                }
-            },
-            {
-                jobId : 'job_2',
-                content : ['documents', 'media'],
-                status : 'pending',
-                source : {
-                    service : 'microsoft',
-                    auth : {
-                        username : 'fred@live.com'
-                    }
-                },
-                destination : {
-                    service : 'google',
-                    auth : {
-                        username : 'jcook@migrate.io'
-                    }
-                }
-            }
-        ],
         invoiceNum : '12345',
         userId : 'user2'
     };
@@ -714,44 +709,6 @@ describe( 'Invoice Domain', function () {
                 username : 'jcook@migrate.io'
             }
         },
-        starts : '2012-05-19T16:20:00.000Z',
-        expires : '2012-06-19T16:20:00.000Z',
-        jobs : [
-            {
-                jobId : 'job_1',
-                content : ['mails', 'contacts'],
-                status : 'completed',
-                source : {
-                    service : 'yahoo',
-                    auth : {
-                        username : 'fred@yahoo.com'
-                    }
-                },
-                destination : {
-                    service : 'google',
-                    auth : {
-                        username : 'jcook@migrate.io'
-                    }
-                }
-            },
-            {
-                jobId : 'job_2',
-                content : ['documents', 'media'],
-                status : 'pending',
-                source : {
-                    service : 'microsoft',
-                    auth : {
-                        username : 'fred@live.com'
-                    }
-                },
-                destination : {
-                    service : 'google',
-                    auth : {
-                        username : 'jcook@migrate.io'
-                    }
-                }
-            }
-        ],
         invoiceNum : '12345',
         userId : 'user2'
     };

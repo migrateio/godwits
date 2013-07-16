@@ -164,7 +164,6 @@
                 return intersect( source.content, destination.content );
             }
 
-
             /**
              * Returns a list of service objects suitable for the 'source' or
              * 'destination' account as indicated by serviceTarget parameter. Each object
@@ -238,7 +237,6 @@
 
             function preauthJob( job ) {
                 var user = authService.user();
-                $log.info( 'Authenticated user: ', user );
 
                 // If the user has not yet authenticated, the call to the server to
                 // preauth the job is not necessary. We will return a "faked" 401
@@ -287,6 +285,7 @@
             return {
                 authenticate : authenticate,
                 contentIntersection : contentIntersection,
+                getService : getServiceByName,
                 getServices : getServices,
                 oauthLink : oauthLink,
                 preauthJob : preauthJob,

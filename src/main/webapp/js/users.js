@@ -8,9 +8,9 @@ users.factory( '$users', [ '$log', '$http', function ( $log, $http ) {
         return $http.get( '/api/users/signin/' + encodeURIComponent( email ) );
     }
 
-    function createUserRecord( email, firstname ) {
+    function createUserRecord( email, username ) {
         return $http.post( '/api/users/signup', {
-            name: firstname,
+            username: username,
             email: {
                 address: email
             }

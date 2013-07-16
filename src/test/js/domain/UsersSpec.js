@@ -93,20 +93,20 @@ describe( 'User Domain', function () {
         } );
 
         it( 'will auto-generate id if not supplied', function () {
-            var result = users.create( { name : 'fred', email : { address : 'fred@bedrock.com' } } );
+            var result = users.create( { username : 'fred', email : { address : 'fred@bedrock.com' } } );
             expect( result.userId ).toEqual( jasmine.any( String ) );
         } );
 
         it( 'should fail if no email is included', function () {
             expect(function () {
-                users.create( { userId : '123', name : 'fred' } );
+                users.create( { userId : '123', username : 'fred' } );
             } ).toThrowMatch( 'Missing required property: address' );
         } );
 
         it( 'should default the email status', function () {
             var result = users.create( {
                 userId : '123',
-                name : 'fred',
+                username : 'fred',
                 email : { address : 'fred@bedrock.com' } } );
             expect( result.email.status ).toEqual( 'candidate' );
         } );
@@ -114,7 +114,7 @@ describe( 'User Domain', function () {
         it( 'should default the user\'s role', function () {
             var result = users.create( {
                 userId : '123',
-                name : 'fred',
+                username : 'fred',
                 email : { address : 'fred@bedrock.com' } } );
             expect( result.roles ).toBeArray();
             expect( result.roles ).toEqual( ['ROLE_CANDIDATE'] );
@@ -123,6 +123,19 @@ describe( 'User Domain', function () {
         it( 'should be able to create a new user', function () {
             var result = users.create( samples.fred );
             expect( result ).toBeDefined();
+        } );
+
+        it( 'should not be able to create a user with the same username', function () {
+            var result = users.create( samples.fred );
+            expect( result ).toBeDefined();
+
+            expect(function(){
+                users.create( {
+                    userId : 'ABC',
+                    username : 'fred',
+                    email : { address : 'fred@migrate.io' } } )
+            } ).toThrowMatch('unique username');
+            
         } );
 
         it( 'should be able to create a "robust" user', function () {
@@ -308,7 +321,7 @@ describe( 'User Domain', function () {
 var samples = {
     fred : {
         userId : '123',
-        name : 'fred',
+        username : 'fred',
         email : {
             address : 'fred@bedrock.com',
             status : 'candidate'
@@ -319,7 +332,7 @@ var samples = {
     // User is verified and selected a password and run a job.
     wilma : {
         userId : '456',
-        name : 'wilma',
+        username : 'wilma',
         password : '$2a$10$TzHJ5IdWP9ooyXanLoT5uuDYFeCTVUiHLw5JUjY9e8Wr9Ob7STHWC',
         payment : {
             fingerprint : 'pay_token_1',
@@ -345,7 +358,7 @@ var samples = {
     // User is verified and selected a password, but has not started a run yet.
     betty : {
         userId : '789',
-        name : 'betty',
+        username : 'betty',
         email : {
             address : 'betty@bedrock.com',
             status : 'verified'
@@ -357,7 +370,7 @@ var samples = {
     // Password is verified, but user has not selected a password yet.
     barney : {
         userId : '987',
-        name : 'barney',
+        username : 'barney',
         email : {
             address : 'barney@bedrock.com',
             status : 'verified'

@@ -1,38 +1,37 @@
 <div data-ng-controller="signin-signup-controller">
     <form name="formSignup" novalidate data-ng-submit="submit()">
 
-        <div alert data-ng-repeat="alert in alerts" type="alert.type" close="closeAlert($index)">
-            <span data-ng-bind-html-unsafe="alert.msg"></span>
-        </div>
+        <table>
+            <tr>
+                <td>
+                    <div alert data-ng-repeat="alert in alerts" type="alert.type" close="closeAlert($index)">
+                        <span data-ng-bind-html-unsafe="alert.msg"></span>
+                    </div>
 
-        <div class="controls">
-            <div class="input-prepend input-append">
-                <span class="add-on"><i class="icon-envelope gray"></i></span>
-                <input name="email" readonly type="email" data-ng-model="model.email"
-                       placeholder="email" required/>
-                <span class="add-on"><a data-ng-click="back()"><i class="icon-hand-left gray"></i></a></span>
-            </div>
+                    <div class="controls">
+                        <div class="input-prepend">
+                            <span class="add-on"><i class="icon-user gray"></i></span>
+                            <input name="username" type="text" data-ng-model="model.username"
+                                   placeholder="username" required data-ng-focus="true"/>
+                        </div>
+                        <div data-validtip="username">
+                            <span data-ng-show="formSignup.username.$error.required">Please choose a unique username</span>
+                        </div>
+                    </div>
 
-        </div>
-
-        <div class="controls">
-            <div class="input-prepend">
-                <span class="add-on"><i class="icon-user gray"></i></span>
-                <input name="firstname" type="text" data-ng-model="model.firstname"
-                       placeholder="first name" required data-ng-focus="true"/>
-            </div>
-            <div data-validtip="firstname">
-                <span data-ng-show="formSignup.firstname.$error.required">Please tell us what to call you</span>
-            </div>
-        </div>
-
-        <div class="controls submit">
-            <p class="callout">
-                I agree to <a data-ng-click="showTandC()">terms and conditions</a>
-            </p>
-            <input class="honey" name="username" data-ng-model="honey" type="text" />
-            <input data-ng-disabled="formSignup.$invalid" class="btn btn-success" type="submit" value="Sign Up"/>
-        </div>
+                    <p class="callout">
+                        I agree to these <a data-ng-click="showTandC()">terms and conditions</a>
+                    </p>
+                </td>
+                <td>
+                    <div class="controls submit">
+                        <input class="honey" name="username" data-ng-model="honey" type="text" />
+                        <input data-ng-disabled="formSignup.$invalid" class="btn btn-success" type="submit" value="Sign Up"/>
+                        <p><a data-ng-click="state.step = 'email'">Cancel</a></p>
+                    </div>
+                </td>
+            </tr>
+        </table>
     </form>
 </div>
 

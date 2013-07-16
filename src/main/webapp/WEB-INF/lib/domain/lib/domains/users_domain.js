@@ -37,21 +37,34 @@ exports.Users = BaseDomain.subClass( {
         return json && json.toJSON && json.toJSON() || json;
     },
 
-    prevalidate : function ( json ) {
+    prevalidate : function ( newValue, oldValue ) {
         // Add a the creation date
-        json.created = new Date().toISOString();
+        newValue.created = new Date().toISOString();
 
         // add an id if not provided
-        if ( !json.userId ) json.userId = this.generate( 6 );
+        if ( !newValue.userId ) newValue.userId = this.generate( 6 );
 
         // If the password is present, but is not BCrypt'd, let's take care of it
         // Is this going too far? Since BCrypt has known characteristics it seems like
         // a nice convenience feature and allows us to centralize the bcrypt function.
-        if ( json.password ) {
+        if ( newValue.password ) {
             // All BCrypt passwords start with $2a$, $2x$ or $2y$
-            if ( !/^\$2[axy]\$/.test( json.password ) ) {
-                json.password = bcrypt( json.password );
+            if ( !/^\$2[axy]\$/.test( newValue.password ) ) {
+                newValue.password = bcrypt( newValue.password );
             }
+        }
+
+        // Username must be unique in the system, we only have to check the username if
+        // this is a create (oldValue is undefined, or updates where the username has
+        // changed.
+        if (!oldValue || newValue.username !== oldValue.username) {
+            var hits = this.read(
+                "where `username` = '" + newValue.username + "'"
+            );
+            if ( hits.length > 0 ) throw {
+                status : 400,
+                message : this.name + ' must have a unique username, not ' + newValue.username
+            };
         }
     },
 

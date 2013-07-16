@@ -18,6 +18,8 @@ var {format} = java.lang.String;
 var {props} = require( 'utility' );
 var stripe = require( 'stripe' )( props['stripe.secret_key'] );
 
+var expFormat = new java.text.SimpleDateFormat( 'MMMM d, yyyy' );
+
 /**
  * An Invoice is an object that represents all of the jobs and transactions associated
  * with a user id and a destination account. There is only one invoice for each composite
@@ -50,12 +52,6 @@ exports.Invoices = BaseDomain.subClass( {
         if ( !json.invoiceNum ) json.invoiceNum = this.generate( 6 );
 
         var now = Date.now();
-
-        if ( !json.starts )
-            json.starts = new Date( now ).toISOString();
-
-        if ( !json.expires )
-            json.expires = new Date( now + 1000 * 60 * 60 * 24 * 30 ).toISOString();
     },
 
     create : function ( json, ttl, timeunit ) {
@@ -160,19 +156,39 @@ exports.Invoices = BaseDomain.subClass( {
      *   digits of their credit card on file. If they do not have this property, it
      *   means they will have to submit payment info.
      *
-     * **open**
-     * > If true, the invoice exists and has not yet expired. If false, there is no
-     *   invoice started for this destination account.
+     * **cardType**
+     * > If the user has an existing customer account with us, this is the type of
+     *   credit card they have stored.
      *
-     * **testedOn**
-     * > Returns the date this destination had been tested. If there is no property, the
-     *   account is available for a test run.
+     * **lastJobs**
+     * > **active**
+     * > > Returns the last job run against this destination which is in active
+     *     or pending status
+     *
+     * > **completed**
+     * > > Returns the last job run against this destination which has been
+     *     completed.
+     *
+     * **canTest**
+     * > Returns true if the user can execute a test against this destination, otherwise
+     *   false.
      *
      * **payment**
-     * > **promotion** Either 'edu' or 'full'.
-     * > **expires** The date the subscription expires, or will expire.
-     * > **amounts** The amount due to purchase or add (`due`) and the total charged
-     *               so far (`charged`).
+     * > **promotion**
+     * > > Either 'edu' or 'full'.
+     *
+     * > **expires**
+     * > > The date the subscription expires, or will expire.
+     *
+     * > **expiresFmt**
+     * > > The date the subscription expires, formatted as January 1, 2013.
+     *
+     * > **amounts**
+     * > > **due**
+     * > > > The amount due to purchase or add
+     *
+     * > > **charged**
+     * > > > The total charged so far
      *
      */
     preauthorize : function ( userId, job ) {
@@ -190,9 +206,18 @@ exports.Invoices = BaseDomain.subClass( {
             message : 'User is not valid.'
         };
 
-        var preauth = {
-            last4 : user.payment && user.payment.last4
-        };
+        var preauth = {};
+
+        preauth.last4 = user.payment && user.payment.last4;
+        if (preauth.last4) {
+            preauth.cardType = user.payment.cardType;
+
+            // Shorten some of the longer card types
+            if (/american express/i.test(user.payment.cardType)) user.payment.cardType = 'AMEX';
+            if (/diners club/i.test(user.payment.cardType)) user.payment.cardType = 'Diners';
+            if (/unknown/i.test(user.payment.cardType)) user.payment.cardType = 'Credit Card';
+        }
+
 
         // Step 2. retrieve the invoice record (if any). Only one open invoice is allowed
         // per destination. Since the readByJob() function sorts by expiration date, the
@@ -200,24 +225,25 @@ exports.Invoices = BaseDomain.subClass( {
         var invoice = this.readByJob( userId, job ) || new Invoice( {} );
 
         // Step 1.2 Check if this job overlaps with currently running jobs.
-        var overlap = invoice.overlappingJobs( job );
-        if ( overlap.length > 0 ) throw {
+        var overlaps = invoice.overlappingJobs( job );
+        if ( overlaps.length > 0 ) throw {
             status : 400,
-            jobId : overlap.jobId,
+            code: 'preauth_overlap',
+            jobs : overlaps,
             message : 'Another job with the same source, destination and content is running.'
         };
 
-        // Step 2.1 Check whether a test run has been done in the past
-        var testInfo = invoice.getTest();
-        if ( testInfo ) preauth.testedOn = testInfo.started;
+        // Step 2.1 Check whether any run has been executed against this domain
+        preauth.lastJobs = invoice.getLastJobs();
+        preauth.canTest = !( preauth.lastJobs.active || preauth.lastJobs.completed );
 
-        // Step 2.2 Check whether an open invoice exists, or in other words, does the
-        // user have any more time left since the last payment for this destination?
-        preauth.open = invoice.isOpen();
+        var expires = invoice.getExpiration();
+        var exp = new Date( expires );
 
         preauth.payment = {
             promotion : invoice.getPromotionType( job ),
-            expires : invoice.getExpiration(),
+            expires : expires,
+            expiresFmt : expFormat.format(exp),
             amounts : invoice.calculatePayment( job )
         };
 
@@ -346,7 +372,7 @@ exports.Invoices = BaseDomain.subClass( {
          */
         function preauthChecks( preauth, payment ) {
             // If payment is a test run request, ensure test run is available
-            if ( payment.test && preauth.testedOn ) throw {
+            if ( payment.test && !preauth.canTest ) throw {
                 status : 400,
                 message : '',
                 code : 'preauth_test',
