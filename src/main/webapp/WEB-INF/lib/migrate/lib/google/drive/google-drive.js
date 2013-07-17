@@ -17,21 +17,44 @@ exports.Drive = function ( credentials ) {
 
     var files = [];
 
+    function buildURI( shorthand, id ) {
+        const API_KEY = 'AIzaSyCoimO0Pl6XrijUuqKiTyBRR4C5WrvALaE';
+        const MAX_RESULTS = 1000;
+
+        var baseurl = getAppropriateURI( shorthand );
+
+        return baseurl + id ? id + '?key=' + API_KEY : '?key=' + API_KEY + '&maxresults=' + MAX_RESULTS;
+    }
+
+    function getAppropriateURI( shorthand ) {
+        switch ( shorthand ) {
+            case 'listFiles':
+                return 'https://www.googleapis.com/drive/v2/files';
+            case 'getFile':
+                return 'https://www.googleapis.com/drive/v2/files/';
+            default:
+                throw {
+                    status : 500,
+                    message : 'Expected listFiles or getFile, got neither'
+                };
+        }
+    }
+
     function init() {
 
     }
 
     function read() {
 
+        var url = buildURI( 'listFiles' );
+
         var opts = {
-            // UGHHHHHHH
-            url : 'https://www.googleapis.com/drive/v2/files?maxResults=1000&key=AIzaSyCoimO0Pl6XrijUuqKiTyBRR4C5WrvALaE',
+            url : url,
             headers : {
                 Authorization : 'Bearer ' + credentials.accesskey
             }
         };
 
-        log.info( 'getDialogUrlOneOA::Making request: {}', JSON.stringify( opts, null, 4 ) );
         var exchange = httpClient.request( opts );
 
         if ( exchange.status === 200 ) {
@@ -44,22 +67,12 @@ exports.Drive = function ( credentials ) {
             //we need to refresh the token.
             refreshToken( credentials )
         }
-
-        log.info( 'getDialogUrlOneOA::Status: {}, Response: {}', exchange.status, exchange.content );
     }
 
     function write( files ) {
-        var file;
-        for ( var i = 0; i < files.length; i++ ) {
-            file = files[i];
-
-
-        }
-    }
-
-    function getAllFiles() {
 
     }
+
 
     function refreshToken( credentials ) {
         var opts2 = {
