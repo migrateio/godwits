@@ -17,6 +17,7 @@ exports.Drive = function ( credentials ) {
 
     this.credentials = credentials;
 
+    // Todo: cover more cases
     function buildURI( shorthand, id ) {
         const API_KEY = 'AIzaSyCoimO0Pl6XrijUuqKiTyBRR4C5WrvALaE';
         const MAX_RESULTS = 1000;
@@ -114,6 +115,10 @@ exports.Drive = function ( credentials ) {
 
             if ( exchange.status !== 200 ) throw 'Error occurred.';
 
+            var permissionsResource = JSON.parse(exchange.content);
+
+            var permissionsID = permissionsResource.id;
+
             var copyURI = buildURI( 'copy', file.id );
             var options = {
                 url : copyURI,
@@ -126,6 +131,8 @@ exports.Drive = function ( credentials ) {
             if ( exchange.status !== 200 ) throw 'Error occurred.';
 
             log.info( 'copied file.' );
+
+
         }
     }
 
