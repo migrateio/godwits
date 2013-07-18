@@ -39,6 +39,10 @@ exports.Drive = function ( credentials ) {
                 return 'https://www.googleapis.com/drive/v2/files/';
             case 'upload':
                 return 'https://www.googleapis.com/upload/drive/v2/files';
+            case 'permissions':
+                return 'https://www.googleapis.com/drive/v2/files/';
+            case 'copy':
+                return 'https://www.googleapis.com/drive/v2/files/';
             default:
                 throw {
                     status : 500,
@@ -80,6 +84,50 @@ exports.Drive = function ( credentials ) {
         }
     }
 
+//    g<->g
+//
+//    - share file on source account with destination account.
+//    - on destination account, copy file into their drive.
+//    - on source account, remove permissions after copy is done.
+
+    function copyFilesFromDrive( source ) {
+        var files = source.read();
+
+        for ( var i = 0; i < files.length; i++ ) {
+            var file = files[i];
+
+            var uri = buildURI( 'permissions', file.id );
+            var permissions = JSON.stringify( {
+                role : 'reader',
+                type : 'user',
+                value : getUserEmail( this.access_key )
+            } );
+
+            var opts = {
+                url : uri,
+                method : 'POST',
+                data : permissions,
+                async : false
+            };
+
+            var exchange = httpClient.request( opts );
+
+            if ( exchange.status !== 200 ) throw 'Error occurred.';
+
+            var copyURI = buildURI( 'copy', file.id );
+            var options = {
+                url : copyURI,
+                method : 'POST',
+                async : false
+            };
+
+            var exchange2 = httpClient.request( options );
+
+            if ( exchange.status !== 200 ) throw 'Error occurred.';
+
+            log.info( 'copied file.' );
+        }
+    }
 
     /**
      *
@@ -108,18 +156,16 @@ exports.Drive = function ( credentials ) {
      * @param file
      */
     function passthroughToDrive( file ) {
-        var metadata = JSON.stringify({
-            description: file.description,
-            indexableText: file.indexableText,
-            labels: file.labels,
-            lastViewedByMeDate: file.lastViewedByMeDate,
-            mimeType: file.mimeType,
-            modifiedDate: file.modifiedDate,
-            parents: file.parents,
-            title: file.title
-        });
-
-
+        var metadata = JSON.stringify( {
+            description : file.description,
+            indexableText : file.indexableText,
+            labels : file.labels,
+            lastViewedByMeDate : file.lastViewedByMeDate,
+            mimeType : file.mimeType,
+            modifiedDate : file.modifiedDate,
+            parents : file.parents,
+            title : file.title
+        } );
     }
 
     function refreshToken( credentials ) {
