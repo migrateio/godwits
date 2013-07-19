@@ -1,7 +1,11 @@
-/**
- * Created with IntelliJ IDEA.
- * User: anthony
- * Date: 5/16/13
- * Time: 10:18 AM
- * To change this template use File | Settings | File Templates.
- */
+describe('The google contacts service', function () {
+
+    it('should allow me to read all contacts', function () {
+
+    });
+
+    it('should write contacts', function () {
+
+    });
+
+});

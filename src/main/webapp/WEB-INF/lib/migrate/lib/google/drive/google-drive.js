@@ -15,46 +15,164 @@ var httpClient = require( 'ringo/httpclient' );
  */
 exports.Drive = function ( credentials ) {
 
-    var files = [];
+    this.credentials = credentials;
 
-    function init() {
+    // Todo: cover more cases
+    function buildURI( shorthand, id ) {
+        const API_KEY = 'AIzaSyCoimO0Pl6XrijUuqKiTyBRR4C5WrvALaE';
+        const MAX_RESULTS = 1000;
 
+        var baseurl = getAppropriateURI( shorthand );
+
+        return baseurl + id ? id + '?key=' + API_KEY : '?key=' + API_KEY + '&maxresults=' + MAX_RESULTS;
     }
 
+    /**
+     * Gotta be a better way to do this.
+     * @param shorthand
+     * @returns {string}
+     */
+    function getAppropriateURI( shorthand ) {
+        switch ( shorthand ) {
+            case 'listFiles':
+                return 'https://www.googleapis.com/drive/v2/files';
+            case 'getFile':
+                return 'https://www.googleapis.com/drive/v2/files/';
+            case 'upload':
+                return 'https://www.googleapis.com/upload/drive/v2/files';
+            case 'permissions':
+                return 'https://www.googleapis.com/drive/v2/files/';
+            case 'copy':
+                return 'https://www.googleapis.com/drive/v2/files/';
+            default:
+                throw {
+                    status : 500,
+                    message : 'Expected listFiles, upload, or getFile, got neither'
+                };
+        }
+    }
+
+
+    /**
+     *
+     * basic read. returns an array of file resources:
+     * https://developers.google.com/drive/v2/reference/files
+     *
+     * @returns {*}
+     */
     function read() {
 
+        var url = buildURI( 'listFiles' );
+
         var opts = {
-            // UGHHHHHHH
-            url : 'https://www.googleapis.com/drive/v2/files?maxResults=1000&key=AIzaSyCoimO0Pl6XrijUuqKiTyBRR4C5WrvALaE',
+            url : url,
             headers : {
-                Authorization : 'Bearer ' + credentials.accesskey
+                Authorization : 'Bearer ' + this.credentials.accesskey
             }
         };
 
-        log.info( 'getDialogUrlOneOA::Making request: {}', JSON.stringify( opts, null, 4 ) );
         var exchange = httpClient.request( opts );
 
         if ( exchange.status === 200 ) {
-            //hooray shit works
-            var json = exchange.content;
-            files.push()
+            return exchange.content;
         }
 
         if ( exchange.status === 401 ) {
             //we need to refresh the token.
-            refreshToken( credentials )
+            this.credentials = refreshToken( this.credentials );
+            java.lang.Thread.sleep( 2000 );
+            return read();
         }
-
-        log.info( 'getDialogUrlOneOA::Status: {}, Response: {}', exchange.status, exchange.content );
     }
 
-    function write( files ) {
-        var file;
+//    g<->g
+//
+//    - share file on source account with destination account.
+//    - on destination account, copy file into their drive.
+//    - on source account, remove permissions after copy is done.
+
+    function copyFilesFromDrive( source ) {
+        var files = source.read();
+
         for ( var i = 0; i < files.length; i++ ) {
-            file = files[i];
+            var file = files[i];
+
+            var uri = buildURI( 'permissions', file.id );
+            var permissions = JSON.stringify( {
+                role : 'reader',
+                type : 'user',
+                value : getUserEmail( this.access_key )
+            } );
+
+            var opts = {
+                url : uri,
+                method : 'POST',
+                data : permissions,
+                async : false
+            };
+
+            var exchange = httpClient.request( opts );
+
+            if ( exchange.status !== 200 ) throw 'Error occurred.';
+
+            var permissionsResource = JSON.parse(exchange.content);
+
+            var permissionsID = permissionsResource.id;
+
+            var copyURI = buildURI( 'copy', file.id );
+            var options = {
+                url : copyURI,
+                method : 'POST',
+                async : false
+            };
+
+            var exchange2 = httpClient.request( options );
+
+            if ( exchange.status !== 200 ) throw 'Error occurred.';
+
+            log.info( 'copied file.' );
 
 
         }
+    }
+
+    /**
+     *
+     * Takes an array of files resources to upload to google drive. File resources have download/export links.
+     * This function loops through a specific job chunked and passes through the specified files before returning a result.
+     * @param files
+     * @returns {Array}
+     */
+    function write( files ) {
+        var result = [];
+
+        for ( var i = 0; i < files.length; i++ ) {
+            result.push( passthroughToDrive( files[i] ) );
+        }
+
+        return result;
+    }
+
+    /**
+     * Here's where the bulk of the work gets done.
+     *
+     * In here we take a singular file resource, download it, remove any metadata that we
+     * aren't allowed to upload (download link would be one).
+     *
+     * Then we download the file and upload to drive with the metadata.
+     * @param file
+     */
+    function passthroughToDrive( file ) {
+        var metadata = JSON.stringify( {
+            description : file.description,
+            indexableText : file.indexableText,
+            labels : file.labels,
+            lastViewedByMeDate : file.lastViewedByMeDate,
+            mimeType : file.mimeType,
+            modifiedDate : file.modifiedDate,
+            parents : file.parents,
+            title : file.title
+        } );
     }
 
     function refreshToken( credentials ) {
@@ -75,6 +193,17 @@ exports.Drive = function ( credentials ) {
         };
         log.info( 'Making request: {}', JSON.stringify( opts2, null, 4 ) );
         var exchange = httpClient.request( opts2 );
+
+        if ( exchange.status === 200 ) return exchange.content;
+
+        throw 'Error refreshing credentials';
+    }
+
+    function updateCredentials( rawcreds ) {
+        return {
+            access_key : rawcreds.access_key,
+            refresh_token : rawcreds.refresh_token
+        };
     }
 
     return {};

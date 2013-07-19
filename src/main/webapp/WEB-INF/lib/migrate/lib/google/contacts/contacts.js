@@ -3,10 +3,6 @@ var httpClient = require( 'ringo/httpclient' );
 
 exports.Service = Object.subClass( {
 
-    init : function ( auth ) {
-
-    },
-
     read : function () {
         var opts = {
             url: 'http://www.google.com/m8/feeds',
@@ -34,6 +30,8 @@ exports.Service = Object.subClass( {
 
         return request.content;
     }
+
+
 } );
 
 obj = {

@@ -52,3 +52,8 @@ exports.Drive = function ( credentials ) {
 
     return {};
 };
+
+var typof = function ( x ) {
+    var s, n = typeof x;
+    return n === 'object' ? (s = Object.prototype.toString( x ).substring( 8, s.length - 1 ).toLowerCase() : n;
+};
